@@ -1,0 +1,9 @@
+I'm copying functions from Strombergsson.pari over to hejhal.pari.
+
+Some changes I'm making:
+- No more R variable
+  - He has R = s - 1/2 (although this changes if eval > 1/4...?)
+- hypergeom2 is now hypergeom
+  - Modified relative error to depend on current PARI precision
+  - Might be worth making the relative error an argument later?
+- Plegendre2 is now Plegendre

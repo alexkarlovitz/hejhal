@@ -1,0 +1,237 @@
+/*
+This file contains functions for testing the algorithms in flare_disk_Hecke.pari.
+NOTE: need to run "\r flare_disk_Hecke.pari" in gp before running any code in
+this file, since it assumes those functions are defined.
+*/
+
+/**********************************************************************
+  Miscellaneous test functions
+**********************************************************************/
+
+/* Check if a set of test points will be admissible */
+check_admissible(zs, r, alpha0, rho0)=
+{
+  local(z, adml_vec, zrth);
+
+  /* check each test point */
+  for(j = 1, length(zs),
+    z = zs[j];
+    adml_vec = [0, 0];
+
+    /* admissible for flare if angle <= alpha0 */
+    zrth = true_to_hyp(r, inv_cayley_transform(z));
+    if(zrth[2] <= alpha0, adml_vec[1] = 1);
+
+    /* admissible for disk model if radius <= rho0 */
+    if(abs(z) <= rho0, adml_vec[2] = 1);
+
+    /* now print point and admissibility for each expansion */
+    print(z" "adml_vec);
+  );
+}
+
+/* Check if set of test points will be admissible for a disk/flare system */
+is_admissible_disk_and_flare(zs, r, rho0, alpha0)=
+{
+  local(z, z_pb, w, ww, zrth, zrth_pb, num_eqns, str);
+
+  /* check each test point */
+  for(j = 1, length(zs),
+    str = "";
+
+    /* get point and pullback in both disk and flare domains */
+    z = zs[j];
+    z_pb = pullback_Hecke_disk(z, r);
+    w = inv_cayley_transform(z, r);
+    ww = inv_cayley_transform(z_pb, r);
+    zrth = true_to_hyp(r, w);
+    zrth_pb = true_to_hyp(r, ww);
+
+    num_eqns = 0;
+
+    /* if z is admissible wrt disk, get at least one equation */
+    if(arg(z) <= rho0, num_eqns = 1);
+
+    /* if z admissible wrt flare, add one more equation */
+    if(zrth[2] <= alpha0, num_eqns++);
+
+    /* final answer depends on whether point is in fundamental domain */
+    if(abs(z - z_pb) < 1e-10,
+      /* if test point was in fundamental domain, need both expansions */
+      if(num_eqns != 2, str="FAIL: in fundl domain but inadmissible.",
+        str = "1";
+      );
+      ,
+
+      /* if not in fundamental domain, need pullback to be admissible
+         for at least one expansion */
+      if(abs(z_pb) <= rho0, str = "2",
+        if(zrth_pb[2] <= alpha0, str = "2",
+          str = "FAIL: pullback not admissible for either expansion."
+        );
+      );
+    );
+
+    /* print result */
+    print(z" "str);
+  );
+}
+
+/* set up to test some of the functions defined above */
+test_points()=
+{
+  local(zs, r, alpha0, rho0);
+  r = 7/20;
+  alpha0 = 2.2;
+  rho0 = 3/4;
+
+  zs = test_points_shared(r, 0.48, -3*Pi/4, -Pi/4, 1.98, 50, 20);
+  is_admissible_disk_and_flare(zs, r, rho0, alpha0);
+  /* check_admissible(zs, r, alpha0, rho0); */
+
+  /*for(j = 1, length(zs),
+    print(zs[j]);
+    print(pullback_Hecke_disk(zs[j], r));
+    print(" ");
+  );*/
+}
+
+/**********************************************************************
+  Experiments
+**********************************************************************/
+
+/* Run one iteration of the secant method zoom in */
+example_secant() =
+{
+  local(r, rho0, alpha0, s, M, MM, delta, z1, z2);
+
+  default(realprecision, 32);
+  r = 0.35;
+  rho0 = 9/10; M = 15;
+  alpha0 = 2.2; MM = 5;
+  s = 0.76; delta = 0.005;
+
+  z1 = test_points_shared(r, 3/4, -11*Pi/20, -Pi/4, 2, 50, 20);
+  z2 = test_points_shared(r, 3/4 - 0.1, -11*Pi/20, -Pi/4, 1.98, 50, 20);
+
+  secant_method(z1, z2, r, rho0, M, alpha0, MM, s, delta);
+}
+
+test1() =
+{
+  local(x, z, r, s_true, rho0, M, A, AA, B, j, y);
+  r = 0.35;
+  s_true = 0.76705241700910205677150208864259506276668;
+  rho0 = 1;
+  alpha0 = Pi;
+
+  M = 5;
+  MM = 2;
+
+  z = test_points_shared(r, 1/2, -Pi/2, -Pi/4, 2, 10, 5);
+
+  /* Set up matrix of equations */
+  A = init_eqns_disk_and_flare(z, r, s_true, rho0, M, alpha0, MM);
+  default(realprecision, 5);
+  for(i = 1, matsize(A)[1],
+    print(A[i, 1..matsize(A)[2]]);
+  );
+  default(realprecision, 32);
+
+  /* Use Strombergsson's method for least squares */
+  AA = mattranspose(A)*A;
+  /* TODO: MAYBE CHANGE THIS? SEEMS LIKE WE'RE IGNORING AN EQUATION... */
+  B = vector(M+MM+1, k, vector(M+MM+2, j, AA[k+1, j]));
+  x = solve_sys(B, 1)~;
+
+  for(j = 1, length(x), print(x[j]));
+  print(" ");
+  print(AA*x);
+  print(" ");
+
+  y = vec_coeffs();
+  y = y[1..M+MM+2];
+  print(AA*y);
+}
+
+test2() =
+{
+  local(x, z, r, s, rho0, M, A, AA, B, j, y);
+  r = 0.35;
+  s = 0.76;
+  rho0 = 1;
+  alpha0 = Pi;
+
+  M = 2;
+  MM = 2;
+
+  z = [exp(-3*Pi/4*I)/2, exp(-Pi/4*I)/2,
+      cayley_transform(hyp_to_true(r, Pi/2, 1.5), r)];
+
+  /* Set up matrix of equations */
+  A = init_eqns_disk_and_flare(z, r, s, rho0, M, alpha0, MM);
+  for(i = 1, matsize(A)[1],
+    print(A[i, 1..M+MM+2]);
+  );
+}
+
+/* Save list of coefficients (from PythonCode/Coeffs/diskCoeffs2.txt) in a vector */
+vec_coeffs()={
+  return([0.8622472798988633516470633523234990978776175229171238339303912863,
+0.7538570734255533842438327997267673026027974077862708178005160626,
+0.09911031861626297728236197092371781642974711239393155111248908734,
+0.07128943304496067465678777597607401516154021795650371229027365105,
+0.3419153122757881271958427081912790160636637092719546957531238368,
+0.2997596636354777837538495824864710160614105293452984766625937256,
+-0.02425917195878919891516058551683241259178416983301440203387865413,
+-0.1269070704433817842566001982355062131171978210203255642757524280,
+0.1183577653685285583280149732686744593750964447700541067266677461,
+0.5223912517921065571204080820525592686847654768827931007331738609,
+9.257001970842736500151606904406066920360118071284962324977958305,
+304.2179682538195896670070792709366472601448597874927974888814369,
+8286.275356068785067855970068236819749281162848392692351660841200,
+184083.5074198123520921930076552289532861522151325204499496084709,
+3330569.806563494559189579407328856308411957247176314421007420697,
+48487889.21122375964280502345631700693811587775492109235525052114,
+548899636.3789576936159799418892755669754529771138059055931444214,
+4363031092.652082903501854356229164440608332554695335206984707673,
+13866543421.26764766975707859798983492612158090241050519658866928,
+-231895782839.7318913037874896855586860440097059153619590050221545,
+-4979064296270.349089876702576536181666941565338652710054549616408,
+-53760190502512.95094935681344657386609825722988893384806881656584,
+-369355582192575.9485430373948358625688745607266380443148923173043,
+-1253711649495634.800087203792224267460684961243489783371668736052,
+5519882734964116.413569391633702480772750345256170661435268717158,
+115588764349108863.0252513867974842916626555088001239434075073332,
+880160901666482221.4176654115562106848313002009652902588940303881,
+3709081111419990693.737042699048981149556881612461626941647877015,
+4721325738666323689.646382931640309138315601998220783396945096616,
+-36390875194525470810.96192050371703858256529210045874407511680787,
+-83022176771083240880.35253536465198633361750144784429172450508638,
+2157564511095223419236.328501192740017121831962226627683050952917,
+24117047808257319183090.12613020264637451132768638379526064805270,
+137888312462014533665517.3326537996235757838729939473367291746165,
+533002100295365121985966.6317848498758011067094053272510607595100,
+1819742819831888913739395.936801042799128563600134888060211636541,
+8823338161888391712826330.485330909518214370146190845451589736072,
+55489973663446750168977968.85716696719071452022275177807742456879,
+300346097742579621948430706.8980498875207298948324644579056146011,
+1273912450372051052219706928.036770323499558374442000665853950131,
+4590330260853055405217589258.485271884835676266729543311315023683,
+16510581544015058903984611467.83575500315389400183347961562369439,
+64443313528590365208819109368.07016705847515965569401866196976331,
+246916468358017237781209749215.7558034766525436225092992703403565,
+830766948465310851129332523905.1715171513881439955719104640851492,
+2437996954552305098347895784005.402340368549779904814468310013726,
+6740781751088186315260578191936.118135283340047394117738827245283,
+18687508452312611755780114706775.67577484468220216275623508039434,
+49081193030955611762925405528391.61517061969811442915527841286419,
+108718008623976776245935211559171.0003770445417784992898661608607,
+191227728772816718804569593634449.2345844299096900139033778935644,
+276116476863646908940895319202579.0246224536019535424753576927473,
+352505658802869129275714763894604.9915995006981393779755328815141,
+124577627178263606722797294103561.6570403749569321580620715541230,
+-1586135718357085087382401533328526.211966675001647160373776811104,
+-5308749315717127919940146271417594.546480997859155796867879796609,
+-8334318487395440957566333431872020.161734827533521429471354550058]~);
+}

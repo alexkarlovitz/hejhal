@@ -1,0 +1,275 @@
+/*
+This file contains functions for testing the algorithms in cusp_flare_Hecke.pari.
+NOTE: need to run "\r cusp_flare_Hecke.pari" in gp before running any code in this
+file, since it assumes those functions are defined.
+*/
+
+/**********************************************************************
+  Miscellaneous test functions
+**********************************************************************/
+
+/* Check if a set of test points will be admissible */
+check_admissible(zs, r, y0, alpha0, rho0)=
+{
+  local(z, adml_vec, zrth, z_disk);
+
+  /* check each test point */
+  for(j = 1, length(zs),
+    z = zs[j];
+    adml_vec = [0, 0, 0];
+
+    /* admissible for cusp if height >= y0 */
+    if(imag(z) >= y0, adml_vec[1] = 1);
+
+    /* admissible for flare if angle <= alpha0 */
+    zrth = true_to_hyp(r, z);
+    if(zrth[2] <= alpha0, adml_vec[2] = 1);
+
+    /* admissible for disk model if radius <= rho0 */
+    z_disk = cayley_transform(z, r);
+    if(z_disk[1] <= rho0, adml_vec[3] = 1);
+
+    /* now print point and admissibility for each expansion */
+    print(z" "adml_vec);
+  );
+}
+
+/* Check if set of test points will be admissible for a cusp/flare system */
+is_admissible_cusp_flare(zs, r, y0, alpha0)=
+{
+  local(z, zrth, num_eqns, str);
+
+  /* check each test point */
+  for(j = 1, length(zs),
+    str = "";
+
+    /* get point and pullback in both cusp and flare domains */
+    z = zs[j];
+    zrth = true_to_hyp(r, z);
+    z_pb = pullback_Hecke(z, r);
+    zrth_pb = true_to_hyp(r, z_pb);
+
+    num_eqns = 0;
+
+    /* if z is admissible wrt cusp, get at least one equation */
+    if(imag(z) >= y0, num_eqns = 1);
+
+    /* if z admissible wrt flare, add one more equation */
+    if(zrth[2] <= alpha0, num_eqns++);
+
+    /* final answer depends on whether point is in fundamental domain */
+    if(abs(z - z_pb) < 1e-10,
+      /* if test point was in fundamental domain, need both expansions */
+      if(num_eqns != 2, str="FAIL: in fundl domain but inadmissible.",
+        str = "1";
+      );
+      ,
+
+      /* if not in fundamental domain, need pullback to be admissible
+         for at least one expansion */
+      if(imag(z_pb) >= y0, str = "2",
+        if(zrth_pb[2] <= alpha0, str = "2",
+          str = "FAIL: pullback not admissible for either expansion."
+        );
+      );
+    );
+
+    /* print result */
+    print(z" "str);
+  );
+}
+
+/* set up to test some of the functions defined above */
+test_points()=
+{
+  local(zs, r, y0, alpha0, rho0);
+  r = 7/20;
+  y0 = 0.3;
+  alpha0 = 2.2;
+  rho0 = 3/4;
+
+  /* zs = test_points_Stromb(r, Y, MM, alpha, M); */
+  zs = test_points_Stromb(r, 0.32, 50, 2.0, 25);
+  is_admissible_cusp_flare(zs, r, y0, alpha0);
+  /* check_admissible(zs, r, y0, alpha0, rho0); */
+}
+
+/**********************************************************************
+  Experiments
+**********************************************************************/
+
+/* Set up to run grid zoom in algorithm */
+example_grid() =
+{
+  local(r, alpha, y0, M, MM, s_start, grid_size_start, num_steps);
+
+  r = 0.35;
+  alpha = 2.0;
+  y0 = 0.32;
+  M = 15;
+  MM = 5;
+  s_start = 0.76;
+  grid_size_start = 0.01;
+  num_steps = 2;
+
+  print(grid_zoom_in(r,alpha,y0,M,MM,s_start,grid_size_start, num_steps));
+  /* real answer to 22 decimal places is
+     0.7670524170090910430752 */
+}
+
+/* Run a bunch of secant methods with varying inputs */
+secant_methods() =
+{
+  local(r, alpha0, y0, Ms, M, MMs, MM, s, delta, precs, s_guess, s_true);
+  s_true = 0.76705241700910205677150208864259506276668;
+
+  /* Set static values for rest of computations */
+  r=0.35; alpha0=2.0; y0=0.32; s = 0.76; delta = 0.01;
+
+  /* Modify lists here; all combinations of values
+     taken from these lists will be performed. */
+  Ms = [15];
+  MMs = [5];
+  precs = [32];
+
+  /* nested loop through M, MM, and prec values */
+  for(i=1, length(Ms),
+    M = Ms[i];
+    for(j=1, length(MMs),
+      MM = MMs[j];
+      for(k=1, length(precs),
+        default(realprecision, precs[k]);
+        s_guess = secant_method(r, y0, alpha0, M, MM, s, delta);
+        print("M = "M);
+        print("MM = "MM);
+        print("prec = "precs[k]);
+        print("Error = "abs(s_guess - s_true));
+        print(" ");
+      );
+    );
+  );
+}
+
+/* Run one iteration of the secant method zoom in */
+example_secant() =
+{
+  local(r, y0, alpha0, s, M, MM, delta);
+
+  default(realprecision, 60);
+  r = 0.35; y0 = 0.34; alpha0 = 2.2; M = 60;
+  MM = 35;
+  s = 0.7670524170091020567715020886425950625;
+  delta = 4e-37;
+
+  z1 = test_points_Stromb(r, y0, M, alpha0, MM);
+  z2 = test_points_Stromb(r, y0-0.02, M, alpha0+0.05, MM);
+
+  secant_method(z1, z2, r, y0 - 0.01, alpha0 + 0.1, M, MM, s, delta);
+}
+
+/* Compute and print cusp coefficients */
+get_cusp_coeffs()=
+{
+  local(r, s_true, y0, M, alpha0, MM, zs, xs, xs_cusp, xs_flare);
+
+  default(realprecision, 64);
+  r = 0.35;
+  s_true = 0.76705241700910205677150208864259506276668;
+  y0 = 0.3;
+  M = 25;
+  alpha0 = 2.2;
+  MM = 15;
+
+  /*zs = test_points_Stromb(r, .32, M, Pi/2, MM);*/
+  zs = test_points_Stromb(r, 0.32, 50, 2.0, 25);
+  zs = zs[16..102];
+  xs = least_square_method_cusp_and_flare(zs, r, s_true, y0, M, alpha0, MM);
+  xs_cusp = xs[1..M+1];
+  xs_flare = xs[M+2..M+MM+2];
+
+  for(j = 1, M + 1, print(xs_cusp[j]));
+}
+
+/**********************************************************************
+  Functions for using flare/cusp model to get disk coefficients
+**********************************************************************/
+
+/*
+Map from upper half plane model to disk model.
+  Note: this is the usual Cayley transform when r = 1. We use this different
+  version to ensure that w |-> -w is in the Hecke group in the disk model.
+*/
+cayley_transform(z, r) =
+{
+  local(w);
+  w = (z - r*I)/(z + r*I);
+  if(w == 0, return([0, 0]););
+  return([abs(w), arg(w)]);
+}
+
+/*
+Approximate eigenfunction at point z given cuspidal coefficients bs
+*/
+approx_cusp(bs, z, s)=
+{
+  local(num_coeffs, n, S);
+
+  /* Always assume constant coefficient is 1 */
+  S = imag(z)^(1 - s);
+
+  /* Get length of expansion, then sum over those n */
+  num_coeffs = length(bs);
+  for(n = 1, num_coeffs - 1,
+    S += bs[n + 1]*cusp_Whitt(imag(z), n, s - 0.5)*cos(2*Pi*n*real(z));
+  );
+
+  return(S);
+}
+
+/*
+Use the Fourier coefficients from cusp/flare model to compute
+those in disk model.
+*/
+get_disk_coeffs()=
+{
+  local(s_true, r, y0, M, alpha0, MM, zs, xs, xs_cusp, xs_flare,
+        j, k, z, rho, thet, c);
+  default(realprecision, 64);
+  s_true = 0.76705241700910205677150208864259506276668;
+
+  /* set up parameters */
+  r = 0.35;
+  y0 = 0.32;
+  M = 25;
+  alpha0 = 2.0;
+  MM = 15;
+
+  /* Start by using true eigenvalue to get Fourier coefficients in cusp
+     and flare expansions */
+  zs = test_points_Stromb(r, y0, M, alpha0, MM);
+  /* zs = test_points_horiz(M + 2*MM + 2, 5, 1/2, 1); */
+  xs = least_square_method_cusp_and_flare(zs, r, s_true, y0, M, alpha0, MM);
+  xs_cusp = xs[1..M+1];
+  /*xs_flare = xs[M+2..M+MM+2];*/
+
+  /* Now we get an equation for each z: Fourier expansion in disk model
+     should equal evaluation at z in cuspidal expansion */
+  A = matrix(M + 2*MM + 2, M + 2*MM + 2, j, k, 0);
+  b = vector(M + 2*MM + 2, j, 0)~;
+  for(j = 1, M + 2*MM + 2,
+    /* Get point z in disk model */
+    z = zs[j];
+    [rho, thet] = cayley_transform(z, r);
+
+    /* Fill in matrix (remember that odd coefficients are 0) */
+    for(k = 0, M + 2*MM + 1,
+      A[j, k + 1] = disk_Whitt(rho, 2*k, s_true)*cos(2*k*thet);
+    );
+
+    /* Fill in solution vector */
+    b[j] = approx_cusp(xs_cusp, z, s_true);
+  );
+
+  c = matsolve(A, b);
+  for(j = 1, M + 2*MM + 2, print(c[j]));
+}

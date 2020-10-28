@@ -1,0 +1,381 @@
+/*
+This file contains functions for testing the algorithms in
+flare_Schottky.pari. NOTE: need to run "\r flare_Schottky.pari"
+in gp before running any code in this file, since it assumes those
+functions are defined.
+*/
+
+/**********************************************************************
+  Functions for generating test points
+**********************************************************************/
+
+/*
+Check if a test point is admissible. Admissibility for a flare requires
+arg(z) <= alpha0. If point is in fundamental domain, z must be admissible
+for at least two expansions.
+If point is not in fundamental domain, then
+  - z must be admissible for at least one expansion
+  - the pullback must be admissible for at least one expansion
+  - z cannot be inside a flare
+*/
+is_admissible(z, flare_data, circles_doubled, refl_cent, refl_rad, alpha0)=
+{
+  local(zpb, best_flares, cent, rad);
+
+  zpb = pullback_Schottky(z, circles_doubled, refl_cent, refl_rad);
+
+  /* Check whether point is in fundamental domain */
+  if(abs(zpb - z) < 1e-10,
+    /* z is in fundamental domain */
+
+    /* Check how many flares z is admissible for */
+    best_flares = get_best_flares(z, flare_data, alpha0);
+
+    /* If less than two flares worked, not admissible */
+    if(best_flares[1] == 0 || best_flares[2] == 0, return(0));
+
+    /* If we got here, z is admissible */
+    return(1);
+
+    ,
+    /* z is not in fundamental domain */
+
+    /* z must be admissible for at least one flare */
+    best_flares = get_best_flares(z, flare_data, alpha0);
+    if(best_flares[1] == 0, return(0));
+
+    /* zpb must be admissible for at least one flare */
+    best_flares = get_best_flares(zpb, flare_data, alpha0);
+    if(best_flares[1] == 0, return(0));
+
+    /* z cannot be in a flare */
+    for(i = 1, 3,
+      cent = (flare_data[i][1] + flare_data[i][2])/2;
+      rad = abs(flare_data[i][1] - flare_data[i][2])/2;
+      if(abs(z - cent) <= rad, return(0));
+    );
+  );
+}
+
+/*
+Creates set of 3N admissible test points inside the fundamental domain, N
+in each of the three flares, at fixed angle alpha
+*/
+test_points_FD(N, flare_data, alpha)=
+{
+  local(zs, kappas);
+
+  /* kappas are the scaling parameters for the flares */
+  kappas = vector(3);
+  for(i = 1, 3,
+    kappas[i] = true_to_hyp(flare_data[i][4], flare_data[i][1],
+                            flare_data[i][2], flare_data[i][3])[1];
+  );
+
+  zs = vector(3*N);
+  for(i = 1, 3,
+
+    /* Get N points in the i^th flare at fixed angle alpha (only take half
+       the flare since two halves give equivalent data) */
+    for(j = 1, N,
+      zs[(i - 1)*N + j] = hyp_to_true(exp(j/(2*N)*log(kappas[i])), alpha,
+                    flare_data[i][1], flare_data[i][2], flare_data[i][3]);
+    );
+  );
+
+  return(zs);
+}
+
+/*
+Creates set of 3*N admissible test points outside the fundamental domain and
+outside the flares; N are taken from between each pair of flares
+
+TODO: finish this function! Right now just does 2*N test points
+*/
+test_points_non_FD(N, flare_data, alpha)=
+{
+  local(zs, kappas);
+
+  zs = vector(2*N);
+
+  /* Get N points inside R2(Im axis) but outside flares, also include
+     reflections of these points across imaginary axis */
+  for(j = 1, N,
+    /* Pullback points at fixed angle alpha in flare domain */
+    zs[j] = hyp_to_true(j/(N + 1), alpha, flare_data[3][1],
+                        flare_data[3][2], flare_data[3][3]);
+    zs[N + j] = -real(zs[j]) + I*imag(zs[j]);
+  );
+
+  return(zs);
+}
+
+/*
+Creates set of 3N admissible test points inside the fundamental domain, N
+in each of the three flares; points are chosen randomly
+*/
+test_points_rand_FD(N, flare_data, circles_doubled, refl_cent, refl_rad)=
+{
+  local(zs, z, rad, center, r, thet);
+
+  zs = vector(3*N);
+  for(i = 1, 3,
+    rad = abs(flare_data[i][2] - flare_data[i][1]) / 2;
+    center = (flare_data[i][2] + flare_data[i][1]) / 2;
+
+    /* Get N random points in the i^th flare */
+    for(j = 1, N,
+      r = random()/2^31 * rad;
+      thet = random()/2^31 * Pi;
+      z = r*exp(I*thet) + center;
+      z = pullback_Schottky(z, circles_doubled, refl_cent, refl_rad);
+      zs[(i - 1)*N + j] = z;
+    );
+  );
+
+  return(zs);
+}
+
+/*
+Creates set of N random points in the box [-0.8, 0.8]X[1, 2] (this is
+specific to the theta=Pi/6 case; this rectangle is contained in the convex
+core, and it regularly is in flares with arg 4Pi/5)
+*/
+test_points_rect(N)=
+{
+  local(zs, x ,y);
+
+  zs = vector(N);
+
+  for(i = 1, N,
+    x = random()/2^31 * 1.6 - 0.8;
+    y = random()/2^31 * 1.0 + 1;
+    zs[i] = x + y*I;
+  );
+
+  return(zs);
+}
+
+/**********************************************************************
+  Experiments
+**********************************************************************/
+
+/* Run one iteration of the secant method zoom in */
+example_secant() =
+{
+  local(alpha0, s, M, delta, N1, N2, z1, z2, alpha1, alpha2,
+        beta1, beta2, zs_FD, zs_non_FD, circles_doubled, refl_cent, refl_rad,
+        circles_shifted, flare_data, s_guess);
+
+  /*default(realprecision, 60);*/
+
+  /* Parameters */
+  thet = Pi/6;
+
+  alpha0 = Pi; M = 20;
+
+  alpha1 = Pi/4; alpha2 = Pi/6; N1 = 35;
+  beta1 = 9*Pi/10; beta2 = 4*Pi/5; N2 = 35;
+
+  s = 0.743; delta = 3e-3;
+
+  /* Schottky group data */
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(thet);
+  flare_data = get_flare_data(circles_doubled, refl_cent, refl_rad, circles_shifted);
+
+  /* Get test points */
+  zs_FD = test_points_FD(N1, flare_data, alpha1);
+  zs_non_FD = test_points_non_FD(N2, flare_data, beta1);
+  z1 = concat(zs_FD, zs_non_FD);
+  zs_FD = test_points_FD(N1, flare_data, alpha2);
+  zs_non_FD = test_points_non_FD(N2, flare_data, beta2);
+  z2 = concat(zs_FD, zs_non_FD);
+
+  s_guess = secant_method(z1, z2, alpha0, M, flare_data, circles_doubled, refl_cent, refl_rad, s, delta);
+  print("Final guess: s = "s_guess);
+}
+
+/**********************************************************************
+  Miscellaneous test functions
+**********************************************************************/
+
+test_get_circles()=
+{
+  [circles_doubled, refl_center, refl_rad, circles_shifted] = get_circle_data(Pi/2);
+  print(circles_doubled);
+  print();
+  print([refl_center, refl_rad]);
+  print();
+  print(circles_shifted);
+}
+
+test_flare_maps()=
+{
+  local(circles_doubled, refl_cent, refl_rad, circles_shifted, flare_data, z, w);
+
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(Pi/2);
+
+  flare_data = get_flare_data(circles_doubled, refl_cent, refl_rad, circles_shifted);
+  print(flare_data);
+  print(" ");
+
+  /* test first flare */
+  z = -2.5 + 1/10*I;
+  w = true_to_hyp(z, flare_data[1][1], flare_data[1][2], flare_data[1][3]);
+  print("z = "z);
+  print("U(z) = "w);
+  print("U^{-1}(U(z)) = "hyp_to_true(w[1], w[2], flare_data[1][1], flare_data[1][2], flare_data[1][3]));
+  print("kappa = "true_to_hyp(flare_data[1][4], flare_data[1][1], flare_data[1][2], flare_data[1][3]));
+  print(" ");
+
+  /* test second flare */
+  z = 2.5 + 1/10*I;
+  w = true_to_hyp(z, flare_data[2][1], flare_data[2][2], flare_data[2][3]);
+  print("z = "z);
+  print("U(z) = "w);
+  print("U^{-1}(U(z)) = "hyp_to_true(w[1], w[2], flare_data[2][1], flare_data[2][2], flare_data[2][3]));
+  print("kappa = "true_to_hyp(flare_data[2][4], flare_data[2][1], flare_data[2][2], flare_data[2][3]));
+  print(" ");
+
+  /* test third flare */
+  z = 1/10*I;
+  w = true_to_hyp(z, flare_data[3][1], flare_data[3][2], flare_data[3][3]);
+  print("z = "z);
+  print("U(z) = "w);
+  print("U^{-1}(U(z)) = "hyp_to_true(w[1], w[2], flare_data[3][1], flare_data[3][2], flare_data[3][3]));
+  print("kappa = "true_to_hyp(flare_data[3][4], flare_data[3][1], flare_data[3][2], flare_data[3][3]));
+  print(" ");
+}
+
+test_pullback()=
+{
+  local(circles_doubled, refl_cent, refl_rad, circles_shifted);
+
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(Pi/2);
+
+  zs = vector(10, x, (x - 1)/2 - 10 + I/10);
+  print(zs);
+  ws = vector(10);
+
+  for(i = 1, 10,
+    ws[i] = pullback_Schottky(zs[i], circles_doubled, refl_cent, refl_rad);
+  );
+  print(ws);
+}
+
+test_best_flares()=
+{
+  local(circles_doubled, refl_cent, refl_rad, circles_shifted, flare_data, z);
+
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(Pi/2);
+  flare_data = get_flare_data(circles_doubled, refl_cent, refl_rad, circles_shifted);
+
+  z = 100*I;
+  print("z = "z);
+  print(get_best_flares(z, flare_data, Pi/2));
+
+  z = 0.1*I;
+  print("z = "z);
+  print(get_best_flares(z, flare_data, Pi/2));
+
+  z = -1.5 + 0.1*I;
+  print("z = "z);
+  print(get_best_flares(z, flare_data, Pi/2));
+
+  z = 1.5 + 0.1*I;
+  print("z = "z);
+  print(get_best_flares(z, flare_data, Pi/2));
+}
+
+test_init_eqns()=
+{
+  local(circles_doubled, refl_cent, refl_rad, circles_shifted, flare_data, zs,
+        s, alpha0, M);
+
+  /* Schottky group data */
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(Pi/2);
+  flare_data = get_flare_data(circles_doubled, refl_cent, refl_rad, circles_shifted);
+
+  /* Some test z values */
+  zs = vector(3);
+  zs[1] = 10 + 1/10*I;
+  zs[2] = -9.4 + I;
+  zs[3] = 1/20*I;
+
+  /* Parameters */
+  s = 0.4;
+  alpha0 = Pi/2;
+  M = 3;
+
+  A = init_eqns_flare_disk(zs, s, alpha0, M, flare_data,
+                           circles_doubled, refl_cent, refl_rad);
+  default(realprecision, 5);
+  for(i = 1, length(A), print(A[i]));
+  default(realprecision, 38);
+}
+
+test_test_points()=
+{
+  local(circles_doubled, refl_cent, refl_rad, circles_shifted, flare_data, zs,
+        zs1, zs2, N);
+
+  /* Schottky group data */
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(Pi/2);
+  flare_data = get_flare_data(circles_doubled, refl_cent, refl_rad, circles_shifted);
+  N = 20;
+
+  zs1 = test_points_FD(N, flare_data, Pi/4);
+  zs2 = test_points_non_FD(N, flare_data, 9*Pi/10);
+  zs = concat(zs1, zs2);
+  print(zs);
+}
+
+test_true_s()=
+{
+  local(alpha0, s, M, delta, N1, N2, z1, z2, alpha1, alpha2,
+        beta1, beta2, zs_FD, zs_non_FD, circles_doubled, refl_cent, refl_rad,
+        circles_shifted, flare_data);
+
+  default(realprecision, 60);
+
+  /* Parameters */
+  thet = Pi/6;
+
+  alpha0 = 4*Pi/5; M = 40;
+
+  alpha1 = Pi/4; alpha2 = Pi/6; N1 = 50;
+  beta1 = 9*Pi/10; beta2 = 4*Pi/5; N2 = 0;
+
+  s = 0.74306238;
+
+  /* Schottky group data */
+  [circles_doubled, refl_cent, refl_rad, circles_shifted] = get_circle_data(thet);
+  flare_data = get_flare_data(circles_doubled, refl_cent, refl_rad, circles_shifted);
+
+  /* Get test points */
+  /*zs_FD = test_points_FD(N1, flare_data, alpha1);
+  zs_non_FD = test_points_non_FD(N2, flare_data, beta1);
+  z1 = concat(zs_FD, zs_non_FD);
+  zs_FD = test_points_FD(N1, flare_data, alpha2);
+  zs_non_FD = test_points_non_FD(N2, flare_data, beta2);
+  z2 = concat(zs_FD, zs_non_FD);*/
+
+  z1 = test_points_rect(5*(N1 + N2));
+  z2 = test_points_rect(5*(N1 + N2));
+
+  x1 = get_coefficients(z1, s, alpha0, M, flare_data, circles_doubled, refl_cent, refl_rad);
+  x2 = get_coefficients(z2, s, alpha0, M, flare_data, circles_doubled, refl_cent, refl_rad);
+
+  print("x1 = "precision(x1, 1));
+  print(" ");
+  print("x2 = "precision(x2, 1));
+  print(" ");
+  print("x1 - x2 = "precision(x1-x2, 1));
+
+  for(i = 1, 3,
+    for(j = 1, M,
+      print(precision(x1[M*(i - 1) + j] - x2[M*(i - 1) + j], 1));
+    );
+    print(" ");
+  );
+}
