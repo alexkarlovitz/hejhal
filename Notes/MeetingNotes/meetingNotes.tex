@@ -1,0 +1,148 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+%opening
+\title{Notes from Meetings with Kontorovich}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+
+\section*{5/15/2020}
+
+We discussed what could be called ``good'' test points for the disk model.
+The Fourier expansion converges faster when points are farther from the boundary, so really we just want to include a bound on the radius.
+In other words, admissibility for the disk model will refer to points being a bounded distance from the boundary.
+
+Also!
+I didn't realize that the flare expansion can be extended to higher dimensions; I thought only the disk model would work.
+This means I should try using the disk model and flare expansion together in two dimensions.
+If that works, we can go up a dimension!
+\\
+
+\textbf{To Do:}
+\begin{itemize}
+	\item[$\checkmark$] When getting the disk coefficients from the true cusp coefficients, utilize the fact that the odd coefficients are zero.
+	\item Check if the disk coefficients obtained from the true cusp coefficients solve the linear system.
+	\begin{itemize}
+		\item This is a good test of whether there are errors in the code when setting up the system.
+		\item Once it seems like there are no errors, I can compare the coefficients from the algorithm to these coefficients.
+	\end{itemize}
+	\item Use the disk model and flare expansion together!
+\end{itemize}
+	
+\section*{5/7/2020}
+
+\textbf{To Do:}
+\begin{itemize}
+	\item[$\checkmark$] I have a set of ``true'' disk coefficients obtained from the true cuspidal coefficients. One way to check if these are correct is to compose the Cayley transform with an automorphism of the disk so that action of the Hecke group includes the map $w \mapsto -w$ on the disk.
+	\begin{itemize}
+		\item A little computation shows that the Mobius transformation
+		$$
+		f(z) = \frac{z - ir}{z + ir}
+		$$
+		works as needed.
+		\item Note that for $r = 1$, this is exactly the Cayley transform, suggesting that our computations are correct.
+	\end{itemize}
+	\item Try larger variety of tests like those in diskTests.py (maybe include tests of all three models so I can compare them?)
+	\begin{itemize}
+		\item In particular, investigate why the $k^{th}$ Fourier coefficients are growing for certain values of $\rho$.
+		\item In fourierAsymptotics.pdf, we prove that the $k^{th}$ Fourier coefficient in the disk model is always bounded by the constant coefficient, so this growth is impossible.
+	\end{itemize}
+	\item[$\checkmark$] Try a variety of test points when computing the disk coefficients from the cuspidal coefficients.
+	\begin{itemize}
+		\item The constant part of the Fourier coefficient is independent of the test points, so these should all give same solution.
+		\item Idea is to choose points which give good convergence for both expansions (Kontorovich suggested points at height near 1 with $x \in [1/2, 1]$).
+	\end{itemize}
+\end{itemize}
+	
+\section*{4/21/2020}
+
+We discussed some details of Str\"ombergsson's code that I was confused about.
+\begin{itemize}
+	\item Why are the two sets of test points taken so close together? (Guess: if they're too far apart, perhaps they are near different local minima?)
+	\item Why are we allowed to take just the nonnegative $n$ in the Fourier expansion, and furthermore why do we just include the cosine part of the exponential and ignore the sine? (Answer: the base eigenfunction is real and even. Can use this to ``fold'' the Fourier expansion and cancel out the sines).
+\end{itemize}
+
+\noindent We also discussed details of switching this over to the disk model.
+These are mentioned in the ``To Do'' list below.
+\\
+
+\noindent \textbf{To Do:}
+\begin{itemize}
+	\item[$\checkmark$] Try a variety of test points in Str\"ombergsson's code; specifically, will we do worse if the two sets of test points are farther apart?
+	\item[$\checkmark$] Write up notes on why we can take just nonnegative $n$ and just cosines in the Fourier expansion.
+	\item[$\checkmark$] Cheat and use true Fourier coefficients in the cuspidal expansion to get coefficients in the disk expansion.
+	This will be useful in verifying the code.
+	\item[$\checkmark$] Double check how evenness and realness of the base eigenfunction affect the Fourier expansion in the disk model.
+	\item[$\checkmark$] Review old notes on the Fourier expansion in the disk model.
+	\begin{itemize}
+		\item Any integral of the base eigenfunction over a circle about the origin gives the constant coefficient $a_0$.
+		Taking the radius to $1$ should show that $a_0 = 0$? (\textbf{Conclusion:} No! In fact, managed to show $a_0 \neq 0$.)
+		\item I think that $z \mapsto -1/z$ becomes $w \mapsto -w$ in the disk model.
+		This forces $a_n = 0$ for odd $n$?
+	\end{itemize}
+\end{itemize}
+	
+\section*{4/6/2020}
+
+We discussed section 2.5 in the paper ``Sector Estimates for Hyperbolic Isometries'' by Bourgain-Kontorovich-Sarnak.
+This uses the representation theoretic way of looking at things, as opposed to the more geometric way.
+To see what I mean by this, recall that
+$$
+\textup{T}^1\mathbb{H} \cong G \cong KAK \cong NAK
+$$
+where $\textup{T}^1\mathbb{H}$ denotes the unit tangent bundle for the upper half plane, $G = \text{SL}(2, \mathbb{R})$, and $KAK$ and $NAK$ are the Cartan and Iwasawa decompositions (resp.) of $G$.
+I am used to working with $\mathbb{H}$ (or $\mathbb{D}$), which is isomorphic to $G/K$.
+In the paper, they work with the $KAK$ decomposition.
+
+Let's write $(\theta, \rho, \theta_2)$ to denote an element of $G$ in the $KAK$ decomposition.
+Basically, the representation theory tells us that $\mathcal{H} := L^2(\Gamma\backslash G)$ can be decomposed into ``$K$-types'' $\mathcal{H} = \oplus \mathcal{H}^k$ via taking a Fourier transform in $\theta_2$.
+In other words, any $v \in \mathcal{H}$ can be written as
+$$
+v(\theta, \rho, \theta_2) = \sum_{k \in \mathbb{Z}}v_k(\theta, \rho)e(k\theta_2)
+$$
+The $v_k$'s are called ``$K$-isotypic vectors.''
+Note that the dependence of $v$ on $\theta_2$ is only by characters on the circle.
+We can actually decompose further by using periodicity in the $\theta$ variable; this let's us write $v_k$ in a further Fourier expansion (they do this in the paper).
+
+In my project, I'm interested in $L^2(\Gamma\backslash\mathbb{H})$, so we have modded out by $K$ on the right.
+To get from the results in the paper to my situation, we can simply set $\theta_2 = 0$ to remove the dependence on $K$.
+\\
+
+We also discussed the following important fact: it is possible to take the base eigenfunction $u$ of the Laplacian acting on $\Gamma\backslash\mathbb{H}$ (for a Fuchsian group $\Gamma$) to be everywhere positive.
+The proof idea is as follows.
+First, use the Fourier expansion (at a cusp or a flare) with the explicit Fourier coefficients to see that $u$ can be taken to be real.
+Next, note that if $u$ takes both positive and negative values, then it has a zero set which is some nodal line in $\Gamma\backslash\mathbb{H}$ (that is, there is some curve in a fundamental domain separating a positive region from a negative region).
+Then, note that
+$$
+-\lambda_0 = \sup_{\phi}\frac{||\Delta\phi||}{||\phi||}
+$$
+This is true for all negative definite operators (recall that we define the eigenvalues by $\Delta \phi + \lambda \phi = 0$; this is where we pick up the negative sign on $\lambda_0$).
+To finish the argument, one uses the fact that there must be nodal lines separating positive sections from negative sections to see that we can replace negative sections with their absolute value and still have an $L^2$ function.
+This can only increase the eigenvalue, contradicting the supremum unless there were no negative sections to begin with.
+	
+\section*{3/23/2020}
+
+\textbf{To do:}
+\begin{itemize}
+	\item[$\checkmark$] Email Andreas Str\"ombergsson about the zoom in algorithm (see function ``zoomin'' in fourier2.pari).
+	\item[$\checkmark$] Write up notes explaining Andreas's response.
+	\item[$\checkmark$] In notes on asymptotics, add point to the cusp expansion write-up: main point is that there is a region in which we can uniformly choose a bound $M$ on the number of Fourier coefficients. Example: $y \geq 1/10$ implies $M = 100$ always works.
+	Also, update theorem statement in cusp section (see screen shot from discussion).
+	\item[$\checkmark$] In notes on asymptotics, add reference to paper ``Almost Prime Pythagorean Triples in Thin Orbits'' by Kontorovich-Oh. Appendix A has results we need on flare asymptotics.
+	\item[$\checkmark$] Try to replicate the asymptotics arguments for the disk model. What's the corresponding equidistribution result? What's a good region in the disk where we know a uniform bound on $M$?
+	\item[$\checkmark$] Write code to see how many digits we can get in the $r = 7/20$ example. Varying the precision of PARI as well as the number of Fourier coefficients $M$ and $MM$ should give better results. Perhaps compare grid method and Str\"ombergsson's zoom in?
+\end{itemize}
+	
+\end{document}

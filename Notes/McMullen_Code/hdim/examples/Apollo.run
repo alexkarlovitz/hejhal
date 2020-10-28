@@ -1,0 +1,4 @@
+#
+# Apollonian gasket; writes postscript file too
+#
+./hdim -p cover.ps -a -e .1

@@ -1,0 +1,4 @@
+#
+# Table of Schottky group dimensions
+#
+hdim -S 3 5 115 5 -e 1e-4

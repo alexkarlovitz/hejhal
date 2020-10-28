@@ -1,0 +1,4 @@
+#
+# Table of Julia set dimensions
+#
+hdim -C -1.0 0.5 .1 -e 1e-2

@@ -1,0 +1,4 @@
+#
+# Shows range of epsilons
+#
+hdim -s 3 100 -E 1 .0001

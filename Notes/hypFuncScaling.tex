@@ -1,0 +1,80 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+\usepackage{caption}
+
+%opening
+\title{Scaling the Hypergeometric Function}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+
+Recall that the hypergeometric function $\prescript{}{2}{F}_1$ is defined
+$$
+\prescript{}{2}{F}_1(a, b, c; z) = \sum_{n=0}^{\infty}\frac{(a)_n(b)_n}{(c)_n}\frac{z^n}{n!}
+$$
+where $(q)_n$ is the Pochhammer symbol
+\[
+	(q)_n =
+	\begin{cases}
+		1 & n = 0 \\
+		q(q+1)\cdots(q+n-1) & n \neq 0
+	\end{cases}
+\]
+From this definition, we see that if $z \sim 0$, then $\prescript{}{2}{F}_1(a, b, c; z) \sim 1$.
+\\
+
+For our application, we will be using $z = \rho^2 \sim 1$.
+To get an approximate size for the hypergeometric function near $z = 1$, we use the transformation formula
+$$
+\prescript{}{2}{F}_1(a, b, c; z) =
+\frac{\Gamma(c)\Gamma(c-a-b)}{\Gamma(c-a)\Gamma(c-b)}\prescript{}{2}{F}_1(a, b, a+b+1-c; 1-z) $$$$ + \frac{\Gamma(c)\Gamma(a+b-c)}{\Gamma(a)\Gamma(b)}(1-z)^{c-a-b}\prescript{}{2}{F}_1(c-a, c-b, 1+c-a; 1-z)
+$$
+Since $\prescript{}{2}{F}_1(a, b, c; z) \sim 1$ when $z \sim 0$, this formula implies that
+\begin{equation}\label{zSim1}
+\prescript{}{2}{F}_1(a, b, c; z) \sim
+\frac{\Gamma(c)\Gamma(c-a-b)}{\Gamma(c-a)\Gamma(c-b)} +
+\frac{\Gamma(c)\Gamma(a+b-c)}{\Gamma(a)\Gamma(b)}(1-z)^{c-a-b} ~~~~~\text{when}~ z \sim 1
+\end{equation}
+
+Now let's move to our application.
+Recall that we are interested in the function
+$$
+\prescript{}{2}{F}_1(s, s + |n|, 1 + |n|; \rho^2)
+$$
+where $s = 1/2 - \nu$ (given that $\lambda = 1/4 - \nu^2$ is the eigenvalue of a Maass form), $n \in \mathbb{Z}$ is bounded by $|n| \leq M$ ($M$ is how far we go out in the finite Fourier series approximation), and $\rho$ is the magnitude of $z$ (which we take to be near $1$).
+If we plug these values into Equation \ref{zSim1}, we get
+\begin{equation}\label{simApp}
+\prescript{}{2}{F}_1(s, s + |n|, 1 + |n|; \rho^2) \sim
+\frac{\Gamma(1 + |n|)\Gamma(1 - 2s)}{\Gamma(1 + |n| - s)\Gamma(1 - s)} +
+\frac{\Gamma(1 + |n|)\Gamma(2s-1)}{\Gamma(s)\Gamma(s + |n|)}(1 - \rho^2)^{1 - 2s}
+\end{equation}
+for $\rho \sim 1$.
+Next, we use Stirling's formula.
+This is stated in Iwaniec-Kowalski as follows:
+$$
+\Gamma(s) = \left( \frac{2\pi}{s} \right)^{1/2}\left( \frac{s}{e} \right)^s\left( 1 + O\left( \frac{1}{|s|}\right) \right)
+$$
+This is valid in the sector $|\arg s| \leq \pi - \epsilon$ for any $\epsilon > 0$ (the implied constant depends on $\epsilon$).
+Applying Stirling's formula to Equation \ref{simApp} gives
+\begin{equation}\label{approxResult}
+	\prescript{}{2}{F}_1(s, s + |n|, 1 + |n|; \rho^2) \sim
+	\frac{(1+|n|)^{\frac{1}{2}+|n|}(1-2s)^{\frac{1}{2}-2s}}{(1+|n|-s)^{\frac{1}{2}+|n|-s}(1-s)^{\frac{1}{2}-s}} +
+	\frac{(1+|n|)^{\frac{1}{2}+|n|}(2s-1)^{2s-\frac{3}{2}}}{s^{s-\frac{1}{2}}(s+|n|)^{s+|n|-\frac{1}{2}}}(1-\rho^2)^{1-2s}
+\end{equation}
+\textbf{Write code to test accuracy of this estimate!!!}
+\\
+
+To finish, we wish to apply Equation \ref{approxResult} to our ``disk version'' of Hejhal's algorithm.
+
+\end{document}
