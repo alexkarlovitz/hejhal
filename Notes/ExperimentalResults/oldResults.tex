@@ -1,0 +1,194 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+%opening
+\title{Recent Results}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+	In this document, I collect results from tests using the faster, better organized version of the code.
+	\\
+	
+	\textbf{Note: all of the tests in this document which used the disk method failed because we were scaling the constant term of the Fourier expansion to $0$.}
+	
+	\section*{Nov 15 2019}
+	
+	UHP model with
+	$$
+	(D, M_0, N, Y_1, Y_2, R) =
+	(50, 30, 200, 0.5, 0.1, 1)
+	$$
+	Best $\nu$ found: $9.5337i$
+	
+	\textbf{Correct!}
+	\\
+	
+	UHP model with
+	$$
+	(D, M_0, N, Y_1, Y_2, R) =
+	(50, 30, 150, 0.5, 0.1, 1)
+	$$
+	Best $\nu$ found: $9.5337i$
+	
+	\textbf{Correct!}
+	\\
+	
+	Disk model with
+	$$
+	(D, M_0, N, P_1, P_2, R) =
+	(50, 50, 150, 0.666666666667, 0.9, 1)
+	$$
+	Best $\nu$ found: $9.3888i$
+	
+	\textbf{Incorrect!}
+	\\
+	
+	Disk model with
+	$$
+	(D, M_0, N, P_1, P_2, R) =
+	(100, 100, 300, 0.666666666667, 0.9, 1)
+	$$
+	Best $\nu$ found: $9.3266i$
+	
+	\textbf{Incorrect!}
+	
+	\section*{Nov 17 2019}
+	
+	UHP model with
+	$$
+	(D, M_0, N, Y_1, Y_2, R) =
+	( 50,30,100,0.5,0.1,1 )
+	$$
+	Best $\nu$ found: $9.5337i$
+	
+	\textbf{Correct!}
+	\\
+	
+	Disk model with
+	$$
+	(D, M_0, N, P_1, P_2, R) =
+	( 100,150,500,0.666666666667,0.9,1 )
+	$$
+	Best $\nu$ found: $9.8455i$
+	
+	\textbf{Incorrect!}
+	
+	\section*{Nov 18 2019}
+	
+	UHP model with
+	$$
+	(D, M_0, N, Y_1, Y_2, R) =
+	( 50,30,61,0.5,0.1,1 )
+	$$
+	Best $\nu$ found: $9.5337i$
+	
+	\textbf{Correct!}
+	
+	\section*{Nov 22 2019}
+	
+	UHP model with
+	$$
+	(D, M_0, N, Y_1, Y_2, R) =
+	( 50,50,200,0.333333333333,0.05,0.707106781186547 )
+	$$
+	Best $\nu$ found: $7.2209i$
+	
+	\textbf{Correct!}
+	\\
+	
+	Disk model with
+	$$
+	(D, M_0, N, P_1, P_2, R) =
+	( 50,50,200,0.666666666667,0.9,0.707106781186547 )
+	$$
+	Best $\nu$ found: $7.0784i$
+	
+	\textbf{Incorrect!}
+	
+	\section*{Ideas to Test the Disk Model}
+	
+	I have been attempting tests to determine what is going wrong with the disk model.
+	Here are some tests that might give some information.
+	\begin{enumerate}
+		\item Run both models (upper half plane and disk) with a correct eigenvalue as input.
+		The linear system should thus return approximately correct Fourier coefficients.
+		Use these coefficients to evaluate the Maass form at some points.
+		Just checking at one point is not enough, since the Maass form is only unique up to scaling.
+		So check the ratio at two points, and check if the two models give the same value.
+		\item Run the disk model with the correct eigenvalue as input.
+		Check that the Fourier coefficients given by the two sets of test points (at different $\rho$ values) are close to each other.
+		\item Use the coefficients from the upper half plane model (which I know are correct, since they match those found on Str\"ombergsson's website) to evaluate the Maass form at a collection of test points.
+		Set up a linear system for the expansion in the disk model to solve for those Fourier coefficients.
+		This should give the correct Foruier coefficients, since the function values are verified to be approximately correct.
+		\item Put the correct coefficients obtained from test 3 into the linear system for the disk model.
+		They should solve the linear system.
+	\end{enumerate}
+	
+	\section*{Nov 25 2019}
+	
+	I attempted test 3 described above with two different inputs.
+	I used the ratio idea from test 1 to verify that the Fourier coefficients found were correct.
+	\\
+	
+	Using $M_0 = 50$ and $D = 50$, I took $N = 2M_0$ test points equally spaced around a circle of radius $9/10$ to set up the system.
+	The ratio test did \textbf{not} give the same values.
+	\\
+	
+	Using $M_0 = 100$ and $D = 100$, I took $N = 2M_0$ test points equally spaced around a circle of radius $9/10$ to set up the system.
+	The ratio test did give the same values, but only to a precision of about $2\times 10^{-4}$.
+	I am starting to wonder if the expansion in the disk model requires much higher precision than that of the upper half plane model to work.
+	\\
+	
+	Using $M_0 = 50$ and $D = 50$, I took $N = 2M_0$ test points equally spaced around a circle of radius $1/2$ to set up the system.
+	The ratio test did work, to a precision of about $10^{-14}$.
+	It appears that the system is much better conditioned when the radius is relatively far from $1$.
+	
+	\section*{Nov 27 2019}
+	
+	Disk model with
+	$$
+	(D, M_0, N, P_1, P_2, R) =
+	( 100,100,250,0.5,0.666666666667,1 )
+	$$
+	Best $\nu$ found: $10.0555i$
+	
+	\textbf{Incorrect!}
+	\\
+	
+	I tried the ratio test (test 1 described above) with various inputs, and none of them were working.
+	However, I noticed that for all my tests I was using a radius of $2/3$ for the test points for the disk model.
+	Inspired by the tests on Nov 25, I reduced the radius of those test points.
+	\\
+	
+	I tried the ratio test with the following inputs:
+	$$
+	d = 100, M_0 = 100, N = 250, Y = \frac{1}{3}, \rho = \frac{1}{2}
+	$$
+	The outputs were as follows:
+	
+	Ratio for UHP:
+	$$
+	(-0.15371 + 0.00000000000000029035i)
+	$$
+	Ratio for Disk:
+	$$
+	(-0.14936 + 0.0046816i)
+	$$
+	This is the first time the ratio test came even remotely close to working.
+	\\
+	
+	I tried the same test as the previous one with $\rho = \frac{1}{3}$, and the results were again wildly off.
+	
+\end{document}

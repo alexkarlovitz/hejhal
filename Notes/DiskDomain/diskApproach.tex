@@ -1,0 +1,337 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+%opening
+\title{A Disk Model Version of Hejhal's Algorithm}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+\textbf{Note:} These are pretty old notes.
+While I do believe they are correct, we use the less common definition which takes $\Delta = -y^2(\partial_{xx} + \partial_{yy})$.
+I had done this because it makes the operator $\Delta$ positive definite.
+
+Instead, most authors take $\Delta = y^2(\partial_{xx} + \partial_{yy})$ but define the $\lambda$ values by the equation $\Delta u + \lambda u = 0$.
+In either case, the values of interest $\lambda$ are strictly positive.
+
+I should update these notes at some point to match the convention.
+	
+\section{Fourier Expansion in the Disk Model}
+
+Recall that we can map our work in the upper half plane to the unit disk via
+$$
+z \mapsto \frac{z - i}{z + i}
+$$
+(The inverse map is $\tau \mapsto i(1+\tau)/(1-\tau)$, where $\tau$ is taken in the unit disk).
+\\
+
+The new idea here is to apply Hejhal's algorithm to the fundamental domain in $\mathbb{D}$.
+To do this, we begin by writing a Maass form $f$ in polar form $f(\rho, \theta)$.
+Then $f$ is $2\pi$-periodic in $\theta$, and so it has a Fourier expansion
+$$
+f(\rho, \theta) = \sum_n a_n(\rho)\exp(in\theta)
+$$
+Next, since $f$ is a Maass form, it is an eigenfunction of the hyperbolic Laplace operator, say $\Delta f = s(1-s)f$.
+After mapping to $\mathbb{D}$ and converting to polar coordinates, this operator is
+\begin{equation}\label{laplaceBeltrami}
+\Delta = -\left(\frac{(1 - \rho^2)^2}{4}\frac{\partial^2}{\partial\rho^2} +
+\frac{(1 - \rho^2)^2}{4\rho}\frac{\partial}{\partial\rho} +
+\frac{(1 - \rho^2)^2}{4\rho^2}\frac{\partial^2}{\partial\theta^2}\right)
+\end{equation}
+If we would like to treat our function with $\theta$ taking values in the range $[0, \pi]$, then the operator changes according to the map $\theta \mapsto \theta/2$.
+The new operator is then
+$$
+\Delta = -\left(\frac{(1 - \rho^2)^2}{4}\frac{\partial^2}{\partial\rho^2} +
+\frac{(1 - \rho^2)^2}{4\rho}\frac{\partial}{\partial\rho} +
+\frac{(1 - \rho^2)^2}{16\rho^2}\frac{\partial^2}{\partial\theta^2}\right)
+$$
+This version is often used when one identifies the upper half plane with $PSL(2, \mathbb{R})$, for then the $\theta$ in the $KAK$ decomposition corresponds to half of the polar $\theta$.
+
+Applying (\ref{laplaceBeltrami}) to the Fourier expansion, then using uniqueness of Fourier coefficients, we have that the $a_n(\rho)$'s satisfy the differential equation
+$$
+\frac{(1-\rho^2)^2}{4}a_n''(\rho) + \frac{(1-\rho^2)^2}{4\rho}a_n'(\rho) - \frac{n^2(1-\rho^2)^2}{4\rho^2}a_n(\rho) = s(s-1)a_n(\rho)
+$$
+This equation has solution
+\begin{equation}\label{solnDE}
+a_n(\rho) = a_n(1 - \rho^2)^s\rho^{|n|} \prescript{}{2}{F}_1(s, s+|n|, 1+|n|; \rho^2)
+\end{equation}
+where $\prescript{}{2}{F}_1$ is a hypergeometric function.
+\\
+
+To get a linear system, we first approximate $f$ by a finite Fourier expansion with $|n| \leq M$ (we are no longer assuming $f$ is a cusp form).
+We choose $M$ large enough that
+$$
+f(\rho, \theta) = \sum_{|n| \leq M} a_n(\rho)\exp(in\theta) + E(\rho)
+$$
+where $E(\rho)$ is ``small'' (like, smaller than $10^{-D}$ if we are looking for $D$ digits of precision).
+The reason we can make this error small is that the $a_n(\rho)$'s are decaying exponentially as $|n| \rightarrow \infty$.
+
+Next, we fix a distance $\rho = P$ from the origin and take $N \geq 2M+1$ equally spaced $\theta$'s to produce sample points.
+For example, we could take the points $(P, \theta_j)$ where
+$$
+\theta_j = \frac{2\pi}{N}\left( j + \frac{1}{2} \right) ~~~~~\text{for}~~~~~0 \leq j < N
+$$
+We can then extract an expression for the Fourier coefficients by taking an appropriate linear combination of the function evaluated at the sample points.
+This expression is
+$$
+a_n(P) = \frac{1}{N}\sum_{j=0}^{N-1}f(P, \theta_j)e^{-in\theta_j} + E(P)
+$$
+Finally, we can set up a $(2M+1)\times (2M+1)$ linear system by using the $\Gamma$-automorphicity of $f$.
+Let $(P_j^*, \theta_j^*)$ be the point in the chosen fundamental domain which is equivalent to $(P, \theta_j)$ mod $\Gamma$.
+Some straightforward computation gives the following system
+$$
+a_nc_n(P) = \sum_{|\ell| \leq M} a_\ell V_{n\ell} + 2E(P)
+$$
+where
+$$
+c_n(\rho) = (1-\rho^2)^s\rho^{|n|} \prescript{}{2}{F}_1(s, s+|n|, 1+|n|; \rho^2)
+~~~~~\text{and}~~~~~
+V_{n\ell} = \frac{1}{N}\sum_{j=0}^{N-1}c_\ell(P_j^*)e^{i(\ell\theta_j^* - n\theta_j)}
+$$
+\textbf{Note}: recall that the code is varying the parameter $\nu$ in $\lambda = (1/2 + \nu)(1/2 - \nu)$; so we can set $s = 1/2 + \nu$ or $s = 1/2 - \nu$ so that $\lambda = s(1-s)$.
+
+Since the $a_n$'s should give the Fourier coefficients for a Maass form, which is an eigenfunction of the Laplacian, any scalar multiple of these coefficients will be a solution as well.
+We assume the scaling $a_2 = 1$ then solve the resulting system.
+\\
+
+\textbf{Remark}: it is most natural to scale $a_2$ for the following reason.
+
+\textbf{FINISH THIS IDEA!}
+
+\section*{Verification of Formula (\ref{laplaceBeltrami})}
+
+In the upper half plane model of hyperbolic space, the Laplace-Beltrami operator is
+$$
+\Delta = -y^2\left( \frac{\partial^2}{\partial x^2} + \frac{\partial^2}{\partial y^2} \right)
+$$
+where $z = x + iy \in \mathbb{H}$.
+\\
+
+We can map from the upper half plane to the unit disk via the conformal map
+$$
+z \mapsto \tau = \frac{z-i}{z+i}
+$$
+Now if we write $\tau = u + iv \in \mathbb{D}$, we can rewrite $(u, v)$ in polar coordinates $(\rho, \theta)$ so that
+$$
+u = \rho\cos\theta ~~~~~~~~~~ v = \rho\sin\theta
+$$
+(these are the normal polar coordinates in $\mathbb{R}^2$).
+
+We can go from $(\rho, \theta)$ coordinates to $(x, y)$ coordinates via the formulas
+$$
+x = \frac{-2\rho\sin\theta}{1 + \rho^2 - 2\rho\cos\theta} ~~~~~~~~~~
+y = \frac{1 - \rho^2}{1 + \rho^2 - 2\rho\cos\theta}
+$$
+For the other direction, we have
+$$
+\rho = \sqrt{\frac{x^2 + (y-1)^2}{x^2 + (y+1)^2}} ~~~~~~~~~~
+\tan\theta = \frac{-2x}{x^2 + y^2 - 1}
+$$
+(Note: the sign of $x^2 + y^2 - 1$ matches the sign of $u$ in $(u, v)$ coordinates in the disk).
+I wrote some code to verify these formulas.
+\\
+
+Next, we wish to rewrite the Laplace-Beltrami operator in our new $(\rho, \theta)$ coordinates.
+To achieve this, let us be very clear about what we are trying to do.
+If $f : \mathbb{H} \rightarrow \mathbb{C}$ is a function in $(x, y)$ coordinates and $g : \mathbb{D} \rightarrow \mathbb{C}$ is a function in $(r, \theta)$ coordinates, then we think of $f$ and $g$ as the same function if
+$$
+f(x, y) = g(\rho(x, y), \theta(x, y)) ~~\forall~x + iy \in \mathbb{H}
+$$
+Now, the functions we are interested in are those which are differentiable in the $\mathbb{R}^2$ sense.
+So by applying the chain rule for functions from $\mathbb{R}^2$ to $\mathbb{R}^2$, we conclude that
+$$
+\frac{\partial^2f}{\partial x^2} =
+\frac{\partial^2\rho}{\partial x^2}\frac{\partial g}{\partial\rho} +
+\frac{\partial^2\theta}{\partial x^2}\frac{\partial g}{\partial\theta} +
+\left(\frac{\partial\rho}{\partial x}\right)^2\frac{\partial^2 g}{\partial\rho^2} +
+2\frac{\partial\rho}{\partial x}\frac{\partial\theta}{\partial x}\frac{\partial^2 g}{\partial\rho\partial\theta} +
+\left(\frac{\partial\theta}{\partial x}\right)^2\frac{\partial^2 g}{\partial\theta^2} $$$$
+\frac{\partial^2f}{\partial y^2} =
+\frac{\partial^2\rho}{\partial y^2}\frac{\partial g}{\partial\rho} +
+\frac{\partial^2\theta}{\partial y^2}\frac{\partial g}{\partial\theta} +
+\left(\frac{\partial\rho}{\partial y}\right)^2\frac{\partial^2 g}{\partial\rho^2} +
+2\frac{\partial\rho}{\partial y}\frac{\partial\theta}{\partial y}\frac{\partial^2 g}{\partial\rho\partial\theta} +
+\left(\frac{\partial\theta}{\partial y}\right)^2\frac{\partial^2 g}{\partial\theta^2}
+$$
+In the computation for the Laplacian, we will end up adding these two expressions together.
+I used sympy (python's symbolic programming package) to do the computations.
+One finds that
+$$
+\frac{\partial^2\theta}{\partial x^2} + \frac{\partial^2\theta}{\partial y^2} = 0
+~~~~~ \text{and} ~~~~~
+\frac{\partial\rho}{\partial x}\frac{\partial\theta}{\partial x} +
+\frac{\partial\rho}{\partial y}\frac{\partial\theta}{\partial y} = 0
+$$
+So, the $\partial g/\partial\theta$ and $\partial^2g/\partial\rho\partial\theta$ terms vanish.
+For the other three terms, we get
+$$
+\frac{\partial^2\rho}{\partial x^2} + \frac{\partial^2\rho}{\partial y^2} = \textbf{???} $$$$
+\left( \frac{\partial\rho}{\partial x} \right)^2 + \left(\frac{\partial\rho}{\partial y^2}\right)^2 = \frac{4}{(x^2 + (y+1)^2)^2} $$$$
+\left( \frac{\partial\theta}{\partial x} \right)^2 + \left(\frac{\partial\theta}{\partial y^2}\right)^2 = \frac{4}{(x^2 + (y-1)^2)(x^2 + (y+1)^2)}
+$$
+Multiplying by $y^2$, then substituting in the expressions for $x$ and $y$ in terms of $\rho$ and $\theta$, we get
+$$
+y^2\left(\frac{\partial^2f}{\partial x^2} + \frac{\partial^2f}{\partial y^2}\right) =
+\frac{(1 - \rho^2)^2}{4}\frac{\partial^2g}{\partial\rho^2} +
+(\textbf{???})\frac{\partial g}{\partial \rho} +
+\frac{(1 - \rho^2)^2}{4\rho^2}\frac{\partial^2g}{\partial\theta^2}
+$$
+It turns out sympy has a little trouble with one of the terms, but following the pattern and plugging in a few test points suggests that the missing piece should be $(1-\rho^2)^2/4\rho$.
+
+\section*{Verification of Formula (\ref{solnDE})}
+
+In the literature, it is claimed that the differential equation
+\begin{equation}\label{litDE}
+\frac{(1-\rho^2)^2}{4}a_n''(\rho) + \frac{(1-\rho^2)^2}{4\rho}a_n'(\rho) - \frac{n^2(1-\rho^2)^2}{16\rho^2}a_n(\rho) = s(1-s)a_n(\rho)
+\end{equation}
+has solution
+\begin{equation}\label{litSoln}
+	a_n(\rho) = (1 - \rho^2)^s\rho^{|n|}\prescript{}{2}{F}_1(s, s+|n|, 1+|n|; \rho^2)
+\end{equation}
+We will first verify this, as it is a simple change of variables to verify our solution (\ref{solnDE}).
+
+\subsection*{An Aside on the Hypergeometric Function}
+
+Here, we list a few properties of the hypergeometric function which we shall use.
+The hypergeometric function $\prescript{}{2}{F}_1$ is defined for $|z| < 1$ by
+$$
+\prescript{}{2}{F}_1(a, b, c; z) = \sum_{n=0}^{\infty}\frac{(a)_n(b)_n}{(c)_n}\frac{z^n}{n!}
+$$
+where $(q)_n$ is the Pochhammer symbol
+\[
+(q)_n =
+\begin{cases}
+1 & n = 0 \\
+q(q+1)\cdots(q+n-1) & n \neq 0
+\end{cases}
+\]
+It can also be defined as a solution to the differential equation
+\begin{equation}\label{hyperDE}
+z(1-z)\frac{d^2 w}{dz^2} + [c - (a+b+1)z]\frac{dw}{dz} - abw = 0
+\end{equation}
+Let us verify that our power series solves this differential equation.
+First, notice that $(q)_{n+1} = q(q+1)_n$ (this is a simple exercise).
+Hence,
+$$
+\frac{d}{dz}\prescript{}{2}{F}_1(a, b, c; z) =
+\sum_{n=0}^{\infty}\frac{(a)_{n+1}(b)_{n+1}}{(c)_{n+1}}\frac{z^n}{n!} =
+\frac{ab}{c}\sum_{n=0}^{\infty}\frac{(a+1)_n(b+1)_n}{(c+1)_n}\frac{z^n}{n!} =
+\frac{ab}{c}\prescript{}{2}{F}_1(a+1, b+1, c+1; z)
+$$
+and
+$$
+\frac{d^2}{dz^2}\prescript{}{2}{F}_1(a, b, c; z) =
+\frac{a(a+1)b(b+1)}{c(c+1)}\prescript{}{2}{F}_1(a+2, b+2, c+2; z)
+$$
+Plugging this into the differential equation, one finds that there are five series to deal with.
+Computing coefficients of $z^n$ for every $n$ is a tedious exercise, but I went for it.
+All of them came out to be zero, verifying that the hypergeometric function is a solution to (\ref{hyperDE}).
+
+\subsection*{Verifying Equation (\ref{litSoln})}
+
+Next, we return to the differential equation (\ref{litDE}).
+We take $q_k$ to be the $k^{th}$ coefficient in the power series expansion of $\prescript{}{2}{F}_1$; that is,
+$$
+q_k = \frac{(s)_k(s+|n|)_k}{(1+|n|)_kk!}
+$$
+Then our conjectured solution is
+$$
+a_n(\rho) = (1 - \rho^2)^s \sum_{k=0}^{\infty}q_k\rho^{2k + |n|}
+$$
+Now we can take $n \geq 0$, since this solution (as well as the differential equation) is invariant under the map $n \mapsto -n$.
+\\
+
+We begin with the case $n \geq 2$, since for $n = 0$ and $n = 1$, the first one or two terms are annihilated by taking derivatives.
+In the case $n \geq 2$, we have
+$$
+a_n'(\rho) = -2s(1 - \rho^2)^{s-1}\sum_{k=0}^{\infty}q_k\rho^{2k+n+1} +
+(1 - \rho^2)^s\sum_{k=0}^{\infty}(2k+n)q_k\rho^{2k+n-1} $$$$
+\begin{aligned}
+a_n''(\rho) = 4s(s-1)(1-\rho^2)^{s-2}&\sum_{k=0}^{\infty}q_k\rho^{2k+n+2}
+-2s(1 - \rho^2)^{s-1}\sum_{k=0}^{\infty}(4k+2n+1)q_k\rho^{2k+n} \\
+&+ (1 - \rho^2)^s\sum_{k=0}^{\infty}(2k+n)(2k+n-1)q_k\rho^{2k+n-2}
+\end{aligned}
+$$
+
+\section*{Old Ideas}
+
+First, note that we are working with the function $h(\rho) = \prescript{}{2}{F}_1(a, b, c; \rho^2)$; that is, we have a square in the last component instead of just a $z$.
+Applying the chain rule, one can verify that the differential equation satisfied by the original hypergeometric function turns into the following for $h(\rho)$:
+\begin{equation}\label{scaledHyperDE}
+\frac{1-\rho^2}{4}h''(\rho) + \left( \frac{2c - 2(a+b)\rho^2 - \rho^2 - 1}{4\rho} \right)h'(\rho) - abh(\rho) = 0
+\end{equation}
+This will come up in our computation.
+
+Next, to solve the differential equation, we make the guess
+$$
+a_n(\rho) = g(\rho)h(\rho)
+$$
+where $h(\rho) = \prescript{}{2}{F}_1(a, b, c; \rho^2)$ as before, and $g(\rho)$ is to be determined.
+Plugging this into (\ref{maassDE}) gives
+$$
+\begin{aligned}
+\left[ \frac{(1-\rho^2)^2}{4}g(\rho) \right]h''(\rho) &+
+\left[ \frac{(1-\rho^2)^2}{4}\left( 2g'(\rho) + \frac{1}{\rho}g(\rho) \right) \right]h'(\rho) \\
+&+ \left[ \frac{(1-\rho^2)^2}{4}\left( g''(\rho) + \frac{1}{\rho}g'(\rho) - \frac{n^2}{\rho^2}g(\rho) \right) \right]h(\rho) = s(1-s)g(\rho)h(\rho)
+\end{aligned}
+$$
+It seems to me that this differential equation could be solved by choosing a $g$ which makes the coefficient of $h(\rho)$ on the left hand side equal to $0$.
+Then the hope is that we can choose $a, b, c$ in the definition of $h(\rho)$ so that applying equation (\ref{scaledHyperDE}) gives the solution we are looking for.
+\textbf{This step is just a guess; if this method fails to provide a solution, may need to come back and change this.}
+
+Making the coefficient of $h(\rho)$ equal to zero in the equation above is equivalent to the differential equation
+$$
+\rho^2g''(\rho) + \rho g'(\rho) - n^2g(\rho) = 0
+$$
+This is an Euler differential equation with solutions $g_1(\rho) = \rho^n$ and $g_2(\rho) = \rho^{-n}$.
+Thinking ahead to the Fourier expansion in the disk model, it will be far preferable to have $\rho^{|n|}$ as opposed to $\rho^{-|n|}$, so we will start with this guess.
+\textbf{At this step, we have made the assumption $n \neq 0$; we will have to return to the DE later to consider the case $n = 0$.}
+
+\subsection*{Solving the Differential Equation for the Fourier Coefficients}
+
+We are trying to solve the differential equation
+\begin{equation}\label{maassDE}
+\frac{(1-\rho^2)^2}{4}a_n''(\rho) + \frac{(1-\rho^2)^2}{4\rho}a_n'(\rho) - \frac{n^2(1-\rho^2)^2}{4\rho^2}a_n(\rho) = s(1-s)a_n(\rho)
+\end{equation}
+for the function $a_n(\rho)$.
+
+Since the coefficients of $a_n(\rho)$ and its derivatives in Equation (\ref{maassDE}) are all polynomials in $\rho$, we attempt to find a power series solution.
+So we guess
+$$
+a_n(\rho) = \sum_{m=0}^{\infty}c_m\rho^m
+$$
+Plugging this in and putting everything into one series, we get
+$$
+A(c_0, c_1, c_2, c_3, \rho, \rho^2, \rho^3) + \sum_{m=4}^{\infty}B_m(c_m, c_{m-2}, c_{m-4})\rho^m = 0
+$$
+where $A$ and $B_m$ are the following polynomials:
+$$
+\begin{aligned}
+A = (-4s(1-s)c_1 + 2c_1n^2 - &2c_1 + 6c_2 - c_3n^2 + 3c_3)\rho^3 \\ &+ (-4s(1-s)c_0 + 2c_0n^2 - c_2n^2 + 4c_2)\rho^2 + (c_1 - c_1n^2 )\rho - c_0n^2
+\end{aligned}
+$$$$
+B_m = (m^2 - n^2)c_m - (2(m - 2)^2 + 4s(1-s) - 2n^2)c_{m-2} + ((m - 4)^2 - n^2)c_{m-4}
+$$
+Now, to solve the differential equation, we need every power of $\rho$ to have a coefficient of $0$.
+In other words, the coefficients in $A$ as a polynomial of $\rho$ need to be $0$, and $B_m$ must be equivalently $0$ for all $m$.
+We proceed by making some observations about the $c_m$'s which will simplify the computation.
+
+\textbf{Observation 1:} The first coefficient $c_k$ which can be nonzero is for $k = |n|$.
+To see this, consider the four cases $n^2 = 0, n^2 = 1, n^2 = 4$, and $n^2 > 4$ separately.
+In the first three cases, the result follows from studying the polynomial $A$.
+In the fourth case, one finds that $c_0 = c_1 = c_2 = c_3 = 0$ by studying $A$.
+Then since $c_m$ depends linearly on $c_{m-2}$ and $c_{m-4}$ for $m \geq 4$, we must have that $c_m = 0$ until the coefficient of $c_m$ is $0$.
+This happens when $m = |n|$.
+
+\end{document}

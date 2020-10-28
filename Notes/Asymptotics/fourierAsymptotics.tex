@@ -1,0 +1,309 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+\newtheorem*{theorem}{Theorem}
+
+%opening
+\title{Asymptotics for the Fourier Coefficients of Maass Forms in Various Expansions}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+
+Let $\Gamma$ be a Fuchsian group, and let $f$ be a Maass form on $\Gamma\backslash\mathbb{H}$.
+We assume that $f$ has some type of Fourier expansion (e.g. at a cusp, at a flare, or in the polar expansion in the disk model).
+In particular, we assume $f$ has some expression of the form
+$$
+	f(x, y) = \sum_{n \in \mathbb{Z}}a_nW(y)e(nx)
+$$
+(Depending on the context, we may instead have a logarithmic Fourier expansion, or an expansion in coordinates other than $(x, y)$; in any case, 
+
+The purpose of this note is to derive a bound for the $a_n$'s as $|n| \rightarrow \infty$.
+In particular, we are planning on cutting the Fourier expansion off at a finite point $|n| \leq M$, so we wish to know for a given $y$ what is a good choice for $M$.
+Before doing this in the flare expansion, we recall an argument for the typical cuspidal expansion.
+Then, we attempt to replicate that argument in the flare case.
+	
+\section*{Asymptotics in the Cuspidal Expansion}
+
+When the group $\Gamma$ in question has a cusp, recall that a Maass form $f(z)$ has a Fourier expansion in the $x$-variable of the form
+\begin{equation}\label{cuspExp}
+f(x + iy) = \sum_{n\in\mathbb{Z}}a_n\sqrt{y}K_\nu(2\pi|n|y)e(nx)
+\end{equation}
+It can be shown that $K_\nu(Y)$ decays exponentially as $Y \rightarrow \infty$.
+On the other hand, note that
+$$
+a_n\sqrt{y}K_\nu(2\pi|n|y) = \int_{0}^{1}f(x + iy)e(-nx)dx
+$$
+We will use the fact that $f \in L^2(\Gamma\backslash\mathbb{H})$ to get a bound on the $a_n$'s.
+For simplicity, let us assume for the remainder of the argument that $n > 0$ (the $n < 0$ case follows similarly).
+First, we multiply both sides of the above equation by $1/y^2$ and integrate over $y$ in $1/n$ to $2/n$ (assuming of course that $n \neq 0$).
+This bounds $K_{\nu}(2\pi ny)$ between two constants, and hence we conclude that
+$$
+\left|a_n\int_{1/n}^{2/n}\sqrt{y}\frac{dy}{y^2}\right| \leq C_0\left|\int_{1/n}^{2/n}\int_{0}^{1}f(x+iy)e(-nx)\frac{dxdy}{y^2}\right|
+$$
+where $C_0 > 0$ is a constant independent of $n$.
+The integral on the left hand side comes out to a positive constant times $\sqrt{n}$, and so we conclude that
+\begin{equation}\label{firstCuspBound}
+	|a_n| \leq
+	Cn^{-1/2}\int_{1/n}^{2/n}\int_{0}^{1}|f(x+iy)|\frac{dxdy}{y^2}
+\end{equation}
+where $C > 0$ is a constant independent of $n$.
+\\
+
+The next part of the argument is to use equidistribution of low-lying horocycles to bound the inner integral (with respect to $x$) on the right hand side of (\ref{firstCuspBound}).
+
+We use the statement of Theorem 1.11 in ``Almost Prime Pythagorean Triples in Thin Orbits'' by Kontorovich-Oh.
+We begin by setting up some notation.
+By Patterson and Lax-Philips (see references in AK-Oh's paper), the Laplacian acting on $L^2(\Gamma\backslash\mathbb{H})$ admits finitely many eigenvalues in $[0, 1/4)$.
+We denote these eigenvalues
+$$
+0 \leq \lambda_0 < \lambda_1 < \cdots < \lambda_k < \frac{1}{4}
+$$
+and we write $\phi_j$ for the eigenfunction corresponding to $\lambda_j$.
+Let us assume the eigenfunctions are scaled so that $||\phi_j||_2 = 1$.
+
+Writing $\lambda_j = s_j(1 - s_j)$, where $s_j$ is chosen to be greater than $1/2$, one version of the theorem can be stated as follows:
+\begin{theorem}
+	Let $\psi \in C^\infty(\Gamma\backslash\mathbb{H})$. Then
+	$$
+	\int_{0}^{1}\psi(x + iy)dx =
+	C\langle \psi, \phi_0 \rangle y^{1-\delta} + O\left( y^{1 - s_1} \right)
+	$$
+	as $y \rightarrow 0$, where $C > 0$ is independent of $\psi$, and the implied constant depends on a Sobolev norm $\psi$.
+\end{theorem}
+
+Next, we apply the theorem to the inner integral on the right hand side of \ref{firstCuspBound}.
+Taking $\psi = |f|$, this implies that
+$$
+\int_{0}^{1}|f(x + iy)|dx =
+C\langle |f|, \phi_0 \rangle y^{1-\delta} + O\left( y^{1 - s_1} \right)
+$$
+By Cauchy-Schwartz, the inner product is bounded by the $L_2$ norm of $f$.
+Since $s_1 < \delta$, the previous equation implies that
+\begin{equation}\label{xIntBound}
+	\int_{0}^{1}|f(x + iy)|dx \ll_f y^{1 - \delta}
+\end{equation}
+\\
+
+Putting together the bounds (\ref{firstCuspBound}) and (\ref{xIntBound}), we get
+$$
+|a_n| \ll_f n^{-1/2}\int_{1/n}^{2/n}y^{-1-\delta}dy
+$$
+That is,
+\begin{equation}\label{cuspBound}
+	|a_n| \ll_f n^{\delta-1/2}
+\end{equation}
+(Recall that $1/2 < \delta < 1$).
+\\
+
+From the arguments above, we see that the entire Fourier coefficient
+$$
+a_n\sqrt{y}K_\nu(2\pi|n|y)
+$$
+decays exponentially with $n$.
+In particular, once $n \approx 1/y$, the coefficients will begin to decay very quickly.
+So for a given $y$, we can say that the finite expansion
+$$
+\sum_{|n| \leq M}a_n\sqrt{y}K_\nu(2\pi|n|y)e(nx)
+$$
+is a very good approximation to the function if we take, say, $M \approx 2/y$.
+
+Let us take the preceding argument one step further.
+Since the function $2/y$ is decreasing in $y$, we can make a uniform statement in any region where $y$ is bounded below.
+For example, we can conclude that taking $M = 20$ will result in a very accurate approximation for every $y \geq 1/10$.
+\\
+
+\textbf{Note:} if we are only interested in the case of where $f$ is the base eigenfunction of the Laplacian, we can use positivity to make the argument much simpler.
+This is the argument we use in the disk model below.
+
+\section*{Asymptotics in the Flare Expansion}
+
+When the group $\Gamma$ in question has a flare, recall that a Maass form $\phi(z)$ has a Fourier expansion in the $r$-variable (where we write $z = (r, \theta)$ in polar coordinates).
+The expansion depends on the size of the flare, which we assume to bounded between $1$ and $\kappa > 1$.
+The expansion then takes the form
+\begin{equation}\label{flareExp}
+\phi(r, \theta) = \sum_{n\in\mathbb{Z}}b_n\sqrt{\sin\theta}P_{\mu_n}^{-\nu}(\cos\theta)e\left( n\frac{\log r}{\log\kappa} \right)
+\end{equation}
+where
+$$
+\mu_n = -\frac{1}{2} + \frac{2\pi in}{\log\kappa}
+$$
+
+The asymptotics for the Fourier coefficients are shown in the appendix to the paper ``Almost Prime Pythagorean Triples in Thin Orbits'' by Kontorovich-Oh.
+There, they show
+$$
+b_n \ll n^se^{-\pi n\alpha/\log\kappa}
+$$
+where
+\begin{itemize}
+	\item $\Delta\phi = s(1-s)\phi$
+	\item $\alpha$ is chosen so that the flare
+	$$
+	\{ re^{i\theta} : 1 < r < \kappa, 0 < \theta < \alpha \}
+	$$
+	is entirely contained in a single fundamental domain for $\Gamma\backslash\mathbb{H}$
+	\item the implied constant depends on $\alpha$ and $\kappa$
+\end{itemize}
+(Note: the statement above is ambiguous with regards to the choice of $s$ versus $1 - s$.
+Perhaps check the proof to determine correct choice? In any case, the exponential behavior dominates the polynomial behavior, so it shouldn't affect the final outcome.)
+
+As shown in the subsection below on the asymptotics of the Legendre $P$ function, we have
+$$
+P_{\mu_n}^{-\nu}(\cos\theta) \sim (\sin\theta)^{-1/2}|n|^{-\nu-1/2}e^{2\pi|n|\theta/\log\kappa}
+$$
+Thus the entire Fourier coefficient
+$$
+b_n\sqrt{\sin\theta}P_{\mu_n}^{-\nu}(\cos\theta)
+$$
+decays exponentially as $n \rightarrow \infty$ so long as $\theta < \frac{\alpha}{2}$.
+
+\subsection*{Asymptotics of the Legendre $P$ Function}
+
+We make use of the Digital Library of Mathematical Functions (DLMF) to get asymptotics on the Legendre $P$ function.
+We start with equation 14.15(iii) in the DLMF:
+$$
+P_\mu^{-\nu}(\cos\theta) = \frac{1}{\mu^\nu}\sqrt{\frac{\theta}{\sin\theta}}\left( J_\nu((\mu+1/2)\theta) + O\left( \frac{1}{\mu} \right)\text{env}J_\nu((\mu+1/2)\theta) \right)
+$$
+where $J_\nu$ is the $J$-Bessel function and $\text{env}J_\nu$ is defined in the DLMF.
+This statement holds uniformly for $\theta \in (0, \pi - \delta]$ as $|\mu| \rightarrow \infty$ for fixed $\nu \geq 0$.
+Since we are interested in the behavior as $|\mu|$ gets large, we will content ourselves with the statement
+$$
+P_\mu^{-\nu}(\cos\theta) \sim \frac{1}{\mu^\nu}\sqrt{\frac{\theta}{\sin\theta}}J_\nu((\mu+1/2)\theta)
+$$
+as $|\mu| \rightarrow \infty$.
+
+Next, we need asymptotics for the $J$-Bessel function.
+Equation 10.7(ii) in the DLMF states that
+$$
+J_\nu(z) = \sqrt{\frac{2}{\pi z}}\left( \cos\left(z - \frac{\nu\pi}{2} - \frac{\pi}{4}\right) + e^{|\text{Im}(z)|}o(1) \right)
+$$
+for fixed $\nu$ as $|z| \rightarrow \infty$.
+In particular, if $\text{Im}(z)$ is becoming large, we have that
+$$
+J_\nu(x + iy) \sim y^{-1/2}e^{|y|}
+$$
+as $y \rightarrow \pm\infty$.
+
+Putting these estimates together, we expect for
+$$
+\mu_n := -\frac{1}{2} + \frac{2\pi in}{\log\kappa}
+$$
+to have
+\begin{equation}\label{legPAsymptotic}
+P_{\mu_n}^{-\nu}(\cos\theta) \sim (\sin\theta)^{-1/2}|n|^{-\nu-1/2}e^{2\pi|n|\theta/\log\kappa}
+\end{equation}
+as $|n| \rightarrow \infty$.
+Note that this asymptotic holds \textit{uniformly for} $\theta \in (0, \pi - \delta]$.
+
+\section*{Asymptotics in the Disk Model}
+
+Recall that we can work in the disk model (as opposed to the upper half plane model) via the map $\tau : \mathbb{H} \rightarrow \mathbb{D}$ defined by
+$$
+\tau(z) = \frac{z - i}{z + i}
+$$
+If we write our Maass form in polar coordinates $f(\rho, \theta)$ on the disk, we automatically have a Fourier expansion in the disk model due to the $2\pi$-periodicity of $f$ in $\theta$.
+Applying the differential equation $\Delta f + s(1-s)f = 0$, we get an explicit expression for the Fourier coefficients.
+In this way, one can show that the expansion takes the form
+$$
+f(\rho, \theta) = \sum_{n \in \mathbb{Z}}c_n(1 - \rho^2)^s\rho^{|n|}\prescript{}{2}{F_1}(s, s + |n|, 1 + |n|, \rho^2)e^{in\theta}
+$$
+We can then solve for the $n^{th}$ Fourier coefficient:
+$$
+c_n(1 - \rho^2)^s\rho^{|n|}\prescript{}{2}{F_1}(s, s + |n|, 1 + |n|, \rho^2) =
+\int_{0}^{2\pi}f(\rho, \theta)e^{-in\theta}d\theta
+$$
+Now, we are interested in the case where $f = \phi_0$ is the base eigenfunction.
+In this case, $f$ is everywhere positive, so we have
+\begin{equation}\label{firstCbound}
+|c_nW_n(\rho)| \leq \int_{0}^{2\pi}|f(\rho,m \theta)|d\theta = c_0W_0(\rho)
+\end{equation}
+where we are writing $W_n(\rho)$ for the $n^{th}$ Whittaker function which appears in the Fourier expansion.
+(Side note: inequality (\ref{firstCbound}) immediately implies $c_0 \neq 0$).
+Next, we apply the asymptotic
+$$
+\prescript{}{2}{F_1}(s, s + |n|, 1 + |n|, \rho^2) \rightarrow (1 - z)^{-s}
+$$
+as $n \rightarrow \infty$. (Still need to prove this, but seems likely since $\prescript{}{2}{F_1}(a, b, b, z) = (1 - z)^{-a}$; I also checked this computationally in Python and the result appears to hold).
+Since $0 \leq \rho < 1$, we see that the entire Whittaker function has
+$$
+W_n(\rho) = (1 - \rho^2)^s\rho^{|n|}\prescript{}{2}{F_1}(s, s + |n|, 1 + |n|, \rho^2) \sim \rho^{|n|}
+$$
+as $n \rightarrow \infty$.
+Plugging this into (\ref{firstCbound}), we see that
+$$
+c_n \ll \rho^{-|n|}
+$$
+as $n \rightarrow \infty$.
+Now, this was true for any $\rho \in [0, 1)$.
+The idea now is to take $\rho = 1 - \delta$, with $\delta > 0$ small.
+Then for any $\rho < 1 - \delta$, the entire Fourier coefficient has exponential decay:
+$$
+c_nW_n(\rho) \sim \left( \frac{\rho}{1 - \delta} \right)^{|n|}
+$$
+Thus, inside any fixed radius $\rho \leq P$, there is a constant $M$ so that taking the finite Fourier expansion $|n| \leq M$ gives a good approximation to the Maass form.
+
+\section*{Old Ideas}
+
+\subsection*{Attempts at the Flare Expansion before finding Reference}
+
+There are two parts to the Fourier coefficient: the unknown $b_n$'s and the known function of $\theta$.
+For the function of $\theta$, it can be shown that
+$$
+P_{\mu_n}^{-\nu}(\cos\theta) \sim (\sin\theta)^{-1/2}|n|^{-\nu-1/2}e^{2\pi|n|\theta/\log\kappa}
+$$
+as $|n| \rightarrow \infty$ uniformly in $\theta \in (0, \pi-\delta]$ for any $\delta > 0$.
+For a proof, see the section below on asymptotics of the Legendre $P$ function.
+On the other hand, note that
+$$
+b_n\sqrt{\sin\theta}P_{\mu_n}^{-\nu}(\cos\theta) =
+\int_{1}^{\kappa}\phi(r, \theta)e\left(-n\frac{\log r}{\log\kappa}\right)\frac{dr}{r}
+$$
+We will use the fact that $\phi \in L^2(\Gamma\backslash\mathbb{H})$ to get a bound on the $b_n$'s.
+First, we apply the Cauchy-Schwartz inequality:
+$$
+|b_n\sqrt{\sin\theta}P_{\mu_n}^{-\nu}(\cos\theta)|^2 =
+\left|\int_{1}^{\kappa}\phi(r, \theta)e\left(-n\frac{\log r}{\log\kappa}\right)\frac{dr}{r}\right|^2 \leq
+\int_{1}^{\kappa}|\phi(r, \theta)|^2\frac{dr}{r^2}
+$$
+Next, since this holds for all $\theta \in (0, \pi)$, we can multiply by $(\sin\theta)^{-2}$ and integrate over any $I \subseteq (0, \pi)$.
+\\
+
+\textbf{STILL NEED TO FIGURE OUT THE REST OF THIS ARGUMENT. HERE ARE MY IDEAS SO FAR.}
+
+Continuing with our previous inequality, we see that
+$$
+|b_n|^2\int_I \left( P_{\mu_n}^{-\nu}(\cos\theta) \right)^2\frac{d\theta}{\sin\theta} \leq
+\int_I\int_{1}^{\kappa}|\phi(r, \theta)|^2\frac{drd\theta}{r^2\sin^2\theta}
+$$
+Now the hyperbolic measure in polar coordinates is just
+$$
+\frac{dxdy}{y^2} = \frac{rdrd\theta}{r^2\sin^2\theta} = \frac{drd\theta}{r\sin^2\theta}
+$$
+So the right hand side in our inequality above is bounded by the $L^2$ norm of $\phi$ times the number of fundamental domains our domain of integration passes through.
+In other words, we find that
+$$
+|b_n|^2\int_I \left( P_{\mu_n}^{-\nu}(\cos\theta) \right)^2\frac{d\theta}{\sin\theta} \leq
+C\cdot\#\{ \mathcal{F} : \mathcal{F} \cap ([1, \kappa]\times I) \neq \varnothing \}
+$$
+
+\textbf{Thoughts:} smaller values of $\theta$ will ensure we pass through fewer fundamental domains.
+For example, if $I = (0, \pi/2)$, then the size of the set on the right is just 1!
+So for bounding the right hand side, small $\theta$ is good.
+
+On the other hand, the integrand on the left hand side is growing like an exponential which depends on $\theta$.
+The larger $\theta$ is, the larger the integrand.
+So when thinking about the left hand side, larger values of $\theta$ will lead to better bounds on $|b_n|$.
+
+The question is clearly then to optimally pick $I$...
+	
+\end{document}

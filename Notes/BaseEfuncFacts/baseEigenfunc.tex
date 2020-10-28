@@ -1,0 +1,232 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+%opening
+\title{Facts about the Base Eigenfunction}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+In this document, we compile a variety of facts about the base eigenfunction which allow us to reduce the complexity of the algorithm.
+Proofs or proof outlines are also supplied.
+	
+\section*{Base Eigenfunction is Real-Valued}
+
+The key fact we use is that the base eigenvalue has multiplicity $1$.
+The proof of this comes from Patterson-Sullivan theory.
+
+The rest of the proof is simple.
+We simply notice that if $f$ is an eigenfunction of the Laplace-Beltrami operator, then so is $\bar{f}$.
+Moreover, $\bar{f}$ has the same eigenvalue.
+Since the base eigenvalue has multiplicity $1$, this implies that the base eigenfunction $\varphi$ satisfies
+$$
+\varphi(z) = \omega\bar{\varphi}(z)
+$$
+for some $\omega \in \mathbb{C}$.
+In other words, $\arg(\varphi(z))$ is constant.
+Since we only care about the eigenfunction up to multiplication by a nonzero constant, we can multiply by a rotation to assume without loss of generality that $\varphi$ is real-valued.
+
+\section*{Base Eigenfunction is Real-Valued $\implies$ Nonnegative}
+
+The proof idea is as follows.
+First, note that if $u$ takes both positive and negative values, then it has a zero set which is some nodal line in $\Gamma\backslash\mathbb{H}$ (that is, there is some curve in a fundamental domain separating a positive region from a negative region).
+Then, note that
+$$
+-\lambda_0 = \sup_{\phi}\frac{||\Delta\phi||}{||\phi||}
+$$
+This is true for all negative definite operators (recall that we define the eigenvalues by $\Delta \phi + \lambda \phi = 0$; this is where we pick up the negative sign on $\lambda_0$).
+To finish the argument, one uses the fact that there must be nodal lines separating positive sections from negative sections to see that we can replace negative sections with their absolute value and still have an $L^2$ function.
+This can only increase the eigenvalue, contradicting the supremum unless there were no negative sections to begin with.
+
+\section*{Base Eigenfunction is Even}
+
+The Laplacian corresponding to the hyperbolic measure $dxdy/y^2$ is
+$$
+\Delta = y^2\left( \frac{\partial^2}{\partial x^2} + \frac{\partial^2}{\partial y^2} \right)
+$$
+Let $\varphi$ denote the base eigenfunction.
+Since we take two derivatives in $x$, we see that $\varphi(-x + iy)$ is also an eigenfunction of $\Delta$ with the same eigenvalue.
+But since the base eigenvalue has multiplicity 1, this implies that $\varphi(-x + iy)$ is a constant multiple of $\varphi(x + iy)$.
+Finally, note that these two functions match on the line $x = 0$; so the constant multiple is 1.
+Hence, we have shown $\varphi(-x + iy) = \varphi(x + iy)$; i.e. $\varphi$ is even.
+
+\section*{Base Eigenfunction has \textit{Real} Fourier Coefficients}
+
+We make this claim for all three expansions: the parabolic (cuspidal) expansion, the hyperbolic (flare) expansion, and the elliptic (disk model) expansion.
+
+\subsection*{Parabolic Expansion}
+
+Let $\varphi(z)$ denote the base eigenfunction, and write
+$$
+\varphi(x + iy) = \sum_{n \in \mathbb{Z}}a_nW_n(y)e(nx)
+$$
+for the Fourier expansion at the cusp.
+We showed above that $\varphi$ is even, and so
+$$
+\sum_{n \in \mathbb{Z}}a_nW_n(y)e(nx) = \sum_{n \in \mathbb{Z}}a_nW_n(y)e(-nx)
+$$
+Since $W_n(y) = \sqrt{y}K_\nu(2\pi|n|y) = W_{-n}(y)$ for $n \neq 0$, this implies that $a_n = a_{-n}$.
+This allows us to ``fold'' the Fourier expansion to only allow nonnegative coefficients.
+This proceeds by adding the $n$ and $-n$ terms together and using the fact that
+$$
+e(nx) + e(-nx) = 2\cos(2\pi nx)
+$$
+We can absorb the $2$ into the coefficient $a_n$ and get
+$$
+\varphi(x + iy) = a_0W_0(y) + \sum_{n = 1}^{\infty}a_nW_n(y)\cos(2\pi nx)
+$$
+Finally, we use the fact that $\varphi$ is real-valued to see that the $a_n$'s must be real as well.
+
+\subsection*{Hyperbolic Expansion}
+
+In the upper half plane model, the hyperbolic Laplacian in polar coordinates is
+$$
+\Delta = -\sin^2\theta\left(r^2\frac{\partial^2}{\partial r^2} + r\frac{\partial}{\partial r} + \frac{\partial^2}{\partial\theta^2}\right)
+$$
+It is a simple exercise to check that if $f(r, \theta)$ is an eigenfunction of this operator, then $f(\kappa/r, \theta)$ is also an eigenfunction with the same eigenvalue (where $\kappa$ is any positive constant).
+
+Now let $\phi(r, \theta)$ denote the base eigenfunction in polar coordinates, and write
+$$
+\phi(r, \theta) = \sum_{n \in \mathbb{Z}}b_n\sqrt{\sin\theta}P^{-\nu}_{\mu_n}(\cos\theta)e\left( n\frac{\log r}{\log\kappa} \right) ~~~\text{where}~~~ \mu_n = -\frac{1}{2} + \frac{2\pi in}{\log \kappa}
+$$
+for the Fourier expansion at a flare ($\kappa > 1$ is the scaling parameter for the flare).
+Since the base eigenfunction has multiplicity 1, and since $\phi(\kappa/r, \theta)$ is also an eigenfunction with the same eigenvalue, we have that
+$$
+\phi(r, \theta) = \omega\phi(\kappa/r, \theta)
+$$
+for some constant $\omega \in \mathbb{C}$.
+But these functions agree at $r = \sqrt{\kappa}$; thus, $\omega = 1$ and $\phi$ is invariant under $r \mapsto \kappa/r$.
+
+Setting the Fourier expansions of $\phi(r, \theta)$ and $\phi(\kappa/r, \theta)$ equal to each other, and using the fact that $e(n\log(\kappa/r)/\log\kappa) = e(-n\log r/\log\kappa)$, we see that
+$$
+b_n\sqrt{\sin\theta}P_{\mu_n}^{-\nu}(\cos\theta) = b_{-n}\sqrt{\sin\theta}P_{\mu_{-n}}^{-\nu}(\cos\theta)
+$$
+Since $P_{\mu_{n}}^{-\nu}(\cos\theta) = P_{\mu_{-n}}^{-\nu}(\cos\theta)$, this in fact shows that $b_n = b_{-n}$.
+(We argue the equality of the Legendre $P$ functions below; but first, let's finish this argument).
+
+We now wish to ``fold'' the Fourier expansion by adding the $\pm n$ terms together.
+This gives
+$$
+\phi(r, \theta) = b_0\sqrt{\sin\theta}P_{-1/2}^{-\nu}(\cos\theta) +
+\sum_{n=1}^{\infty}b_n\sqrt{\sin\theta}P_{\mu_{n}}^{-\nu}(\cos\theta)\cos\left( 2\pi n\frac{\log r}{\log\kappa} \right)
+$$
+Since $\phi$ is real-valued, and since every other term in the expansion is real, this shows that the $b_n$'s are real as well.
+\\
+
+We now return to the argument that $P_{\mu_{n}}^{-\nu}(\cos\theta) = P_{\mu_{-n}}^{-\nu}(\cos\theta)$ for our specific choices of inputs.
+Recall that for $-1 < x < 1$, the Legendre $P$ function is defined by
+$$
+P_\mu^\nu(x) = 
+\frac{1}{\Gamma(1 - \nu)}\left( \frac{1 + x}{1 - x} \right)^{\nu/2}\prescript{}{2}{F_1}(\mu + 1, -\mu, 1 - \nu, (1 - x)/2)
+$$
+(see Digital Library of Mathematical Functions 14.3.1).
+The hypergeometric function is defined by the series
+$$
+\prescript{}{2}{F_1}(a, b, c, z) = \sum_{n=0}^{\infty}\frac{(a)_n(b)_n}{(c)_n}\frac{z^n}{n!}
+$$
+where $(a)_n$ denotes the Pochammer symbol.
+Now since $\mu_n = -1/2 + 2\pi in/\log\kappa$, we have $\mu_{-n} = \bar{\mu}_n$.
+Tracking this bar through the definitions of the special functions above, we see that
+$$
+P_{\mu_{-n}}^{-\nu}(\cos\theta) = \bar{P}_{\mu_{n}}^{-\nu}(\cos\theta)
+$$
+On the other hand, note that the only piece of $P_{\mu_{n}}^{-\nu}(\cos\theta)$ which is not clearly real is the hypergeometric function
+$$
+\prescript{}{2}{F_1}(\mu_n + 1, -\mu_n, 1 + \nu, (1 - \cos\theta)/2)
+$$
+But in fact this is real, since $\mu_n + 1 = \frac{1}{2} + \frac{2\pi in}{\log\kappa}$, $-\mu_n = \frac{1}{2} - \frac{2\pi in}{\log\kappa}$, and
+$$
+(a + x)_m(a - x)_m = \prod_{k=0}^{m-1}((a + k)^2 - x^2)
+$$
+So since $P_{\mu_{n}}^{-\nu}(\cos\theta)$ is real and $P_{\mu_{-n}}^{-\nu}(\cos\theta) = \bar{P}_{\mu_{n}}^{-\nu}(\cos\theta)$, we have concluded the proof that $P_{\mu_{-n}}^{-\nu}(\cos\theta) = P_{\mu_{n}}^{-\nu}(\cos\theta)$.
+
+\subsection*{Elliptic Expansion}
+
+In the disk model, the hyperbolic Laplacian in polar coordinates is
+$$
+\Delta = \frac{(1 - \rho^2)^2}{4}\left(\frac{\partial^2}{\partial\rho^2} +
+\frac{1}{\rho}\frac{\partial}{\partial\rho} +
+\frac{1}{\rho^2}\frac{\partial^2}{\partial\theta^2}\right)
+$$
+Since two derivatives are taken in $\theta$, it is clear that if $f(\rho, \theta)$ is an eigenfunction of this operator, then $f(\rho, -\theta)$ is also an eigenfunction with the same eigenvalue.
+
+Now write $\psi(\rho, \theta)$ for the base eigenfunction.
+Since the base eigenvalue has multiplicity 1, the fact that $\psi(\rho, -\theta)$ is also a base eigenfunction implies
+$$
+\psi(\rho, \theta) = \omega\psi(\rho, -\theta)
+$$
+for some constant $\omega \in \mathbb{C}$.
+But these functions agree at $\theta = 0$, so $\omega = 1$.
+
+Next, recall that $\psi$ has a Fourier expansion of the form
+$$
+\psi(\rho, \theta) = \sum_{n \in \mathbb{Z}}a_nW_n(\rho)e^{in\theta}
+$$
+where
+$$
+W_n(\rho) = (1 - \rho^2)^s\rho^{|n|} \prescript{}{2}{F}_1(s, s+|n|, 1+|n|; \rho^2)
+$$
+Now, clearly $W_{-n}(\rho) = W_n(\rho)$.
+Thus, by applying the invariance under $\theta \mapsto -\theta$ to the Fourier expansion, we see that
+$$
+a_{-n} = a_n
+$$
+As usual, this allows us to ``fold'' the Fourier expansion to only be a sum over positive $n$:
+$$
+\psi(\rho, \theta) = \sum_{n = 0}^{\infty}a_nW_n(\rho)\cos(n\theta)
+$$
+
+\section*{Odd Coefficients in the Disk Model are 0}
+
+Let us \textit{assume} that our automorphic functions are invariant under $w \mapsto -w$.
+Now let $f$ be a Maass form with respect to such a $\Gamma$.
+Then $f$ has a polar expansion in the disk model of the form
+$$
+f(\rho, \theta) = \sum_{n \in \mathbb{Z}}c_nW_n(\rho)e^{in\theta}
+$$
+Now mapping $w \mapsto -w$ is the same as mapping $\theta \mapsto \theta + \pi$.
+So we have that
+$$
+f(\rho, \theta) = f(\rho, \theta + \pi)
+$$
+Comparing Fourier expansions, this implies that
+$$
+c_n = (-1)^nc_n
+$$
+In other words, $c_n = 0$ for $n$ odd.
+
+\subsection*{Invariance under $w \mapsto -w$}
+
+Let us discuss two ways in which we would expect the automorphic functions in the disk model to have this invariance.
+
+First, recall that the most common way to map from the upper half plane model to the disk model is via the Cayley transform
+$$
+\tau(z) = \frac{z - i}{z + i}
+$$
+Now if the group of interest $\Gamma$ contains the matrix $S =
+\begin{psmallmatrix}
+0 & -1 \\
+1 & 0
+\end{psmallmatrix}$,
+then of course automorphic functions on the upper half plane are invariant under $z \mapsto -1/z$.
+Mapping this to automorphic functions on the disk, a simple calculation shows that these must be invariant under
+$$
+w \mapsto -w
+$$
+So this is one way in which we see the required invariance to conclude that the odd coefficients are $0$.
+
+Alternatively, suppose $S \notin \Gamma$.
+Here, we could compose the Cayley transform with an automorphism of the disk to ensure that the automorphic functions are invariant under $w \mapsto -w$.
+
+\end{document}

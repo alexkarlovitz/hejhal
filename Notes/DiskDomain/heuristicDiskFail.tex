@@ -1,0 +1,66 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+\usepackage{caption}
+
+%opening
+\title{Heuristic Argument For Why Disk Model Approach Fails}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+\section{Recalling Some Numerics from Hejhal's Algorithm}
+
+In the original version of Hejhal's Algorithm, we use the Fourier expansion at the cusp at infinity and get
+$$
+f(x + iy) = \sum_{n=-\infty}^{\infty}a_n\sqrt{y}K_{\nu}(2\pi|n|y)e(nx)
+$$
+where $f$ has eigenvalue $\lambda = (1/2 - \nu)(1/2 + \nu)$.
+
+Now, the $K$-Bessel function has well-understood asymptotics.
+I need to look up the exact asymptotics, but the gist is that it decays exponentially.
+So, for relatively large values of $y$, most of the information in the Fourier expansion is contained in relatively small values of $|n|$.
+\\
+
+With this in mind, we take points on a low-lying horocylce as our sample points, and sum over these.
+Then, we play this off of the expansions at the pullbacks to the standard fundamental domain.
+This has the following effects:
+\begin{itemize}
+	\item \textbf{Good:} since the sample points have a small height, they will hit a large variety of fundamental domains; this ensures their pullbacks aren't ``too close'' together, which could cause the system to be numerically singular
+	\item \textbf{Bad:} since the sample points are low, the $K$-Bessel function will be relatively large, causing us to need a relatively large amount of terms in the Fourier expansion
+	\item \textbf{Good:} since the fundamental domain is bounded off of the real axis, the $y$-values of the pullbacks are relatively large; this ensures that we need relatively few terms in the Fourier expansion
+	\item \textbf{Good:} since the sample points are all at the same height, the number of times we have to compute the $K$-Bessel function at the ``bad'' points is much smaller than at the ``good'' points
+\end{itemize}
+
+\section{Comparing the Disk Model Approach to the Original}
+
+In the disk model approach, we instead use the model of hyperbolic space in the unit disk.
+Then, since our function is $2\pi$-periodic, we have a Fourier expansion in the $\theta$ variable.
+The expansion ends up being
+$$
+f(\rho, \theta) = \sum_{n=-\infty}^{\infty}a_n(1-\rho^2)^2\rho^{|n|}\prescript{}{2}{F}_1(s, s+|n|, 1+|n|; \rho^2)\exp(n\theta)
+$$
+In my notes on the Hausdorff dimension of limit sets, I derive the asymptotics of the hypergeometric function for $\rho \sim 1$.
+
+In short, the hypergeometric function is very small for large $\rho$ values, and it is close to $1$ for $\rho$ close to $0$.
+To try to mimic the original method, we choose sample points on a circle of fixed radius $P$ close to $1$ and sum over these.
+Then we play these off of the expansions at the pullbacks to some fundamental domain.
+This has the following effects:
+\begin{itemize}
+	\item \textbf{Good:} since the sample points have a large radius, they will hit a large variety of fundamental domains
+	\item \textbf{Good:} the sample points have relatively large radii, so the hypergeometric function will be very small at these points; this means we will need relatively few terms in the Fourier expansion
+	\item \textbf{Bad:} if we choose the standard fundamental domain, we will points of \textit{any} radius from $0$ to $1$; this means some of the pullbacks will have a relatively small radius, causing the hypergeometric function to be relatively large, which in turn causes us to need a large number of terms in the Fourier expansion
+	\textbf{Bad:} since the pullbacks can have such a variety of radii, we may have to compute the hypergeometric function at a large number of ``bad'' points
+\end{itemize}
+	
+\end{document}
