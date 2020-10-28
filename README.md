@@ -1,2 +1,2 @@
 # hejhal
-Algorithms for extending Hejhal's algorithm to infinite volume 
+Algorithms for extending Hejhal's algorithm to infinite volume.
