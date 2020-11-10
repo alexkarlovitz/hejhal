@@ -12,7 +12,7 @@ This folder contains LaTeX files describing the algorithms, mathematical backgro
 **Warning:** Some of the notation changes across documents. Sorry in advance for any confusion!
 
 ## Visuals
-this folder contains python code for creating visuals of fundamental domains in the upper half plane and disk models. These files produced the visuals in the LaTeX documents in Notes.
+This folder contains python code for creating visuals of fundamental domains in the upper half plane and disk models. These files produced the visuals in the LaTeX documents in Notes.
 
 ## References
 
