@@ -240,6 +240,50 @@ def get_axes(thet) :
 # Draws doubled Schottky group with 3 circles of angle thet, plus the
 # geodesics cutting off the flares
 def draw_labeled_flares(thet, xwidth=5, ywidth=8) :
+    # get circles and geodesics
+    circles = get_UHP_circles(3, thet)
+    g1, g2, g3 = get_axes(thet)
+
+    # draw
+    ax = plot_FD(circles, xwidth, ywidth)
+    g1.draw(ax, 'k', ':')
+    g2.draw(ax, 'k', ':')
+    g3.draw(ax, 'k', ':')
+
+    # label flares
+    plt.text(-.28, .5, '$R_2R_3$', fontsize=12)
+    plt.text(-3.2, 3.5, '$R_1R_2$', fontsize=12)
+    plt.text(2.5, 3.5, '$R_1R_3$', fontsize=12)
+
+    plt.show()
+
+# Draws flare domain for one of the three flares in Schottky group
+# with 3 circles of angle thet (all three domains are equivalent)
+def draw_flare_domains(thet, X=5, Y=5) :
+    # get geodesics
+    circles = get_UHP_circles(3, thet)
+    _, _, g = get_axes(thet)
+
+    # depending on type, get appropriate endpoints
+    z1 = min(g.ep1, g.ep2)
+    z2 = max(g.ep1, g.ep2)
+    t = circles[1, 0] + circles[1, 1]
+
+    # Define Mobius transformation and apply to whole fundamental domain
+    mult = (t - z2)/(t - z1)
+    U = np.array([ [mult, -z1*mult], [1, -z2] ])
+    fd_temp = get_FD(circles)
+    fd = pm.mobius(U, fd_temp)
+    fd.referencePoint = 1j
+
+    # And plot the fundamental domain!
+    ax = pm.setupFig(-X, X, 0, Y)
+    fd.draw(ax, fill=1)
+    plt.show()
+
+# Draws doubled Schottky group with 3 circles of angle thet, plus the
+# geodesics cutting off the flares
+def draw_labeled_flares_doubled(thet, xwidth=5, ywidth=8) :
     # get geodesics
     circles = get_UHP_circles(3, thet)
     g1, g2, g3 = get_axes(thet)
@@ -294,7 +338,7 @@ def draw_expanded_flares(thet, omega, xwidth=5, ywidth=8) :
 
 # Draws flare domain for one of the three flares in doubled Schottky group
 # with 3 circles of angle thet; change type to get different flare
-def draw_flare_domains(thet, type, X, Y) :
+def draw_flare_domains_doubled(thet, type, X, Y) :
     # get geodesics
     circles_start = get_UHP_circles(3, thet)
     g1, g2, g3 = get_axes(thet)
@@ -515,10 +559,4 @@ def plot_test_points() :
     plt.show()
 
 if __name__ == '__main__' :
-    #circles = get_UHP_circles(3, np.pi/2)
-    #circles_doubled, refl = double_group(circles)
-    #circles_shifted = get_shifted_circles(circles)
-
-    #draw_labeled_flares(np.pi/6, 8, 8)
-    draw_expanded_flares(np.pi/2, 4*np.pi/5, 5, 8)
-    #plot_test_points()
+    draw_flare_domains(np.pi/2)
