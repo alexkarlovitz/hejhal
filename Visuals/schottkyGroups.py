@@ -60,32 +60,6 @@ def get_endpoints(center, radius) :
     ep2 = center + radius
     return ep1, ep2
 
-# Given a list of circles and radii, doubles the Schottky group across
-# first circle in the list
-def double_group(circles) :
-    # get circle to reflect across
-    refl_center = circles[0, 0]
-    refl_rad = circles[0, 1]
-
-    # initialize new list
-    N = len(circles)
-    circles_new = np.zeros((2*(N-1), 2))
-
-    # loop through old circles
-    for i in range(1, N) :
-        # save old circle
-        circles_new[2*(i-1), :] = circles[i, :]
-
-        # compute new, reflected circle
-        ep1, ep2 = get_endpoints(circles[i, 0], circles[i, 1])
-        ep1_new = refl_rad**2 / (ep1 - refl_center) + refl_center
-        ep2_new = refl_rad**2 / (ep2 - refl_center) + refl_center
-
-        circles_new[2*i - 1, 0] = (ep1_new + ep2_new) / 2
-        circles_new[2*i - 1, 1] = abs(ep1_new - ep2_new) / 2
-
-    return circles_new, [refl_center, refl_rad]
-
 # Given a list of circles and radii, creates a FundamentalDomain object
 # (for use in plotting)
 def get_FD(circles) :
@@ -108,78 +82,30 @@ def plot_FD(circles, x_lim, y_lim) :
 # Assume 3 circles in the following functions!
 #---------------------------------------------
 
-# Since we care about flares, we will set up a different fundamental
-# domain which is obtained as follows:
-#   - map points outside R1 with Im z >= 0 by R3R1
-#   - map points outside R1 with Im z < 0 by R2R1
-def get_shifted_circles(circles) :
-    # recall ordering of circles: R1, R2, R3
-
-    # new circles will be R1, the geodesic from 0 to infty mapped by
-    # both R3R1 and R2R1, and R1 mapped by both R3R1 and R2R1
-    circles_new = np.zeros((5, 2))
-    circles_new[0, :] = circles[0, :]
-    ep1, ep2 = get_endpoints(circles[0, 0], circles[0, 1])
-
-    # start with mapping of 0 -> infty by R3R1
-    ep0 = reflect(0, circles[0, 0], circles[0, 1])
-    ep0 = reflect(ep0, circles[2, 0], circles[2, 1])
-    ep_inf = reflect(0, circles[2, 0], circles[2, 1])
-    circles_new[1, :] = [(ep_inf + ep0)/2, abs(ep_inf - ep0)/2]
-
-    # next map R1 by R3R1
-    ep3 = reflect(ep1, circles[2, 0], circles[2, 1])
-    ep4 = reflect(ep2, circles[2, 0], circles[2, 1])
-    circles_new[2, :] = [(ep3 + ep4)/2, abs(ep3 - ep4)/2]
-
-    # next map 0 -> infty by R2R1
-    ep0 = reflect(0, circles[0, 0], circles[0, 1])
-    ep0 = reflect(ep0, circles[1, 0], circles[1, 1])
-    ep_inf = reflect(0, circles[1, 0], circles[1, 1])
-    circles_new[3, :] = [(ep_inf + ep0)/2, abs(ep_inf - ep0)/2]
-
-    # next map R1 by R2R1
-    ep3 = reflect(ep1, circles[1, 0], circles[1, 1])
-    ep4 = reflect(ep2, circles[1, 0], circles[1, 1])
-    circles_new[4, :] = [(ep3 + ep4)/2, abs(ep3 - ep4)/2]
-
-    return circles_new
-
 # Pullback algorithm for fundamental domain of the symmetric Schottky group
-# doubled and in the upper half plane model
-def pullback_Schottky(z, circles, R1_cent, R1_rad) :
-    # recall ordering of circles: R2, R1R2, R3, R1R3
+# with 3 circles mapped to the upper half plane model
+def pullback_Schottky(z, circles) :
 
     # loop until in fundamental domain
     i = 0
     while 1 :
         in_FD = 1
 
-        # check if in R2
-        if abs(z - circles[0, 0]) < circles[0, 1] :
-            # map by R1R2
+        # check if outside R1
+        if abs(z - circles[0, 0]) > circles[0, 1] :
+            # map by R1
             z = reflect(z, circles[0, 0], circles[0, 1])
-            z = reflect(z, R1_cent, R1_rad)
             in_FD = 0
 
-        # check if in R1R2
+        # check if in R2
         if abs(z - circles[1, 0]) < circles[1, 1] :
-            # map by R2R1
-            z = reflect(z, R1_cent, R1_rad)
-            z = reflect(z, circles[0, 0], circles[0, 1])
+            # map by R2
+            z = reflect(z, circles[1, 0], circles[1, 1])
             in_FD = 0
 
         # check if in R3
         if abs(z - circles[2, 0]) < circles[2, 1] :
-            # map by R1R3
-            z = reflect(z, circles[2, 0], circles[2, 1])
-            z = reflect(z, R1_cent, R1_rad)
-            in_FD = 0
-
-        # check if in R1R3
-        if abs(z - circles[3, 0]) < circles[3, 1] :
-            # map by R3R1
-            z = reflect(z, R1_cent, R1_rad)
+            # map by R3
             z = reflect(z, circles[2, 0], circles[2, 1])
             in_FD = 0
 
@@ -188,23 +114,8 @@ def pullback_Schottky(z, circles, R1_cent, R1_rad) :
 
         i = i + 1
         if i == 30 :
+            print 'Warning: z = ' + str(z) + ' took more than 30 steps in pullback algorithm.'
             return None
-
-# Pullback algorithm for the shifted fundamental domain
-def pullback_shifted(z, circles_doubled, R1_cent, R1_rad) :
-    # get normal pullback
-    z_star = pullback_Schottky(z, circles_doubled, R1_cent, R1_rad)
-
-    # if pullback is in F1 or F2, map by R2R1 or R3R1, respectively
-    if abs(z_star - R1_cent) >= R1_rad :
-        if z_star.real < 0 :
-            z_star = reflect(z_star, R1_cent, R1_rad)
-            return reflect(z_star, circles_doubled[0, 0], circles_doubled[0, 1])
-        else :
-            z_star = reflect(z_star, R1_cent, R1_rad)
-            return reflect(z_star, circles_doubled[2, 0], circles_doubled[2, 1])
-
-    return z_star
 
 # Given two (center, radius) pairs (c, r) and (a, t), computes the fixed
 # points of the Mobius transformation obtained from reflection across the
@@ -214,10 +125,10 @@ def fixed_points_refls(c, r, a, t) :
     B = np.sqrt(( (a - c)**2 - (r**2 + t**2) )**2 - 4*r**2*t**2 )/2/(c - a)
     return A - B, A + B
 
-# Produces the geodesics cutting off the flares in a doubled group
-# obtained from a symmetric Schottky group with 3 circles of angle thet
+# Produces the geodesics cutting off the flares in the
+# symmetric Schottky group with 3 circles of angle thet
 def get_axes(thet) :
-    # original circles in upper half plane
+    # circles in upper half plane
     circles = get_UHP_circles(3, thet)
 
     # get geodesic fixed by R1R2
@@ -237,7 +148,7 @@ def get_axes(thet) :
 
     return g1, g2, g3
 
-# Draws doubled Schottky group with 3 circles of angle thet, plus the
+# Draws Schottky group with 3 circles of angle thet, plus the
 # geodesics cutting off the flares
 def draw_labeled_flares(thet, xwidth=5, ywidth=8) :
     # get circles and geodesics
@@ -276,42 +187,22 @@ def draw_flare_domains(thet, X=5, Y=5) :
     fd = pm.mobius(U, fd_temp)
     fd.referencePoint = 1j
 
-    # And plot the fundamental domain!
+    # And plot the fundamental domain!mult = (t - z2)/(t - z1)
+    U = np.array([ [mult, -z1*mult], [1, -z2] ])
+    fd_temp = get_FD(circles)
+    fd = pm.mobius(U, fd_temp)
     ax = pm.setupFig(-X, X, 0, Y)
     fd.draw(ax, fill=1)
-    plt.show()
+    return ax
 
-# Draws doubled Schottky group with 3 circles of angle thet, plus the
-# geodesics cutting off the flares
-def draw_labeled_flares_doubled(thet, xwidth=5, ywidth=8) :
-    # get geodesics
-    circles = get_UHP_circles(3, thet)
-    g1, g2, g3 = get_axes(thet)
-    circles_doubled, refl = double_group(circles)
-    circles_shift = get_shifted_circles(circles)
-
-    # draw
-    ax = plot_FD(circles_shift, xwidth, ywidth)
-    g1.draw(ax, 'k', ':')
-    g2.draw(ax, 'k', ':')
-    g3.draw(ax, 'k', ':')
-
-    # label flares
-    plt.text(-.28, .5, '$R_2R_3$', fontsize=12)
-    plt.text(-3.2, 3.5, '$R_1R_2$', fontsize=12)
-    plt.text(2.5, 3.5, '$R_1R_3$', fontsize=12)
-
-    plt.show()
-
+# draws Schottky group plus flares expanded out to angle omega
 def draw_expanded_flares(thet, omega, xwidth=5, ywidth=8) :
     # get geodesics
     circles = get_UHP_circles(3, thet)
     g1, g2, g3 = get_axes(thet)
-    circles_doubled, refl = double_group(circles)
-    circles_shift = get_shifted_circles(circles)
 
     # draw domain
-    ax = plot_FD(circles_shift, xwidth, ywidth)
+    ax = plot_FD(circles, xwidth, ywidth)
 
     # for each flare, draw flare at angle omega
     gs = [g1, g2, g3]
@@ -336,65 +227,20 @@ def draw_expanded_flares(thet, omega, xwidth=5, ywidth=8) :
 
     plt.show()
 
-# Draws flare domain for one of the three flares in doubled Schottky group
-# with 3 circles of angle thet; change type to get different flare
-def draw_flare_domains_doubled(thet, type, X, Y) :
-    # get geodesics
-    circles_start = get_UHP_circles(3, thet)
-    g1, g2, g3 = get_axes(thet)
-    circles = get_shifted_circles(circles_start)
-
-    # RECALL: circles order is R1, R3R1(im_axis), R3(R1),
-    #                          R2R1(im_axis), R2(R1)
-
-    # depending on type, get appropriate endpoints
-    z1 = 0
-    z2 = 0
-    t = 0
-
-    if type == 1 : # between R1 and R2(R1)
-        z1 = min(g1.ep1, g1.ep2)
-        z2 = max(g1.ep1, g1.ep2)
-        t = circles[0, 0] - circles[0, 1]
-
-    elif type == 2 : # between R3(R1) and R1
-        z1 = min(g2.ep1, g2.ep2)
-        z2 = max(g2.ep1, g2.ep2)
-        t = circles[2, 0] + circles[2, 1]
-
-    elif type == 3 : # between R3R1(im_axis) and R2R1(im_axis)
-        z1 = min(g3.ep1, g3.ep2)
-        z2 = max(g3.ep1, g3.ep2)
-        t = circles[3, 0] + circles[3, 1]
-
-    else :
-        raise ValueError('type must be 1, 2, or 3.')
-
-    # Define Mobius transformation and apply to whole fundamental domain
-    mult = (t - z2)/(t - z1)
+def test_pullback(X=5, Y=5) :
+    circles = get_UHP_circles(3, np.pimult = (t - z2)/(t - z1)
     U = np.array([ [mult, -z1*mult], [1, -z2] ])
     fd_temp = get_FD(circles)
-    fd = pm.mobius(U, fd_temp)
-    fd.referencePoint = 1.001j
-
-    # And plot the fundamental domain!
-    ax = pm.setupFig(-X, X, 0, Y)
-    fd.draw(ax, fill=1)
-    plt.show()
-
-def test_pullback() :
-    circles = get_UHP_circles(3, np.pi/2)
-    circles_doubled, refl = double_group(circles)
-    circles_shifted = get_shifted_circles(circles)
+    fd = pm.mobius(U, fd_temp)/2)
 
     #zs = np.arange(1000)/180 + 1 + 1j/10
     zs = np.array([-9.4 + 1j])
     ws = []
     for z in zs :
-        ws.append(pullback_shifted(z, circles_doubled, refl[0], refl[1]))
+        ws.append(pullback(z, circles))
     ws = np.array(ws)
 
-    ax = plot_FD(circles_shifted, 10, 15)
+    ax = plot_FD(circles, X, Y)
     ax.plot(zs.real, zs.imag, 'k.')
     ax.plot(ws.real, ws.imag, 'b.')
 
@@ -404,41 +250,19 @@ def test_pullback() :
 # Functions for checking pari code!
 #----------------------------------
 
-# map to flare
-# - flare 1: between R1R2 and R2
-# - flare 2: betwwen R3 and R1R3
-# - flare 3: between R2 and R3
-def map_to_flare(z, type, thet) :
-    # get geodesics
-    circles_start = get_UHP_circles(3, thet)
-    g1, g2, g3 = get_axes(thet)
-    circles = get_shifted_circles(circles_start)
+# map to flare (fixed by R2R3)
+def map_to_flare(z, thet) :
+    # get circles/geodesics
+    circles = get_UHP_circles(3, thet)
+    _, _, g = get_axes(thet)
 
     # RECALL: circles order is R1, R3R1(im_axis), R3(R1),
     #                          R2R1(im_axis), R2(R1)
 
     # depending on type, get appropriate endpoints
-    z1 = 0
-    z2 = 0
-    t = 0
-
-    if type == 1 : # between R1 and R2(R1)
-        z1 = min(g1.ep1, g1.ep2)
-        z2 = max(g1.ep1, g1.ep2)
-        t = circles[0, 0] - circles[0, 1]
-
-    elif type == 2 : # between R3(R1) and R1
-        z1 = min(g2.ep1, g2.ep2)
-        z2 = max(g2.ep1, g2.ep2)
-        t = circles[2, 0] + circles[2, 1]
-
-    elif type == 3 : # between R3R1(im_axis) and R2R1(im_axis)
-        z1 = min(g3.ep1, g3.ep2)
-        z2 = max(g3.ep1, g3.ep2)
-        t = circles[3, 0] + circles[3, 1]
-
-    else :
-        raise ValueError('type must be 1, 2, or 3.')
+    z1 = min(g.ep1, g.ep2)
+    z2 = max(g.ep1, g.ep2)
+    t = circles[1, 0] + circles[1, 1]
 
     # Apply Mobius transformation to z
     mult = (t - z2)/(t - z1)
@@ -454,78 +278,12 @@ def disk_Whitt(rho, m, s) :
     return (1 - rho**2)**s*rho**abs(m)*mp.hyp2f1(s, s + abs(m), 1 + abs(m), rho**2)
 
 # print some calculations on the point z
-def print_z_and_pb(z, circles_doubled, refl) :
+def print_z_and_pb(z, circles) :
     print 'z =', z
     print ''
-    w = pullback_shifted(z, circles_doubled, refl[0], refl[1])
+    w = pullback_shifted(z, circles)
     print 'Pullback =', w
     return w
-
-# double check computations from flare_disk_Schottky.pari; specifically
-# matrix entries in init_equations function
-def check_pari_comps() :
-    thet = np.pi/2
-    kappa = 13.928203230275509174 # got this from PARI code
-    s = 0.4
-
-    # need circle info for pullbacks
-    circles = get_UHP_circles(3, thet)
-    circles_doubled, refl = double_group(circles)
-    circles_shifted = get_shifted_circles(circles)
-
-    # point outside flares, pullback in flare 1
-    z = 10 + 1j/10
-    w = print_z_and_pb(z, circles_doubled, refl)
-    print ''
-    zd = cayley_transform(z)
-    zd_rho, zd_thet = rect_to_pol(zd.real, zd.imag)
-    wf = map_to_flare(w, 1, thet)
-    wf_rho, wf_thet = rect_to_pol(wf.real, wf.imag)
-    print 'expn at z'
-    for m in range(3) :
-        print disk_Whitt(zd_rho, m, s)*mp.cos(m*zd_thet)
-    print ''
-    print 'expn at w'
-    for m in range(3) :
-        print flare_Whitt(wf_thet, m, s, kappa)*\
-        mp.cos(2*mp.pi*m*mp.log(wf_rho)/mp.log(kappa))
-    print ''
-
-    # point outside flares, pullback in flare 2
-    z = -9.4 + 1j
-    w = print_z_and_pb(z, circles_doubled, refl)
-    print ''
-    zd = cayley_transform(z)
-    zd_rho, zd_thet = rect_to_pol(zd.real, zd.imag)
-    wf = map_to_flare(w, 2, thet)
-    wf_rho, wf_thet = rect_to_pol(wf.real, wf.imag)
-    print 'expn at z'
-    for m in range(3) :
-        print disk_Whitt(zd_rho, m, s)*mp.cos(m*zd_thet)
-    print ''
-    print 'expn at w'
-    for m in range(3) :
-        print flare_Whitt(wf_thet, m, s, kappa)*\
-        mp.cos(2*mp.pi*m*mp.log(wf_rho)/mp.log(kappa))
-    print ''
-
-    # point is equal to pullback and in flare 3
-    z = 1j/20
-    w = print_z_and_pb(z, circles_doubled, refl)
-    print ''
-    zf = map_to_flare(z, 3, thet)
-    zf_rho, zf_thet = rect_to_pol(zf.real, zf.imag)
-    wd = cayley_transform(w)
-    wd_rho, wd_thet = rect_to_pol(wd.real, wd.imag)
-    print 'expn at z'
-    for m in range(3) :
-        print flare_Whitt(zf_thet, m, s, kappa)*\
-        mp.cos(2*mp.pi*m*mp.log(zf_rho)/mp.log(kappa))
-    print ''
-    print 'expn at w'
-    for m in range(3) :
-        print disk_Whitt(wd_rho, m, s)*mp.cos(m*wd_thet)
-    print ''
 
 def plot_test_points() :
     # read file with points
@@ -533,21 +291,23 @@ def plot_test_points() :
         line = f.readline().strip()
 
     # convert point strings to complex numbers
-    pts_string = line.replace('I', '1j')
+    pts_string = line.replace('I', 'j')
     pts_string = pts_string.replace('*', '').split(',')
     pts = []
     for p in pts_string :
         p_new = ''.join(p.split())
-        pts.append(complex(p_new))
+        try :
+            pts.append(complex(p_new))
+        except ValueError :
+            print p_new
+            return
 
     # get geodesics
     circles = get_UHP_circles(3, np.pi/2)
     g1, g2, g3 = get_axes(np.pi/2)
-    circles_doubled, refl = double_group(circles)
-    circles_shift = get_shifted_circles(circles)
 
-    # draw shifted domain
-    ax = plot_FD(circles_shift, 5, 8)
+    # draw fundamental domain
+    ax = plot_FD(circles, 5, 8)
     g1.draw(ax, 'k', ':')
     g2.draw(ax, 'k', ':')
     g3.draw(ax, 'k', ':')
@@ -559,4 +319,11 @@ def plot_test_points() :
     plt.show()
 
 if __name__ == '__main__' :
-    draw_flare_domains(np.pi/2)
+    ax = draw_flare_domains(np.pi/2)
+
+    g1 = pm.Geodesic(inv_cayley_transform(np.exp(2*np.pi*1j/3)))
+
+    mult = (t - z2)/(t - z1)
+    U = np.array([ [mult, -z1*mult], [1, -z2] ])
+    fd_temp = get_FD(circles)
+    fd = pm.mobius(U, fd_temp)

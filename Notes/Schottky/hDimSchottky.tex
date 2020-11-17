@@ -184,4 +184,33 @@ Using the flare cut off by the axis of $R_2R_3$, we get the flare domain picture
 
 \section*{Rotational Symmetry of Maass Forms}
 
+Recall that Maass forms for $\Gamma$ are eigenfunctions of the Laplace-Beltrami operator acting on $L^2(\Gamma\backslash\mathbb{H})$.
+We claim that for a given eigenvalue, a Maass form for the symmetric Schottky group of parameters $(n, \theta)$ can be taken to be invariant under rotation by $2\pi/n$.
+\\
+
+To verify this claim, first recall that the Laplace operator on the disk model (in polar coordinates) is
+$$
+\Delta = -\left(\frac{(1 - \rho^2)^2}{4}\frac{\partial^2}{\partial\rho^2} +
+\frac{(1 - \rho^2)^2}{4\rho}\frac{\partial}{\partial\rho} +
+\frac{(1 - \rho^2)^2}{4\rho^2}\frac{\partial^2}{\partial\theta^2}\right)
+$$
+From this formula, one easily sees that rotations are $\Delta$-invariant.
+Thus, if we compose any eigenfunction of the Laplacian with a rotation, we still have an eigenfunction of the same eigenvalue.
+
+Next, note that a rotation of $2\pi/n$ is smooth on the fundamental domain for the $(n, \theta)$ symmetric Schottky group.
+Thus, given a Maass form $f$, we can construct a $2\pi/n$ rotation-invariant Maass form of the same eigenvalue by taking the linear combination
+$$
+\frac{1}{n}\sum_{i = 0}^{n - 1}f\left(e^{2\pi i/n} z\right)
+$$
+
+So we can assume that any Maass form we are working with is invariant under rotation by $2\pi/n$.
+Even further, we can use the multiplicity one principle to conclude that the base eigenfunction is itself invariant under this rotation.
+
+\subsection*{Consequences for Hejhal's Algorithm}
+
+When running Hejhal's algorithm on the symmetric Schottky groups, we need only consider test points in one $2\pi/n$ sector.
+We can of course take this sector to entirely contain one flare, while not intersecting any others.
+
+If the pullback $z^*$ of a test point $z$ falls outside of the chosen sector, we can simply replace $z^*$ with the appropriate rotation to make it fall in this sector, since the Maass form will be equivalent at those different points.
+
 \end{document}

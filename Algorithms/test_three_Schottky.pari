@@ -1,0 +1,125 @@
+/*
+This file contains functions for testing the algorithms in
+three_Schottky.pari. NOTE: need to run "\r three_Schottky.pari"
+in gp before running any code in this file, since it assumes those
+functions are defined.
+*/
+
+/**********************************************************************
+  Functions for generating test points
+**********************************************************************/
+
+/*
+Creates set of N test points outside the fundamental domain at a
+fixed angle alpha
+*/
+test_points_flare(N, flare_data, alpha)=
+{
+  local(zs, kappa);
+
+  /* kappa is the scaling parameter for the flares */
+  kappa =  true_to_hyp(flare_data[4], flare_data[1],
+                        flare_data[2], flare_data[3])[1];
+
+  zs = vector(N);
+
+  /* Get N points inside R2(Im axis) but outside flares, also include
+     reflections of these points across imaginary axis */
+  for(j = 1, N,
+    /* Pullback points at fixed angle alpha in flare domain */
+    zs[j] = hyp_to_true(kappa + j/(N + 1), alpha, flare_data[1],
+                        flare_data[2], flare_data[3]);
+  );
+
+  return(zs);
+}
+
+/**********************************************************************
+  Experiments
+**********************************************************************/
+
+/* TODO */
+
+/**********************************************************************
+  Miscellaneous test functions
+**********************************************************************/
+
+test_rotations()=
+{
+  zs = [1/2 + I/2, I/3, -0.3, -.4 - .2*I, -.5 + .1*I, 0.2 + 0.3*I];
+
+  for(i = 1, length(zs),
+    z = zs[i];
+    w = rotation_equiv(z);
+    print("z = "z);
+    print("w = "w);
+    print("Abs diff = "abs(z) - abs(w));
+    print("");
+  );
+}
+
+test_circles_UHP()=
+{
+  print(get_circles_UHP(Pi/2));
+}
+
+test_flare_data()=
+{
+  local(circles, flare_data, z1, z2, t, pre_kappa, mult, kappa);
+
+  circles = get_circles_UHP(Pi/2);
+
+  flare_data = get_flare_data(circles);
+  z1 = flare_data[1];
+  z2 = flare_data[2];
+  t = flare_data[3];
+  pre_kappa = flare_data[4];
+
+  print("z1 = "z1);
+  print("z2 = "z2);
+  print("t = "t);
+
+  kappa = true_to_hyp(flare_data[4], z1, z2, t)[1];
+
+  print("kappa = "kappa);
+}
+
+test_pullback()=
+{
+  local(circles, zs, ws);
+
+  circles = get_circles_UHP(Pi/2);
+
+  zs = vector(100, x, (x - 1)/10 - 10 + I/10);
+  print(zs);
+  ws = vector(100);
+
+  for(i = 1, 100,
+    ws[i] = pullback_Schottky(zs[i], circles)*1.;
+  );
+  print(ws);
+}
+
+test_init_eqns()=
+{
+  local(circles, flare_data, zs, s, alpha0, M);
+
+  /* get Schottky group data */
+  circles = get_circles_UHP(Pi/2);
+  flare_data = get_flare_data(circles);
+
+  /* Some test z values */
+  zs = vector(3);
+  zs[1] = 0.4 + 1/10*I;
+  zs[2] = 0.39 + 0.2*I;
+  zs[3] = -0.35 + 1/20*I;
+
+  /* Parameters */
+  s = 0.4;
+  alpha0 = 3*Pi/4;
+  M = 3;
+
+  A = init_eqns(zs, s, alpha0, M, flare_data, circles);
+  default(realprecision, 5);
+  print(A);
+}
