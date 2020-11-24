@@ -31,7 +31,7 @@ def rect_to_pol(x, y) :
 def reflect(z, cent, rad) :
     if abs(z - cent) < 1e-10 :
         return np.inf
-    return rad**2 / (z - cent) + cent
+    return rad**2 / (z.real - z.imag*1j - cent) + cent
 
 # We can define a symmetric Schottky group by
 #   - N: number of circles
@@ -175,7 +175,7 @@ def draw_flare_domains(thet, X=5, Y=5) :
     circles = get_UHP_circles(3, thet)
     _, _, g = get_axes(thet)
 
-    # depending on type, get appropriate endpoints
+    # get endpoints
     z1 = min(g.ep1, g.ep2)
     z2 = max(g.ep1, g.ep2)
     t = circles[1, 0] + circles[1, 1]
@@ -227,11 +227,36 @@ def draw_expanded_flares(thet, omega, xwidth=5, ywidth=8) :
 
     plt.show()
 
-def test_pullback(X=5, Y=5) :
-    circles = get_UHP_circles(3, np.pimult = (t - z2)/(t - z1)
+# draws flare domain plus the sector conatining the flare
+def draw_flare_with_sector() :
+    ax = draw_flare_domains(np.pi/2, 13, 6)
+
+    g1 = pm.Geodesic(inv_cayley_transform(np.exp(2*np.pi*1j/3)).real,
+                     inv_cayley_transform(-np.exp(2*np.pi*1j/3)).real)
+    g2 = pm.Geodesic(inv_cayley_transform(np.exp(4*np.pi*1j/3)).real,
+                     inv_cayley_transform(-np.exp(4*np.pi*1j/3)).real)
+
+    # get geodesics
+    thet = np.pi/2
+    circles = get_UHP_circles(3, thet)
+    _, _, g = get_axes(thet)
+
+    # get endpoints
+    z1 = min(g.ep1, g.ep2)
+    z2 = max(g.ep1, g.ep2)
+    t = circles[1, 0] + circles[1, 1]
+
+    mult = (t - z2)/(t - z1)
     U = np.array([ [mult, -z1*mult], [1, -z2] ])
-    fd_temp = get_FD(circles)
-    fd = pm.mobius(U, fd_temp)/2)
+    fd_temp = pm.FundamentalDomain([g1, g2])
+    fd = pm.mobius(U, fd_temp)
+
+    fd.draw(ax, lstyle=':')
+
+    plt.show()
+
+def test_pullback(X=5, Y=5) :
+    circles = get_UHP_circles(3, np.pi/2)
 
     #zs = np.arange(1000)/180 + 1 + 1j/10
     zs = np.array([-9.4 + 1j])
@@ -319,11 +344,4 @@ def plot_test_points() :
     plt.show()
 
 if __name__ == '__main__' :
-    ax = draw_flare_domains(np.pi/2)
-
-    g1 = pm.Geodesic(inv_cayley_transform(np.exp(2*np.pi*1j/3)))
-
-    mult = (t - z2)/(t - z1)
-    U = np.array([ [mult, -z1*mult], [1, -z2] ])
-    fd_temp = get_FD(circles)
-    fd = pm.mobius(U, fd_temp)
+    plot_test_points()

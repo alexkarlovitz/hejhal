@@ -213,4 +213,36 @@ We can of course take this sector to entirely contain one flare, while not inter
 
 If the pullback $z^*$ of a test point $z$ falls outside of the chosen sector, we can simply replace $z^*$ with the appropriate rotation to make it fall in this sector, since the Maass form will be equivalent at those different points.
 
+\section*{Appendix: Considerations for Choosing Test Points}
+
+Let's consider the action of $R_2R_3$ in the flare domain.
+Note that the main purpose of mapping to the flare domain is to convert this hyperbolic transformation into a scaling matrix (of course this is still a hyperbolic transformation, just a very specific and simple one).
+Specifically, the action is converted to one of the form
+$$
+z \mapsto \kappa z
+$$
+for some $\kappa > 1$.
+Furthermore, recall that it is this action which leads to a logarithmic Fourier expansion of Maass forms.
+Specifically, if $\phi$ is a Maass form for such a Schottky group, where $\phi(r, \theta)$ is a function of the polar coordinates $(r, \theta)$ in the flare, then
+$$
+\phi(r, \theta) = \sum_{n\in\mathbb{Z}}g_n(\theta)e\left( n\frac{\log r}{\log \kappa} \right)
+$$
+But note that $\phi(r, \theta)$ is then automatically invariant under the map $z \mapsto \kappa z$.
+So if we take a test point with pullback equal to $\kappa^nz$ for some $n \in \mathbb{Z}, n \neq 0$, we gain \textit{no new information} from equating $\phi$ at this point and its pullback.
+\\
+
+Next, recall that our Maass form is also invariant \textit{in the disk model} under rotation by $2\pi/3$.
+Let's draw the $2\pi/3$-sector containing our flare after mapping over to the flare domain.
+This is shown in Figure \ref{flare_with_sector}.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{flare_with_sector.png}
+	\caption{The $2\pi/3$-sector containing our flare.}
+	\label{flare_with_sector}
+\end{figure}
+As we have argued, the only viable test points are those which are inside our chosen sector and whose pullback is not just multiplication by a power of $\kappa$.
+Looking at Figure \ref{flare_with_sector}, these points will occur outside the leftmost dotted geodesic, and with argument relatively close to $\pi$, so that multiplication by a negative power of $\kappa$ puts them inside the smallest circle.
+
+\textbf{To do:} rewrite that last paragraph. Pretty clunky...
+
 \end{document}

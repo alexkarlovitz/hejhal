@@ -93,7 +93,7 @@ disk_Whitt(rho, m, s)=
 /* Computes reflection through geodesic semicircle in upper half plane */
 reflect(z, cent, rad)=
 {
-  return( rad^2 / (z - cent) + cent );
+  return( rad^2 / (real(z) - I*imag(z) - cent) + cent );
 }
 
 /*

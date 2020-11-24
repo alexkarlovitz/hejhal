@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.11)  10 NOV 2020 17:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.11)  20 NOV 2020 14:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -380,38 +380,53 @@ Underfull \hbox (badness 10000) in paragraph at lines 187--190
 
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 229--233
+
+ []
+
+<flare_with_sector.png, id=70, 1492.57625pt x 381.425pt>
+File: flare_with_sector.png Graphic file (type png)
+<use flare_with_sector.png>
+Package pdftex.def Info: flare_with_sector.png  used on input line 239.
+(pdftex.def)             Requested size: 469.75502pt x 120.04474pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
 [7
 
-] (./hDimSchottky.aux) ) 
+] [8 <./flare_with_sector.png>] (./hDimSchottky.aux) ) 
 Here is how much of TeX's memory you used:
- 3504 strings out of 494923
- 49500 string characters out of 6180742
- 111936 words of memory out of 5000000
- 6753 multiletter control sequences out of 15000+600000
+ 3510 strings out of 494923
+ 49643 string characters out of 6180742
+ 113944 words of memory out of 5000000
+ 6758 multiletter control sequences out of 15000+600000
  12201 words of font info for 47 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  41i,8n,32p,299b,243s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex1
-0.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/te
-xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-di
-st/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/font
-s/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy1
-0.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/share/te
-xlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on hDimSchottky.pdf (7 pages, 382322 bytes).
+</usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr
+/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmti8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symb
+ols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbo
+ls/msbm7.pfb>
+Output written on hDimSchottky.pdf (8 pages, 412756 bytes).
 PDF statistics:
- 132 PDF objects out of 1000 (max. 8388607)
- 85 compressed objects within 1 object stream
+ 141 PDF objects out of 1000 (max. 8388607)
+ 90 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 53 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 58 words of extra memory for PDF output out of 10000 (max. 10000000)
 
