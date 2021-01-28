@@ -67,11 +67,79 @@ test_points_concat(N, flare_data, alpha)=
   print("To Do");
 }
 
+/*
+Test if list of test points zs is admissible. We include tests for
+  - admissibility for the flare expansion (arg <= alpha0)
+  - whether the point gives a nontrivial equation (z and its pullback
+    have different arguments)
+  - whether original point falls inside the chosen 2Pi/3-sector
+*/
+is_admissible(zs, alpha0, flare_data)=
+{
+  local(rs, z, z_flare, zpb, zpb_rot, zpb_flare, w, w_rot);
+  rs = [1, 1, 1];
+
+  for(i = 1, length(zs),
+    z = zs[i];
+
+    /* Check admissibility for flare expansion */
+    z_flare = true_to_hyp(z, flare_data[1],
+                          flare_data[2], flare_data[3]);
+    if(z_flare[2] > alpha0, rs[1] = 0);
+    print(z_flare[2]);
+
+    /* Check whether z and its pullback have same argument */
+    zpb = pullback_Schottky(z, circles);
+    zpb_rot = inv_cayley_transform(rotation_equiv(cayley_transform(zpb)));
+    zpb_flare = true_to_hyp(zpb_rot, flare_data[1],
+                            flare_data[2], flare_data[3]);
+    if(abs(z_flare[2] - zpb_flare[2]) < 1e-10, rs[2] = 0);
+
+    /* Check if original point is in chosen sector */
+    w = cayley_transform(z);
+    w_rot = rotation_equiv(w);
+    if(abs(w - w_rot) > 1e-10, rs[3] = 0);
+
+    /* Print results */
+    print(z": "rs[1]", "rs[2]", "rs[3]);
+  );
+}
+
 /**********************************************************************
   Experiments
 **********************************************************************/
 
-/* TODO */
+/* Run one iteration of the secant method zoom in */
+example_secant() =
+{
+  local(alpha0, s, M, delta, N, z1, z2, alpha1, alpha2,
+        circles, flare_data, s_guess);
+
+  /*default(realprecision, 60);*/
+
+  /* Parameters */
+  thet = Pi/6;
+
+  alpha0 = Pi; M = 10;
+
+  alpha1 = Pi/2;
+  alpha2 = 3*Pi/4;
+  N = 20;
+
+  s = 0.743; delta = 3e-4;
+
+  /* Schottky group data */
+  circles = get_circles_UHP(thet);
+  flare_data = get_flare_data(circles);
+
+  /* Get test points */
+  ns = [1];
+  z1 = test_points_flare(N, circles, flare_data, alpha1, ns);
+  z2 = test_points_flare(N, circles, flare_data, alpha2, ns);
+
+  s_guess = secant_method(z1, z2, alpha0, M, flare_data, circles, s, delta);
+  print("Final guess: s = "s_guess);
+}
 
 /**********************************************************************
   Miscellaneous test functions
@@ -159,7 +227,7 @@ test_init_eqns()=
 
 test_test_points()=
 {
-  N = 10;
+  N = 50;
   circles = get_circles_UHP(Pi/2);
   flare_data = get_flare_data(circles);
   alpha = Pi/2;
@@ -167,4 +235,6 @@ test_test_points()=
 
   zs = test_points_flare(N, circles, flare_data, alpha, ns);
   print(zs);
+
+  is_admissible(zs, 9*Pi/10, flare_data);
 }

@@ -431,7 +431,7 @@ secant_method(z1, z2, alpha0, M, flare_data, circles, s, delta)=
 {
   local(s_new, c1, c2, j, s_max, s_min, s_mid, delta_new);
 
-  s_new=vector(4); /* REMEMBER TO CHANGE THIS IF YOU CHANGE C1 AND C2 */
+  s_new = vector(4); /* REMEMBER TO CHANGE THIS IF YOU CHANGE C1 AND C2 */
 
   while(1,
 

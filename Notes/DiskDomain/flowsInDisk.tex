@@ -1,0 +1,162 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+%opening
+\title{A Geodesic/Horocycle Flow Approach to Hejhal's Algorithm}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+\section*{Flows in the Disk Model}
+
+We wish to describe the geodesic and horocycle flows in the disk model.
+We do so by recalling the salient facts in the upper half plane model, all the while noting how the Cayley transform moves the behavior into the disk.
+
+\subsection*{Matrix Groups Acting on Hyperbolic Space}
+
+The orientation-preserving isometries on the upper half plane $\mathbb{H}$ are exactly those M\"obius transformations defined by PSL$(2, \mathbb{R})$.
+Recall that we can map from $\mathbb{H}$ to the unit disk $\mathbb{D}$ via the Cayley transform
+$$
+C(z) = \frac{z - i}{z + i}
+$$
+We can of course map back by the inverse
+$$
+C^{-1}(z) = i\frac{1 + z}{1 - z}
+$$
+So for $g \in \text{PSL}(2, \mathbb{R})$ acting on $\mathbb{H}$, the equivalent action on $\mathbb{D}$ is $CgC^{-1}$.
+One can show that
+$$
+C\text{PSL}(2, \mathbb{R})C^{-1} = \text{PSU}(1, 1) :=
+\left\{ 
+\begin{pmatrix}
+\alpha & \beta \\
+\bar{\beta} & \bar{\alpha}
+\end{pmatrix} \in M(2, \mathbb{C}) : |\alpha|^2 - |\beta|^2 = 1
+\right\} / \{\pm I\}
+$$
+where we are thinking of $C$ as the matrix $\begin{psmallmatrix} 1 & -i \\ 1 & i \end{psmallmatrix} \in \text{PSL}(2, \mathbb{C})$, i.e., the usual identification of M\"obius transformations with matrices.
+\\
+
+Next, recall that we extend the action of PSL$(2, \mathbb{R})$ on $\mathbb{H}$ to one on $T^1\mathbb{H}$ via
+$$
+Dg(z, v) = \left( \frac{az + b}{cz + d}, \frac{1}{(cz + d)^2}v \right)
+$$
+where $g = \begin{psmallmatrix} a & b \\ c & d \end{psmallmatrix}$.
+One can check that
+\begin{enumerate}
+	\item $D$ is indeed an action
+	\item $D$ preserves the Riemannian metric on $\mathbb{H} \times \mathbb{C}$
+	\item PSL$(2, \mathbb{R})$ acts simply transitively on $T^1\mathbb{H}$
+\end{enumerate}
+Thus, we can identify PSL$(2, \mathbb{R})$ with $T^1\mathbb{H}$ via this action by choosing a reference point in $T^1\mathbb{H}$.
+The typical choice is $(i, i)$, so we identify $(z, v) \in T^1\mathbb{H}$ with the unique $g \in \text{PSL}(2, \mathbb{R})$ such that $Dg(i, i) = (z, v)$.
+\\
+
+To think about the corresponding extended action on $T^1\mathbb{D}$, we first need to extend the map $C: \mathbb{H} \rightarrow \mathbb{D}$ to a map from $T^1\mathbb{H}$ to $T^1\mathbb{D}$.
+The most natural such extension is
+$$
+DC(z, v) = (C(z), C'(z)v) = \left( \frac{z - i}{z + i}, \frac{2i}{(z + i)^2}v \right)
+$$
+(see Appendix A for why this extension is natural).
+One easily verifies that if $(z, v) \in T^1\mathbb{H}$ then $DC(z, v) \in T^1\mathbb{D}$.
+(Recall that the Riemannian metric on the tangent space at the point $p \in \mathbb{D}$ is given by $\langle v, w \rangle_p = 4v\cdot w/(1 - |p|^2)^2$).
+\\
+
+Now that we can map between $T^1\mathbb{H}$ and $T^1\mathbb{D}$, we can extend the action of $\text{PSU}(1, 1)$ on $\mathbb{D}$ to one on $T^1\mathbb{D}$.
+By passing through $T^1\mathbb{H}$ on the way, we see that the action should be $(DC)(Dg)(DC)^{-1}$ where $\gamma = CgC^{-1}$ is an element of $\text{PSU}(1, 1)$.
+It is straightforward to check that this is equivalent to the action
+$$
+D\gamma(z, v) = (\gamma(z), \gamma'(z)v) = \left( \frac{\alpha z + \beta}{\bar{\beta}z + \bar{\alpha}}, \frac{1}{(\bar{\beta}z + \bar{\alpha})^2}v \right)
+$$
+where
+$$
+\gamma =
+\begin{pmatrix}
+\alpha & \beta \\
+\bar{\beta} & \bar{\alpha}
+\end{pmatrix} \in \text{PSU}(1, 1)
+$$
+In other words, the matrix action is the same as the one we are used to in the upper half plane model; it is just a different matrix group for the disk.
+\\
+
+Finally, just as we identified $\text{PSL}(2, \mathbb{R})$ with $T^1\mathbb{H}$, we can identify $\text{PSU}(1, 1)$ with $T^1\mathbb{D}$.
+We will choose the reference point $(1, 1/2) \in T^1\mathbb{D}$ (since this is the image of the old reference point $(i, i)$ under $DC$).
+That is, $\text{PSU}(1, 1)$ is identified with $T^1\mathbb{D}$ via
+$$
+\gamma \longleftrightarrow D\gamma\left( 1, \frac{1}{2} \right)
+$$
+
+\subsection*{Geodesic Flow}
+
+Recall that the geodesics in $\mathbb{H}$ are vertical lines and semicircles perpendicular to the real line (in other words, the top half of circles with centers on the real axis).
+One can show that a point in $\mathbb{H}$ paired with a direction uniquely defines a geodesic.
+In other words, each $(z, v) \in T^1\mathbb{H}$ gives a geodesic.
+Of course, different points in the tangent bundle can lead to the same geodesic; we typically think of this as taking different \textit{starting points} on the same geodesic.
+\\
+
+The \textit{geodesic flow} beginning at a point $(z, v) \in T^1\mathbb{H}$ is defined by flowing along the geodesic defined by $(z, v)$ in the direction of $v$ at a constant speed (speed is defined with respect to the Riemannian metric).
+Thus, for each starting point $g \sim (z, v) \in T^1\mathbb{H}$ (where we write $g$ for the matrix in $\text{PSL}(2, \mathbb{R})$ corresponding to $(z, v)$), geodesic flow $g_t$ is a function of time.
+Note that $g_0 = (z, v)$ and $g_t$ for $t < 0$ refers to flowing in the opposite direction (i.e., $-v$).
+\\
+
+We can describe geodesic flow very easily in terms of matrices.
+First, one computes that the geodesic flow starting at $(i, i)$ is given by $(e^ti, e^ti)$.
+In terms of $\text{PSL}(2, \mathbb{R})$ - where $(i, i)$ is identified with $I$ - the flow is given by the matrix
+$$
+a_t =
+\begin{pmatrix}
+e^{t/2} & ~ \\
+~ & e^{-t/2}
+\end{pmatrix}
+$$
+(This is easily checked by verifying that $a_t \sim (e^ti, e^ti)$ in the identification).
+Next, we can observe that the geodesic flow starting at any point $(z, v)$ is equivalent to mapping the flow starting at $(i, i)$ by the matrix $g \in \text{PSL}(2, \mathbb{R})$ which has $g \sim (z, v)$.
+This works because $Dg$ is an isometry.
+Therefore, geodesic flow for time $t$ starting at $g \sim (z, v)$ is succinctly described as
+$$
+g_t = ga_t
+$$
+
+Next, we would like to describe the geodesic flow in the disk model.
+Recall that the geodesics in the disk are diameters plus half circles normal to the boundary.
+We can use the Cayley transform as before to map between the models.
+The element corresponding to $a_t$ is
+$$
+c_t := Ca_tC^{-1} =
+\begin{pmatrix}
+\cosh\frac{t}{2} & \sinh\frac{t}{2} \\
+\sinh\frac{t}{2} & \cosh\frac{t}{2}
+\end{pmatrix}
+$$
+The action of this on $T^1\mathbb{D}$ is thus
+$$
+Dc_t(z, v) = \left( \frac{\left( \cosh\frac{t}{2} \right)z + \sinh\frac{t}{2}}{\left( \sinh\frac{t}{2} \right)z + \cosh\frac{t}{2}}, \frac{1}{\left( \left( \sinh\frac{t}{2} \right)z + \cosh\frac{t}{2} \right)^2}v \right)
+$$
+A quick check that this action makes sense is to note that $Dc_t(1, 1/2)$ does indeed give the interval $(-1, 1)$ on the real line.
+
+\section*{Appendix A: Extension of $C$ to the Tangent Bundles}
+
+One way to find an appropriate extension is to consider the unique geodesic going through any point $(z, v) \in T^1\mathbb{H}$.
+Recall that the geodesic passing through that point is the set $\{ga_t(i): t\in \mathbb{R}\}$ where $g$ is the unique element of $\text{PSL}(2, \mathbb{R})$ with $g(i, i) = (z, v)$.
+So the corresponding geodesic in $\mathbb{D}$ is given by $C(ga_ti)$.
+Taking the derivative with respect to $t$, we see that the tangent vectors are given by
+$$
+C'(ge^ti)g'(e^ti)e^ti
+$$
+We are interested in the point in $T^1\mathbb{D}$ corresponding to $(z, v)$ so we simply take $t = 0$ and see that the tangent vector should be
+$$
+C'(z)v
+$$
+
+\end{document}
