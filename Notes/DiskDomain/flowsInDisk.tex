@@ -91,10 +91,10 @@ In other words, the matrix action is the same as the one we are used to in the u
 \\
 
 Finally, just as we identified $\text{PSL}(2, \mathbb{R})$ with $T^1\mathbb{H}$, we can identify $\text{PSU}(1, 1)$ with $T^1\mathbb{D}$.
-We will choose the reference point $(1, 1/2) \in T^1\mathbb{D}$ (since this is the image of the old reference point $(i, i)$ under $DC$).
+We will choose the reference point $(0, 1/2) \in T^1\mathbb{D}$ (since this is the image of the old reference point $(i, i)$ under $DC$).
 That is, $\text{PSU}(1, 1)$ is identified with $T^1\mathbb{D}$ via
 $$
-\gamma \longleftrightarrow D\gamma\left( 1, \frac{1}{2} \right)
+\gamma \longleftrightarrow D\gamma\left( 0, \frac{1}{2} \right)
 $$
 
 \subsection*{Geodesic Flow}
@@ -143,7 +143,58 @@ The action of this on $T^1\mathbb{D}$ is thus
 $$
 Dc_t(z, v) = \left( \frac{\left( \cosh\frac{t}{2} \right)z + \sinh\frac{t}{2}}{\left( \sinh\frac{t}{2} \right)z + \cosh\frac{t}{2}}, \frac{1}{\left( \left( \sinh\frac{t}{2} \right)z + \cosh\frac{t}{2} \right)^2}v \right)
 $$
-A quick check that this action makes sense is to note that $Dc_t(1, 1/2)$ does indeed give the interval $(-1, 1)$ on the real line.
+A quick check that this action makes sense is to note that $Dc_t(0, 1/2)$ does indeed give the interval $(-1, 1)$ on the real line.
+
+\subsection*{Horocycle Flow}
+
+Recall that the horocycles in the upper half plane are horizontal lines and circles tangent to the boundary.
+Given any point $(z, v) \in T^1\mathbb{H}$, the corresponding horocycle is the set of points in the unit tangent bundle for which the distance between it and $(z, v)$ under the geodesic flow goes to $0$ as time goes to infinity.
+So to be more accurate, a horocycle is all the points on the circle paired with unit tangent vectors \textit{normal} to the circle and pointing inward (for a horizontal line, the tangent vectors point up).
+\\
+
+The (stable) \textit{horocycle flow} starting at a point in the unit tangent bundle is defined by sliding along a horocycle at constant unit speed.
+For example, consider the reference point $(i, i) \in T^1\mathbb{H}$.
+The horocycle for this point is the set
+$$
+\{(x + i, i) : x \in \mathbb{R}\}
+$$
+Sliding along this set at constant (hyperbolic) speed for time $s$ is given by
+$$
+(i, i) \mapsto (s + i, i)
+$$
+In terms of the identification with $\text{PSL}(2, \mathbb{R})$, this is the same as $(s + i, i) = u_s(i, i)$ where
+$$
+u_s =
+\begin{pmatrix}
+1 & s \\
+~ & 1
+\end{pmatrix}
+$$
+Just as with geodesic flow, we can extend the horocycle flow to any point by mapping from the reference point $(i, i)$.
+Specifically, let $g \in \text{PSL}_2(\mathbb{R})$ correspond to the point $(z, v) \in T^1\mathbb{H}$.
+Then the horocycle flow starting at this point is given by
+$$
+h_g(s) = gu_s
+$$
+Note that $u_s^{-1} = u_{-s}$ gives the flow in the other direction.
+\\
+
+As usual, we would like to move this flow to the disk model.
+Recall that the horocycles in the disk are circles tangent to the boundary.
+We can use the Cayley transform as before to map between the models.
+The element corresponding to $u_s$ is
+$$
+h_s := Cu_sC^{-1} =
+\begin{pmatrix}
+1 + i\frac{s}{2} & -i\frac{s}{2} \\
+i\frac{s}{2} & 1 - i\frac{s}{2}
+\end{pmatrix}
+$$
+The action of this on $T^1\mathbb{D}$ is thus
+$$
+Dh_s(z, v) = \left( \frac{\left( 1 + i\frac{s}{2} \right)z - i\frac{s}{2}}{i\frac{s}{2}z + 1 - i\frac{s}{2}}, \frac{1}{\left( i\frac{s}{2}z + 1 - i\frac{s}{2} \right)^2}v \right)
+$$
+One way to check if this action makes sense would be to show that $Dh_s(0, 1/2)$ gives the circle with center $(1/2, 0)$ and radius $1/2$.
 
 \section*{Appendix A: Extension of $C$ to the Tangent Bundles}
 

@@ -60,7 +60,7 @@ class Geodesic :
         # find acute angle between thetas
         ang = np.abs(theta1 - theta2)
         wasObtuse = 0
-        if ang == np.pi :
+        if abs(ang - np.pi) < 1e-10 :
             # plot line between them
             x1, y1 = polToRect(1, theta1)
             x2, y2 = polToRect(1, theta2)
@@ -128,7 +128,7 @@ class FundamentalDomain :
                 ang = np.abs(theta1 - theta2)
 
                 # we're on either side of a line
-                if ang == np.pi :
+                if abs(ang - np.pi) < 1e-10 :
                     # rotate by -theta1 so it's a horizontal line
                     if -np.sin(theta1)*xRef + np.cos(theta1)*yRef < 0 :
                         Zs.append(np.less(-np.sin(theta1)*X + np.cos(theta1)*Y, 0))
