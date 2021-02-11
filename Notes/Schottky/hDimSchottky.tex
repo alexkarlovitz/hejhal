@@ -98,8 +98,8 @@ We can of course take this sector to entirely contain one flare, while not inter
 If the pullback $z^*$ of a test point $z$ falls outside of the chosen sector, we can simply replace $z^*$ with the appropriate rotation to make it fall in this sector, since the Maass form will be equivalent at those different points.
 \\
 
-In the Appendix, we work through what this means for choosing test points for Hejhal's algorithm.
-As we show there, the only admissible points come from a very specific area in a flare domain.
+In a previous iteration of this work, we went through what this means for choosing test points for Hejhal's algorithm.
+One finds that the only admissible points come from a very specific area in a flare domain.
 Unfortunately, these test points end up giving very slow convergence in the flare expansion, thus making them useless for Hejhal's algorithm.
 
 These considerations lead one to consider looking at covers of the Schottky group, perhaps by building the rotational invariance into the group itself.
@@ -110,7 +110,6 @@ We consider this idea in the next section.
 In this section, we assume we are interested in a symmetric Schottky group with three circles.
 We will construct another group which contains the Schottky group as a finite index subgroup.
 Because it is a finite degree cover, it will share its bottom eigenvalue with the Schottky group.
-\textbf{DOUBLE CHECK THAT FACT WITH AK!}
 Moreover, our cover will admit a doubling which comprises only of M\"obius transformations, making it more suitable for use in Hejhal's algorithm.
 Finally, the hope is that the larger group (with a smaller fundamental domain) will allow for a greater variety of admissible test points.
 
@@ -163,7 +162,7 @@ This is called \textit{doubling} across $D_1$ since the fundamental domain for t
 \end{figure}
 Note that the composition $D_1D_2$ is just rotation by angle $2\pi/3$.
 It will be necessary to also determine the action of another generator.
-To simplify this, we first note that we can replace $D_1R$ with $(D_1D_2)^{-1}D1R = D_2R$ as a generator.
+To simplify this, we first note that we can replace $D_1R$ with $(D_1D_2)^{-1}D_1R = D_2R$ as a generator.
 This is helpful since the action of $D_2$ is simply conjugation.
 Next, we note that the circle containing the geodesic $R$ has center $\sec(\theta/2)$ and radius $\tan(\theta/2)$.
 Thus, reflection through $R$ can be written as
@@ -178,7 +177,7 @@ $$
 One notices that multiplying the numerator and denominator by $i\cot(\theta/2)$ converts this to a M\"obius transformation where the corresponding matrix is in $\text{PSU}(1, 1)$ (this is the matrix group which is conjugate via the Cayley transform to $\text{PSL}(2, \mathbb{R})$).
 Specifically,
 $$
-D_2R(z) = \frac{i\csc(\theta/2)z - i\cot(\theta/2)}{i\cot(\theta/2) - i\csc(\theta/2)}
+D_2R(z) = \frac{i\csc(\theta/2)z - i\cot(\theta/2)}{i\cot(\theta/2)z - i\csc(\theta/2)}
 $$
 In this way, we see that $\Gamma_0 = \langle D_1D_2, D_2R \rangle$ is isomorphic to the matrix group
 $$
@@ -188,20 +187,13 @@ e^{i\pi/3} & ~ \\
 ~ & e^{-i\pi/3}
 \end{pmatrix},
 \begin{pmatrix}
-i\csc(\theta/2) & -i\cot(\theta/2) \\
-i\cot(\theta/2) & -i\csc(\theta/2)
+i\csc\frac{\theta}{2} & -i\cot\frac{\theta}{2} \\
+i\cot\frac{\theta}{2} & -i\csc\frac{\theta}{2}
 \end{pmatrix}
 \right\rangle < \text{SU}(1, 1)
 $$
 
-\clearpage
-
-\section*{OLD STUFF PAST HERE}
-
-Beyond this point, everything is work from before I realized the rotational symmetry made the algorithm break.
-I am still saving everything in case I need to look back at it later...
-
-\section*{Mapping to the Upper Half Plane}
+\subsection*{Doubled Group in the Upper Half Plane}
 
 Recall that we can map from the upper half plane model to the disk model via the \textit{Cayley transform}
 $$
@@ -212,73 +204,102 @@ $$
 C^{-1}(w) = i\cdot\frac{1 + w}{1 - w}
 $$
 Also recall that $C$ and $C^{-1}$ send geodesics to geodesics.
+In fact, one can go further and show that $C$ defines an isometry between the unit tangent bundles $T^1\mathbb{H}$ and $T^1\mathbb{D}$.
 
-Next, note that we are choosing to center one of our circles of reflection about $1$.
-Since $C^{-1}(1) = \infty$, this has the effect of forcing our fundamental domain to be bounded inside $C^{-1}$ of that circle.
-See Figure \ref{UHP_FD} for an example.
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.6\linewidth]{UHP_FD.png}
-	\caption{The example from Figure \ref{disk_FD} mapped to the upper half plane.}
-	\label{UHP_FD}
-\end{figure}
-
-\textbf{Note:} this image seems to single out the middle flare as different from the other two, but this is just an artifact of our choice of Cayley transform.
-We could just as easily have mapped $e^{\pi i/3}$ or $e^{-\pi i/3}$ to $-1$ instead.
+Next, recall that the orientation-preserving isometries on $\mathbb{H}$ can be described as the set of M\"obius transformations in $\text{PSL}(2, \mathbb{R})$.
+For $g \in \text{PSL}(2, \mathbb{R})$ acting on $\mathbb{H}$, the equivalent action on $\mathbb{D}$ is $CgC^{-1}$.
+One can show that
+$$
+C\text{PSL}(2, \mathbb{R})C^{-1} = \text{PSU}(1, 1) :=
+\left\{ 
+\begin{pmatrix}
+\alpha & \beta \\
+\bar{\beta} & \bar{\alpha}
+\end{pmatrix} \in M(2, \mathbb{C}) : |\alpha|^2 - |\beta|^2 = 1
+\right\} / \{\pm I\}
+$$
+where we are thinking of $C$ as the matrix $\begin{psmallmatrix} 1 & -i \\ 1 & i \end{psmallmatrix} \in \text{PSL}(2, \mathbb{C})$, i.e., the usual identification of M\"obius transformations with matrices.
 \\
 
-Finally, let's give a name to each of the circles involved.
-In the disk, we will call the rightmost circle (which contains the point $1$) $R_1$.
-We then proceed counterclockwise and name the next two circles $R_2$ and $R_3$.
-The resulting labels in the upper half plane are shown in Figure \ref{UHP_labeled}.
-
-\begin{figure}[h]
+Let's map the matrix group $\Gamma_0$ from the previous section to the upper half plane model.
+One finds that
+$$
+C^{-1}D_1D_2C =
+\begin{pmatrix}
+\frac{1}{2} & \frac{\sqrt{3}}{2} \\
+-\frac{\sqrt{3}}{2} & \frac{1}{2}
+\end{pmatrix}
+~~~~~~~~
+C^{-1}D_2RC =
+\begin{pmatrix}
+~ & \cot\frac{\theta}{4} \\
+-\tan\frac{\theta}{4} & ~
+\end{pmatrix}
+$$
+We can get a fundamental domain by simply taking the inverse Cayley transform of the fundamental domain in the disk (see Figure \ref{fd_doubled_UHP}).
+\begin{figure}
 	\centering
-	\includegraphics[width=0.6\linewidth]{UHP_labeled.png}
-	\caption{Labeling of the circles from Figure \ref{UHP_FD}.}
-	\label{UHP_labeled}
+	\includegraphics[width=0.7\linewidth]{doubled_cover_UHP.png}
+	\caption{Fundamental Domain in the upper half plane model for $C^{-1}\Gamma_0C$ with $\theta = \pi/2$}
+	\label{fd_doubled_UHP}
 \end{figure}
 
-\subsection*{Identifying Flare Domains}
+\subsection*{A Flare Domain for $\Gamma_0$}
 
-Let us call the group generated by our three reflections
-$$
-\Gamma = \langle R_1, R_2, R_3 \rangle
-$$
-To get a flare domain, we need to identify a hyperbolic element in $\Gamma$ whose axis\footnote{Recall that the \textit{axis} of a hyperbolic matrix is the geodesic whose endpoints are the fixed points of the matrix.} ``cuts off'' a flare in our fundamental domain.
-To do this, we first recall that even length words in circle reflections give M\"obius transformations.
-Thus, we could look for appropriate hyperbolic matrices by checking small words of even length in our generators.
-Indeed, one quickly finds that $R_1R_2, R_1R_3$, and $R_2R_3$ are hyperbolic matrices with appropriate axes (see Figure \ref{UHP_flares}).
+Next, we want to use the flare present in $\Gamma_0$'s fundamental domain to map over to a flare domain (see Appendix A for a definition).
+Recall that in flare domains, we have a Fourier expansion for Maass forms in polar coordinates.
 
-\begin{figure}[h]
+Our first step for mapping to a flare domain is to identify the matrix in $\Gamma_0$ whose axis\footnote{Recall that the \textit{axis} of a hyperbolic matrix is the geodesic whose endpoints are the fixed points of the matrix.} cuts off the flare.
+In reflection groups, these tend to be easy to identify by composing reflections involving the geodesics which define the flare.
+In the case of $\Gamma_0$, one quickly recognizes $D_1R$ to be the appropriate transformation (see Figures \ref{cover_with_flare} and \ref{cover_with_flare_UHP} for geometric verification).
+\begin{figure}
 	\centering
-	\includegraphics[width=0.6\linewidth]{UHP_flares.png}
-	\caption{Axes cutting off flares labeled with the associated hyperbolic matrices.}
-	\label{UHP_flares}
+	\includegraphics[width=0.5\linewidth]{cover_with_flare.png}
+	\caption{Axis of $D_1R$ cuts off the flare}
+	\label{cover_with_flare}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{cover_with_flare_UHP.png}
+	\caption{Axis of $D_1R$ cuts off the flare}
+	\label{cover_with_flare_UHP}
 \end{figure}
 
-Let's be a bit more formal in our discussion of flares.
-To identify a flare between geodesics $C_1$ and $C_2$, one may look for a geodesic with the following properties:
-\begin{itemize}
-	\item one endpoint of the geodesic is on the other side of $C_1$ from the flare
-	\item the other endpoint is on the other side of $C_2$ from the flare
-	\item the geodesic meets $C_1$ and $C_2$ at right angles
-\end{itemize}
-In our situation, it is always possible to find a hyperbolic element in $\Gamma$ whose axis satisfies these properties.
-To see this, one looks in inversive coordinates (see Kontorovich's letter to Bill Duke).
-Letting $v_1$ and $v_2$ denote the inversive coordinates for $C_1$ and $C_2$, respectively, one looks for the inversive coordinates $v$ such that
+In matrix form, one finds that
 $$
-v_1^tQv = 0 ~~~~~ v_2^tQv = 0 ~~~~~ v^tQv = -1
+D_1R =
+\frac{1}{2}
+\begin{pmatrix}
+-\sqrt{3} + i\csc\frac{\theta}{2} & \sqrt{3} - i\cot\frac{\theta}{2} \\
+\sqrt{3} + i\cot\frac{\theta}{2} & -\sqrt{3} - i\csc\frac{\theta}{2}
+\end{pmatrix}
 $$
-where $Q$ is the quadratic form defining inversive coordinates.
-The first two equations give the orthogonality, and the third gives a true vector of inversive coordinates.
-Finally, these coordinates give the endpoints of our geodesic.
-To find the corresponding M\"obius transformation in $\Gamma$, one searches over all transformations with this axis for the one taking the intersection point with $C_1$ to that of $C_2$.
+In the upper half plane model, this is
+$$
+C^{-1}D_1RC =
+\frac{1}{2}
+\begin{pmatrix}
+-\sqrt{3}\tan\frac{\theta}{4} & \cot\frac{\theta}{4} \\
+-\tan\frac{\theta}{4} & -\sqrt{3}\cot\frac{\theta}{4}
+\end{pmatrix}
+$$
+
+In particular, we can utilize the flare in the upper half plane model to map over to a flare domain (again, see Appendix A for a discussion of this map).
+Letting $z_1 < z_2$ be the endpoints of the axis defined by $D_1R$ (in the upper half plane model), and letting $t$ be the left end point of $R$ (again, in $\mathbb{H}$), we apply the map
+$$
+U(z) = \left( \frac{t - z_2}{t - z_1} \right) \frac{z - z_1}{z - z_2}
+$$
+to our fundamental domain and end up with the flare domain shown in Figure
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{cover_flare.png}
+	\caption{Flare domain for the group $\Gamma_0$ with parameter $\theta = \frac{\pi}{2}$}
+	\label{cover_flare}
+\end{figure}
 
 \clearpage
 
-\section*{Mapping to a Flare Domain}
+\section*{Appendix A: Flare Domains}
 
 Let us look at a generic flare: two geodesics separated by positive length interval on the real line, plus a geodesic cutting through both of these at a right angle.
 Let the two points on this last geodesic be labeled $z_1 < z_2$, and call the rightmost point of the first geodesic $t$.
@@ -305,48 +326,5 @@ See Figure \ref{post_flare} for an example.
 	\caption{A flare domain.}
 	\label{post_flare}
 \end{figure}
-
-Let's consider our symmetric Schottky group example.
-Using the flare cut off by the axis of $R_2R_3$, we get the flare domain pictured in Figure \ref{flare}.
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.6\linewidth]{flare.png}
-	\caption{The flare domain obtained from middle flare in Figure \ref{UHP_flares}.}
-	\label{flare}
-\end{figure}
-
-\clearpage
-
-\section*{Appendix: Considerations for Choosing Test Points}
-
-Let's consider the action of $R_2R_3$ in the flare domain.
-Note that the main purpose of mapping to the flare domain is to convert this hyperbolic transformation into a scaling matrix (of course this is still a hyperbolic transformation, just a very specific and simple one).
-Specifically, the action is converted to one of the form
-$$
-z \mapsto \kappa z
-$$
-for some $\kappa > 1$.
-Furthermore, recall that it is this action which leads to a logarithmic Fourier expansion of Maass forms.
-Specifically, if $\phi$ is a Maass form for such a Schottky group, where $\phi(r, \theta)$ is a function of the polar coordinates $(r, \theta)$ in the flare, then
-$$
-\phi(r, \theta) = \sum_{n\in\mathbb{Z}}g_n(\theta)e\left( n\frac{\log r}{\log \kappa} \right)
-$$
-But note that $\phi(r, \theta)$ is then automatically invariant under the map $z \mapsto \kappa z$.
-So if we take a test point with pullback equal to $\kappa^nz$ for some $n \in \mathbb{Z}, n \neq 0$, we gain \textit{no new information} from equating $\phi$ at this point and its pullback.
-\\
-
-Next, recall that our Maass form is also invariant \textit{in the disk model} under rotation by $2\pi/3$.
-Let's draw the $2\pi/3$-sector containing our flare after mapping over to the flare domain.
-This is shown in Figure \ref{flare_with_sector}.
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{flare_with_sector.png}
-	\caption{The $2\pi/3$-sector containing our flare.}
-	\label{flare_with_sector}
-\end{figure}
-As we have argued, the only viable test points are those which are inside our chosen sector and whose pullback is not just multiplication by a power of $\kappa$.
-Looking at Figure \ref{flare_with_sector}, these points will occur outside the leftmost dotted geodesic, and with argument relatively close to $\pi$, so that multiplication by a negative power of $\kappa$ puts them inside the smallest circle.
-
-\textbf{To do:} rewrite that last paragraph. Pretty clunky...
 
 \end{document}

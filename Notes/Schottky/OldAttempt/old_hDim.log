@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.11)  11 FEB 2021 11:20
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.11)  6 FEB 2021 16:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**hDimSchottky.tex
-(./hDimSchottky.tex
+**old_hDim.tex
+(./old_hDim.tex
 LaTeX2e <2017-04-15>
 Babel <3.18> and hyphenation patterns for 3 language(s) loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
@@ -186,8 +186,8 @@ LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 129.
 \l_MT_above_shortintertext_sep=\dimen129
 \l_MT_below_shortintertext_sep=\dimen130
 )
-(./hDimSchottky.aux)
-\openout1 = `hDimSchottky.aux'.
+(./old_hDim.aux)
+\openout1 = `old_hDim.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 17.
 LaTeX Font Info:    ... okay on input line 17.
@@ -311,119 +311,110 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 19.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<pi_over_2.pdf, id=1, 462.52798pt x 346.89601pt>
-File: pi_over_2.pdf Graphic file (type pdf)
-<use pi_over_2.pdf>
-Package pdftex.def Info: pi_over_2.pdf  used on input line 35.
-(pdftex.def)             Requested size: 281.85587pt x 287.27286pt.
- [1
+<../UHP_FD.png, id=1, 1166.3575pt x 798.985pt>
+File: ../UHP_FD.png Graphic file (type png)
+<use ../UHP_FD.png>
+Package pdftex.def Info: ../UHP_FD.png  used on input line 42.
+(pdftex.def)             Requested size: 281.85587pt x 193.077pt.
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./pi_over_2.pdf>]
-<disk_FD.pdf, id=25, 462.52798pt x 346.89601pt>
-File: disk_FD.pdf Graphic file (type pdf)
-<use disk_FD.pdf>
-Package pdftex.def Info: disk_FD.pdf  used on input line 61.
-(pdftex.def)             Requested size: 281.85587pt x 287.27286pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 71--74
+LaTeX Warning: Reference `disk_FD' on page 1 undefined on input line 43.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--50
 
  []
 
-[2 <./disk_FD.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 98--100
+<../UHP_labeled.png, id=3, 1498.59875pt x 765.86125pt>
+File: ../UHP_labeled.png Graphic file (type png)
+<use ../UHP_labeled.png>
+Package pdftex.def Info: ../UHP_labeled.png  used on input line 58.
+(pdftex.def)             Requested size: 281.85587pt x 144.0427pt.
 
- []
+LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 122.
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <../UHP_FD.png>]
+<../UHP_flares.png, id=21, 1315.91624pt x 808.01875pt>
+File: ../UHP_flares.png Graphic file (type png)
+<use ../UHP_flares.png>
+Package pdftex.def Info: ../UHP_flares.png  used on input line 76.
+(pdftex.def)             Requested size: 281.85587pt x 173.06718pt.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 84.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 122.
-<reflection_group.png, id=42, 809.0225pt x 765.86125pt>
-File: reflection_group.png Graphic file (type png)
-<use reflection_group.png>
-Package pdftex.def Info: reflection_group.png  used on input line 135.
-(pdftex.def)             Requested size: 234.8775pt x 222.33948pt.
- [3]
-<reflection_doubled.png, id=48, 771.88374pt x 761.84625pt>
-File: reflection_doubled.png Graphic file (type png)
-<use reflection_doubled.png>
-Package pdftex.def Info: reflection_doubled.png  used on input line 159.
-(pdftex.def)             Requested size: 234.8775pt x 231.8222pt.
- [4 <./reflection_group.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 220--223
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 84.
+ [2 <../UHP_labeled.png> <../UHP_flares.png>] [3]
+<../labeled_pre_flare.png, id=33, 1489.565pt x 542.025pt>
+File: ../labeled_pre_flare.png Graphic file (type png)
+<use ../labeled_pre_flare.png>
+Package pdftex.def Info: ../labeled_pre_flare.png  used on input line 108.
+(pdftex.def)             Requested size: 281.85587pt x 102.56401pt.
+<../labeled_flare.png, id=34, 1462.46375pt x 756.8275pt>
+File: ../labeled_flare.png Graphic file (type png)
+<use ../labeled_flare.png>
+Package pdftex.def Info: ../labeled_flare.png  used on input line 124.
+(pdftex.def)             Requested size: 281.85587pt x 145.8543pt.
+<../flare.png, id=35, 1488.56125pt x 762.85pt>
+File: ../flare.png Graphic file (type png)
+<use ../flare.png>
+Package pdftex.def Info: ../flare.png  used on input line 133.
+(pdftex.def)             Requested size: 281.85587pt x 144.44247pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[4
+
+ <../labeled_pre_flare.png> <../labeled_flare.png>] [5 <../flare.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 153--157
 
  []
 
-<doubled_cover_UHP.png, id=55, 1478.52374pt x 764.8575pt>
-File: doubled_cover_UHP.png Graphic file (type png)
-<use doubled_cover_UHP.png>
-Package pdftex.def Info: doubled_cover_UHP.png  used on input line 242.
-(pdftex.def)             Requested size: 328.82707pt x 170.10147pt.
-[5 <./reflection_doubled.png>]
-<cover_with_flare.png, id=60, 836.12375pt x 745.78625pt>
-File: cover_with_flare.png Graphic file (type png)
-<use cover_with_flare.png>
-Package pdftex.def Info: cover_with_flare.png  used on input line 257.
-(pdftex.def)             Requested size: 234.8775pt x 209.50151pt.
-<cover_with_flare_UHP.png, id=61, 1506.62875pt x 529.98pt>
-File: cover_with_flare_UHP.png Graphic file (type png)
-<use cover_with_flare_UHP.png>
-Package pdftex.def Info: cover_with_flare_UHP.png  used on input line 263.
-(pdftex.def)             Requested size: 469.75502pt x 165.23825pt.
-<cover_flare.png, id=62, 1478.52374pt x 767.86874pt>
-File: cover_flare.png Graphic file (type png)
-<use cover_flare.png>
-Package pdftex.def Info: cover_flare.png  used on input line 295.
-(pdftex.def)             Requested size: 328.82707pt x 170.77116pt.
- [6 <./doubled_cover_UHP.png>] [7 <./cover_with_flare.png> <./cover_with_flare_
-UHP.png> <./cover_flare.png>]
-<labeled_pre_flare.png, id=76, 1489.565pt x 542.025pt>
-File: labeled_pre_flare.png Graphic file (type png)
-<use labeled_pre_flare.png>
-Package pdftex.def Info: labeled_pre_flare.png  used on input line 309.
-(pdftex.def)             Requested size: 281.85587pt x 102.56401pt.
-<labeled_flare.png, id=77, 1462.46375pt x 756.8275pt>
-File: labeled_flare.png Graphic file (type png)
-<use labeled_flare.png>
-Package pdftex.def Info: labeled_flare.png  used on input line 325.
-(pdftex.def)             Requested size: 281.85587pt x 145.8543pt.
- [8
+<../flare_with_sector.png, id=46, 1492.57625pt x 381.425pt>
+File: ../flare_with_sector.png Graphic file (type png)
+<use ../flare_with_sector.png>
+Package pdftex.def Info: ../flare_with_sector.png  used on input line 163.
+(pdftex.def)             Requested size: 469.75502pt x 120.04474pt.
+[6
 
- <./labeled_pre_flare.png> <./labeled_flare.png>] (./hDimSchottky.aux) ) 
+ <../flare_with_sector.png>] (./old_hDim.aux)
+
+LaTeX Warning: There were undefined references.
+
+ ) 
 Here is how much of TeX's memory you used:
- 3517 strings out of 494923
- 49991 string characters out of 6180742
- 115953 words of memory out of 5000000
- 6764 multiletter control sequences out of 15000+600000
+ 3500 strings out of 494923
+ 49477 string characters out of 6180742
+ 111940 words of memory out of 5000000
+ 6749 multiletter control sequences out of 15000+600000
  12201 words of font info for 47 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 41i,9n,32p,315b,243s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
-17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmti8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/symbols/msbm10.pfb>
-Output written on hDimSchottky.pdf (8 pages, 543016 bytes).
+ 41i,8n,32p,314b,231s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/sh
+are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
+Output written on old_hDim.pdf (6 pages, 377699 bytes).
 PDF statistics:
- 143 PDF objects out of 1000 (max. 8388607)
- 90 compressed objects within 1 object stream
+ 106 PDF objects out of 1000 (max. 8388607)
+ 66 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 63 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 36 words of extra memory for PDF output out of 10000 (max. 10000000)
 
