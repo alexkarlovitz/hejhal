@@ -136,7 +136,7 @@ def doubled_group_UHP(thet, show_axis=False) :
                      inv_Cayley(-np.exp(1j*np.pi/3)).real)
 
     # plot stuff!
-    ax = pm.setupFig(-8, 4, 0, 4)
+    ax = pm.setupFig(-4, 4, 0, 4)
     fd.draw(ax, fill=1)
     D1.draw(ax, lstyle='--')
 
@@ -167,7 +167,7 @@ def doubled_group_UHP(thet, show_axis=False) :
     plt.xticks(label_pts, labels)
     plt.yticks([])
 
-    plt.show()
+    return ax
 
 # draws the flare domain for doubled group
 def draw_flare_domain(thet, X, Y) :
@@ -216,6 +216,31 @@ def draw_flare_domain(thet, X, Y) :
 
     plt.show()
 
+# plots points from testPoints.txt along with fundamental domain in the UHP
+def plot_test_points() :
+    # read file with points
+    with open('testPoints.txt') as f :
+        line = f.readline().strip()
+
+    # convert point strings to complex numbers
+    pts_string = line.replace('I', '1j')
+    pts_string = pts_string.replace('*', '').split(',')
+    pts = []
+    for p in pts_string :
+        p_new = ''.join(p.split())
+        pts.append(complex(p_new))
+
+    # draw fundamental domain
+    ax = doubled_group_UHP(np.pi/2)
+
+    # draw points
+    pts = np.array(pts)
+    ax.plot(pts.real, pts.imag, '.k')
+
+    plt.show()
+
 if __name__ == '__main__' :
     #draw_doubled_group(np.pi/2, True)
-    draw_flare_domain(np.pi/2, 5, 5)
+    #doubled_group_UHP(np.pi/2, True)
+    #draw_flare_domain(np.pi/2, 5, 5)
+    plot_test_points()
