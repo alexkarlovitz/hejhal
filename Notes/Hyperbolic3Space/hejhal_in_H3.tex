@@ -1,0 +1,118 @@
+\documentclass[]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+\PassOptionsToPackage{hyperfootnotes=false}{hyperref}
+\usepackage{hyperref}
+
+%opening
+\title{Hejhal's Algorithm in $\mathbb{H}^3$}
+\author{Alex Karlovitz}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+
+In this document, we describe Hejhal's algorithm as it applies to hyperbolic 3-space.
+It is essentially the same as in 2-space; the differences occur only in the details of discrete groups acting on $\mathbb{H}^3$.
+We begin with some background regarding hyperbolic 3-space, then we move on to Maass forms in this context.
+After that, we will be ready to discuss the algorithm.
+
+\section*{Preliminaries on $\mathbb{H}^3$}
+
+By \textit{hyperbolic 3-space} (or $\mathbb{H}^3$), we mean the unique simply-connected Riemannian 3-manifold with constant sectional curvature -1.
+There are various models of this space, but for now we will work with the upper half-space model.
+Let the set $U^3$ consist of the subset of $\mathbb{R}^3$ with positive third component
+$$
+U^3 = \{ (x_1, x_2, y) \in \mathbb{R}^3 : y > 0 \}
+$$
+We endow $U^3$ with the metric
+$$
+ds^2 = \frac{dx_1^2 + dx_2^2 + dy^2}{y^2}
+$$
+It is well known that $(U^3, ds^2)$ is then isometric to $\mathbb{H}^3$.
+Moreover, we note that $\mathbb{H}^3$ can be identified with the Hamiltonian quaternions whose $k$-term is 0.
+That is, we take the subalgebra of
+$$
+\{ x_1 + x_2i + x_3j + x_4k : x_1, x_2, x_3, x_4 \in \mathbb{R}, i^2 = j^2 = k^2 = ijk = -1 \}
+$$
+whose elements have $x_3 > 0$ and $x_4 = 0$.
+Replacing the name ``$x_3$'' with ``$y$,'' we evidently have the same set $U^3$.
+
+\subsection*{M\"obius Transformations in 3-space}
+
+Recall that $\text{SL}(2, \mathbb{R})$ acts on the upper half plane $\mathbb{H}^2$ via M\"obius transformations.
+It is well known that these give all orientation-preserving isometries of hyperbolic 2-space.
+In a similar fashion, $\text{Isom}^+(\mathbb{H}^3) \cong \text{PSL}(2, \mathbb{C})$.
+Specifically, a given matrix acts on $\mathbb{H}^3$ via M\"obius transformations, where we interpret division as multiplication by the inverse in the quaternions:
+$$
+\begin{pmatrix}
+\alpha & \beta \\
+\gamma & \delta
+\end{pmatrix}(z) =
+(\alpha z + \beta)(\gamma z + \delta)^{-1}
+$$
+($z^{-1} = \bar{z}/|z|^2$).
+If interested, one can find proofs of these facts online. (See, e.g., \href{http://www.maths.qmul.ac.uk/~sb/LTCCcourse/Holodyn2013notes_week3.pdf}{Holodyn 2013} for an outline).
+
+To get a geometric feel for these transformations, it is instructive to consider the \textit{frame bundle} F$\mathbb{H}^3$ of hyperbolic space.
+This is the set
+$$
+\text{F}\mathbb{H}^3 = \{ (z, v, w) \in U^3 \times \mathbb{R}^3 \times \mathbb{R}^3 : ||(v, w)||_z = 1, ~ v \perp w \}
+$$
+where the norm $||(\cdot, \cdot)||_z$ is derived from the hyperbolic metric.
+\textbf{(ASK AK FOR DETAILS HERE)!}
+One can show that $\text{PSL}(2, \mathbb{C})$ acts simply transitively on F$\mathbb{H}^3$, where the action is by
+$$
+g(z, v, w) = (g(z), \textbf{?}, \textbf{?}) ~~~~~ \text{Maybe}~ (g(z), g'(z)v, g'(z)w)\text{? But need to think about derivative...}
+$$
+\textbf{(ASK AK FOR DETAILS HERE)!}
+Thus, we can identify $\text{PSL}(2, \mathbb{C})$ with F$\mathbb{H}^3$ by associating a matrix $g$ with the point $g(j, j, 1)$.
+Intuitively, one thinks of $z$ as the base point in upper half-space, $v$ as a tangent vector pointing in the direction of a geodesic, and $w$ as a ``frame vector'' which is perpendicular to the tangent vector.
+(Recall that geodesics in $\mathbb{H}^3$ are semicircles or vertical lines which are perpendicular to the $x_1x_2$-plane).
+
+We now describe the geometry of the matrix action by describing how it moves the frame bundle.
+First, recall the decomposition $\text{SL}(2, \mathbb{C}) = NAK$ where
+$$
+N = \left\{ 
+\begin{pmatrix}
+1 & u \\
+~ & 1
+\end{pmatrix} : u \in \mathbb{C}
+\right\} ~~~~~
+A = \left\{
+\begin{pmatrix}
+e^{t/2} & ~ \\
+~ & e^{-t/2}
+\end{pmatrix} : t \in \mathbb{R}
+\right\} ~~~~~
+K = M\text{SO}(2)M
+$$
+where $\text{SO}(2)$ is the special orthogonal group and
+$$
+M = \left\{
+\begin{pmatrix}
+e^{i\theta} & ~ \\
+~ & e^{-i\theta}
+\end{pmatrix} : \theta \in \mathbb{R}
+\right\}
+$$
+Matrices from these three groups move the frame bundle in fairly simple ways.
+\begin{itemize}
+	\item A matrix in $N$ moves the point $(j, j, 1)$ to $(j + u, j, 1)$; that is, the base point is shifted by Re$(u)$ in the $x_1$ direction and by Im$(u)$ in the $x_2$ direction.
+	In other words, $N$ moves points along the horosphere determined by the base point (horospheres in $\mathbb{H}^3$ are planes parallel to the $x_1x_2$-plane or spheres which are tangent to the $x_1x_2$-plane); the real part of $u$ determines the translation in the direction of the tangent vector, and the imaginary part determines the translation in the direction of the frame vector.
+	\item Just as in hyperbolic 2-space, a matrix in $A$ moves points along geodesics at unit speed for time $t$.
+	\item Matrices in $K$ fix the base point but can rotate the frame bundle to any position. Specifically, matrices in $M$ rotate the frame vector while leaving the tangent vector fixed, while matrices in SO(2) have the opposite effect.
+\end{itemize}
+
+\subsection*{The Action of Hyperbolic Elements}
+
+\end{document}

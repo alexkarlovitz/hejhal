@@ -26,7 +26,7 @@ In particular, we assume $f$ has some expression of the form
 $$
 	f(x, y) = \sum_{n \in \mathbb{Z}}a_nW(y)e(nx)
 $$
-(Depending on the context, we may instead have a logarithmic Fourier expansion, or an expansion in coordinates other than $(x, y)$; in any case, 
+(Depending on the context, we may instead have a logarithmic Fourier expansion, or an expansion in coordinates other than $(x, y)$).
 
 The purpose of this note is to derive a bound for the $a_n$'s as $|n| \rightarrow \infty$.
 In particular, we are planning on cutting the Fourier expansion off at a finite point $|n| \leq M$, so we wish to know for a given $y$ what is a good choice for $M$.
@@ -111,7 +111,7 @@ $$
 a_n\sqrt{y}K_\nu(2\pi|n|y)
 $$
 decays exponentially with $n$.
-In particular, once $n \approx 1/y$, the coefficients will begin to decay very quickly.
+In particular, beyond $n \approx 1/y$ the coefficients will decay very quickly.
 So for a given $y$, we can say that the finite expansion
 $$
 \sum_{|n| \leq M}a_n\sqrt{y}K_\nu(2\pi|n|y)e(nx)
@@ -166,6 +166,13 @@ $$
 b_n\sqrt{\sin\theta}P_{\mu_n}^{-\nu}(\cos\theta)
 $$
 decays exponentially as $n \rightarrow \infty$ so long as $\theta < \frac{\alpha}{2}$.
+\\
+
+\textbf{Note:} experimental results suggest that the $b_n$'s in fact decay like
+$$
+b_n \sim e^{-2\pi^2n/\log\kappa}
+$$
+This is important if we want to try rescaling the coefficients for numerical stability.
 
 \subsection*{Asymptotics of the Legendre $P$ Function}
 

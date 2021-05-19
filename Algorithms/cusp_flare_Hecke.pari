@@ -159,10 +159,10 @@ Creates set of test points as in Strombergsson's program.
   - r - Hecke group parameter
   - Y - height for test points in original fundamental domain
   - alpha - angle for test point in flare domain
-  - M - will take M + 2 test points in original fundamental domain
-  - MM - will take 2*MM test points in flare domain
+  - N1 - will take N1 test points in original fundamental domain
+  - N2 - will take N2 test points in flare domain
 */
-test_points_Stromb(r, Y, M, alpha, MM) =
+test_points_Stromb(r, Y, N1, alpha, N2) =
 {
   local(kappa, zs, zs1, zs2);
 
@@ -170,12 +170,12 @@ test_points_Stromb(r, Y, M, alpha, MM) =
   kappa = ((1+sqrt(1-4*r^2))/(2*r))^2;
 
   /* Take M+2 points from a horocycle at height Y */
-  zs1 = test_points_horocycle(M+2, Y);
+  zs1 = test_points_horocycle(N1, Y);
 
   /* Take 2*MM points from a ray in the flare domain at angle alpha */
-  zs2 = test_points_ray(2*MM, r, kappa, alpha);
+  zs2 = test_points_ray(N2, r, kappa, alpha);
 
-  /* Return all M+2+(2*MM) */
+  /* Return all N1 + N2 points */
   zs = concat(zs1, zs2);
   return(zs);
 }
@@ -294,8 +294,9 @@ Sets up matrix of equations for list of test points z
   - only use flare expansion if test point has argument <= alpha0
   - M - number of nonzero coefficients to take in cuspidal expansion
   - MM - number of nonzero coefficients to take in flare expansion
+  - scale_flare - 1 if we want to scale flare coefficients for stability
 */
-init_eqns_cusp_and_flare(z, r, s, y0, M, alpha0, MM)=
+init_eqns_cusp_and_flare(z, r, s, y0, M, alpha0, MM, scale_flare)=
 {
   local(num_eqns, j, zz, zjrth, zzrth, kappa, zrepr, jjj, m, a, B);
 
@@ -330,6 +331,9 @@ init_eqns_cusp_and_flare(z, r, s, y0, M, alpha0, MM)=
     /* if z is admissible wrt flare, save those coefficients */
     if(zjrth[2] <= alpha0,
       for(m=0, MM, A[num_eqns+zrepr][M+2+m] = flare_Whitt(zjrth[2], m, s, kappa)*cos(2*Pi*m*log(zjrth[1])/log(kappa)) );
+      if(scale_flare == 1,
+        for(m=0, MM, A[num_eqns+zrepr][M+2+m] /= exp(2*Pi^2*m/log(kappa)));
+      );
       zrepr++;
     );
 
@@ -355,7 +359,10 @@ init_eqns_cusp_and_flare(z, r, s, y0, M, alpha0, MM)=
         if(zzrth[2] > alpha0, error("Pullback "zz" not ok for any expansion!"));
         for(m = 0, MM,
           a = flare_Whitt(zzrth[2], m, s, kappa)*cos(2*Pi*m*log(zzrth[1])/log(kappa));
-          for(jjj = 0, zrepr-1, A[num_eqns+jjj][M+2+m] -= a);
+          if(scale_flare == 1,
+            for(jjj = 0, zrepr-1, A[num_eqns+jjj][M+2+m] -= a/exp(2*Pi^2*m/log(kappa))),
+            for(jjj = 0, zrepr-1, A[num_eqns+jjj][M+2+m] -= a)
+          );
         );
       );
     );
@@ -376,8 +383,9 @@ coefficients. Assumes we are working with an infinite volume Hecke group.
   - only use flare expansion if test point has argument <= alpha0
   - M - number of nonzero coefficients to take in cuspidal expansion
   - MM - number of nonzero coefficients to take in flare expansion
+  - scale_flare - 1 if we want to scale flare coefficients for stability
 */
-least_square_method_cusp_and_flare(z, r, s, y0, M, alpha0, MM) =
+least_square_method_cusp_and_flare(z, r, s, y0, M, alpha0, MM, scale_flare) =
 {
   /* double check that group has infinite volume */
   if(r >= 1, error("Group must have infinite volume to use flare expansion."));
@@ -385,7 +393,7 @@ least_square_method_cusp_and_flare(z, r, s, y0, M, alpha0, MM) =
   local(k, A, AA, B, x);
 
   /* Set up matrix of equations */
-  A = init_eqns_cusp_and_flare(z, r, s, y0, M, alpha0, MM);
+  A = init_eqns_cusp_and_flare(z, r, s, y0, M, alpha0, MM, scale_flare);
 
   /* Use Strombergsson's method for least squares */
   AA = mattranspose(A)*A;
@@ -406,12 +414,13 @@ Strombergsson)
   - r - Hecke group parameter
   - we only use cuspidal expansion when test point has height >= y0
   - we only use flare expansion when test point has argument <= alpha0
-  - M = number of points taken in cuspidal expansion
-  - MM = number of points taken in flare expansion
+  - M1 = number of points taken in cuspidal expansion
+  - M2 = number of points taken in flare expansion
   - s = starting guess
   - delta = starting step size away from guess
+  - scale_flare - 1 if we want to scale flare coefficients for stability
 */
-secant_method(z1, z2, r, y0, alpha0, M, MM, s, delta)=
+secant_method(z1, z2, r, y0, alpha0, M1, M2, s, delta, scale_flare)=
 {
   local(s_new, c1, c2, j, s_max, s_min, s_mid, delta_new);
 
@@ -420,14 +429,14 @@ secant_method(z1, z2, r, y0, alpha0, M, MM, s, delta)=
   while(1,
 
     /* Get differences of some Fourier coefficients for s */
-    x1 = least_square_method_cusp_and_flare(z1, r, s, y0, M, alpha0, MM);
-    x2 = least_square_method_cusp_and_flare(z2, r, s, y0-0.02, M, alpha0+0.05, MM);
-    c1 = [x1[2] - x2[2], x1[3] - x2[3], x1[M+2] - x2[M+2], x1[M+3] - x2[M+3]];
+    x1 = least_square_method_cusp_and_flare(z1, r, s, y0, M1, alpha0, M2, scale_flare);
+    x2 = least_square_method_cusp_and_flare(z2, r, s, y0-0.02, M1, alpha0+0.05, M2, scale_flare);
+    c1 = [x1[2] - x2[2], x1[3] - x2[3], x1[M1+2] - x2[M1+2], x1[M1+3] - x2[M1+3]];
 
     /* Now do the same for s + delta */
-    x1 = least_square_method_cusp_and_flare(z1, r, s+delta, y0, M, alpha0, MM);
-    x2 = least_square_method_cusp_and_flare(z2, r, s+delta, y0-0.02, M, alpha0+0.05, MM);
-    c2 = [x1[2] - x2[2], x1[3] - x2[3], x1[M+2] - x2[M+2], x1[M+3] - x2[M+3]];
+    x1 = least_square_method_cusp_and_flare(z1, r, s+delta, y0, M1, alpha0, M2, scale_flare);
+    x2 = least_square_method_cusp_and_flare(z2, r, s+delta, y0-0.02, M1, alpha0+0.05, M2, scale_flare);
+    c2 = [x1[2] - x2[2], x1[3] - x2[3], x1[M1+2] - x2[M1+2], x1[M1+3] - x2[M1+3]];
 
     /* Run one iteration of secant method on each difference */
     s_max = 0.0; s_min = 100.0;
@@ -441,7 +450,9 @@ secant_method(z1, z2, r, y0, alpha0, M, MM, s, delta)=
     /* Ad hoc check if it's worth continuing */
     delta_new = (s_max - s_min)*5;
     if(delta_new > 0.5*delta,
-      return(s_mid);
+      print("Approximate error:"s_max - s_min);
+      print("Prediction:"s_mid);
+      return([s_mid, x1]);
     );
     delta = delta_new;
     s = s_mid-0.5*delta;
@@ -477,8 +488,8 @@ grid_zoom_in(r, alpha0, y0, M, MM, s_start, grid_size_start, num_steps)=
     /* loop through grid of s values */
     for(j = 1, 11,
       /* get two sets of coefficients  and store error */
-      x1 = least_square_method_cusp_and_flare(z1, r, s_list[j], y0, M, alpha0, MM);
-      x2 = least_square_method_cusp_and_flare(z2, r, s_list[j], y0-0.02, M, alpha0+0.05, MM);
+      x1 = least_square_method_cusp_and_flare(z1, r, s_list[j], y0, M, alpha0, MM, scale_flare);
+      x2 = least_square_method_cusp_and_flare(z2, r, s_list[j], y0-0.02, M, alpha0+0.05, MM, scale_flare);
       error_list[j] = norml2(x1 - x2);
     );
 

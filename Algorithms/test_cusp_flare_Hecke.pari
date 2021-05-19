@@ -126,68 +126,71 @@ secant_methods() =
   /* Set static values for rest of computations */
   r=0.35; alpha0=2.0; y0=0.32; s = 0.76; delta = 0.01;
 
-  /* Modify lists here; all combinations of values
-     taken from these lists will be performed. */
-  Ms = [15];
-  MMs = [5];
-  precs = [32];
+  /* [M, MM, prec] combos to be performed */
+  combos = [[60, 35, 80],
+            [80, 45, 80],
+            [100, 65, 100]];
 
   /* nested loop through M, MM, and prec values */
-  for(i=1, length(Ms),
-    M = Ms[i];
-    for(j=1, length(MMs),
-      MM = MMs[j];
-      for(k=1, length(precs),
-        default(realprecision, precs[k]);
-        s_guess = secant_method(r, y0, alpha0, M, MM, s, delta);
-        print("M = "M);
-        print("MM = "MM);
-        print("prec = "precs[k]);
-        print("Error = "abs(s_guess - s_true));
-        print(" ");
-      );
-    );
+  for(i=1, length(combos),
+    M = combos[i][1];
+    MM = combos[i][2];
+    prec = combos[i][3];
+    default(realprecision, prec);
+    print("M = "M);
+    print("MM = "MM);
+    print("prec = "prec);
+    s_guess = secant_method(r, y0, alpha0, M, MM, s, delta);
+    print(" ");
   );
 }
 
 /* Run one iteration of the secant method zoom in */
 example_secant() =
 {
-  local(r, y0, alpha0, s, M, MM, delta);
+  local(r, y0, alpha0, s, M1, M2, delta, L, xs);
 
-  default(realprecision, 60);
-  r = 0.35; y0 = 0.34; alpha0 = 2.2; M = 60;
-  MM = 35;
-  s = 0.7670524170091020567715020886425950625;
-  delta = 4e-37;
+  default(realprecision, 40);
+  r = 0.35;
+  y0 = 0.3; M1 = 20; N1 = 30;
+  alpha0 = 2.2; M2 = 20; N2 = 30;
+  s = 0.76;
+  delta = 0.005;
 
-  z1 = test_points_Stromb(r, y0, M, alpha0, MM);
-  z2 = test_points_Stromb(r, y0-0.02, M, alpha0+0.05, MM);
+  z1 = test_points_Stromb(r, y0, N1, alpha0, N2);
+  z2 = test_points_Stromb(r, y0-0.02, N1, alpha0+0.05, N2);
 
-  secant_method(z1, z2, r, y0 - 0.01, alpha0 + 0.1, M, MM, s, delta);
+  L = secant_method(z1, z2, r, y0 - 0.01, alpha0 + 0.1, M1, M2, s, delta, 0);
+  xs = L[2][M1+2..M1+M2+2];
+  for(j = 1, length(xs), print(xs[j]));
+  print("--------------------------------------------------------------");
+  L = secant_method(z1, z2, r, y0 - 0.01, alpha0 + 0.1, M1, M2, s, delta, 1);
+  xs = L[2][M1+2..M1+M2+2];
+  for(j = 1, length(xs), print(xs[j]));
 }
 
-/* Compute and print cusp coefficients */
-get_cusp_coeffs()=
+/* Compute and print cusp then flare coefficients */
+get_Fourier_coeffs()=
 {
-  local(r, s_true, y0, M, alpha0, MM, zs, xs, xs_cusp, xs_flare);
+  local(r, s_true, y0, M1, alpha0, M2, zs, xs, xs_cusp, xs_flare);
 
   default(realprecision, 64);
   r = 0.35;
   s_true = 0.76705241700910205677150208864259506276668;
-  y0 = 0.3;
-  M = 25;
-  alpha0 = 2.2;
-  MM = 15;
+  y0 = 0.3; M1 = 25; N1 = 50;
+  alpha0 = 2.2; M2 = 15; N2 = 30;
 
-  /*zs = test_points_Stromb(r, .32, M, Pi/2, MM);*/
-  zs = test_points_Stromb(r, 0.32, 50, 2.0, 25);
-  zs = zs[16..102];
-  xs = least_square_method_cusp_and_flare(zs, r, s_true, y0, M, alpha0, MM);
-  xs_cusp = xs[1..M+1];
-  xs_flare = xs[M+2..M+MM+2];
+  zs = test_points_Stromb(r, y0, N1, alpha0, N2);
+  xs = least_square_method_cusp_and_flare(zs, r, s_true, y0-0.01, M1, alpha0+0.1, M2);
+  xs_cusp = xs[1..M1+1];
+  xs_flare = xs[M1+2..M1+M2+2];
 
-  for(j = 1, M + 1, print(xs_cusp[j]));
+  /* kappa is the scaling parameter for the flare */
+  kappa = ((1+sqrt(1-4*r^2))/(2*r))^2;
+
+  for(j = 1, M1+1, print(xs_cusp[j]));
+  print(" ");
+  for(j = 1, M2+1, print(exp(2*Pi^2*(j - 1)/log(kappa))*xs_flare[j]));
 }
 
 /**********************************************************************

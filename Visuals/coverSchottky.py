@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import diskModel as dm
 import poincareModel as pm
+from mpmath import mp
 
 '''
 This file contains functions for visualizing the triple cover of a symmetric
@@ -127,7 +128,7 @@ def draw_doubled_group(thet, show_axis=False) :
 
 # draws a fundamental domain in the disk for the group as given by
 # get_doubled_group() after mapping to upper half plane
-def doubled_group_UHP(thet, show_axis=False) :
+def doubled_group_UHP(thet, show_axis=False, X=4, Y=4) :
     # get fundamental domain
     fd = disk_to_UHP(get_doubled_group(thet))
 
@@ -136,7 +137,7 @@ def doubled_group_UHP(thet, show_axis=False) :
                      inv_Cayley(-np.exp(1j*np.pi/3)).real)
 
     # plot stuff!
-    ax = pm.setupFig(-4, 4, 0, 4)
+    ax = pm.setupFig(-X, X, 0, Y)
     fd.draw(ax, fill=1)
     D1.draw(ax, lstyle='--')
 
@@ -217,7 +218,7 @@ def draw_flare_domain(thet, X, Y) :
     plt.show()
 
 # plots points from testPoints.txt along with fundamental domain in the UHP
-def plot_test_points() :
+def plot_test_points(thet) :
     # read file with points
     with open('testPoints.txt') as f :
         line = f.readline().strip()
@@ -230,17 +231,220 @@ def plot_test_points() :
         p_new = ''.join(p.split())
         pts.append(complex(p_new))
 
+    # get pullbacks
+    R, D1, _ = get_circles_UHP(thet)
+    pts_pb = []
+    for pt in pts :
+        pts_pb.append(pullback_Schottky(pt, R, D1))
+
     # draw fundamental domain
-    ax = doubled_group_UHP(np.pi/2)
+    ax = doubled_group_UHP(thet)
 
     # draw points
     pts = np.array(pts)
+    pts_pb = np.array(pts_pb)
     ax.plot(pts.real, pts.imag, '.k')
+    ax.plot(pts_pb.real, pts_pb.imag, 'xk')
 
     plt.show()
 
+###################################
+# Functions for testing PARI code #
+###################################
+
+# computes reflection through geodesic semicircle in upper half plane
+def reflect(z, cent, rad) :
+    if abs(z - cent) < 1e-10 :
+        return np.inf
+    return rad**2 / (z.real - 1j*z.imag - cent) + cent
+
+# get center and radius for R, D1, and D2 in UHP model
+def get_circles_UHP(thet) :
+    # get fundamental domain
+    fd = disk_to_UHP(get_reflection_group(thet))
+
+    # recall that geodesic order is R, D1, D2
+
+    # get R
+    g = fd.geodesics[0]
+    R = [0, 0]
+    R[0] = (g.ep1 + g.ep2)/2
+    R[1] = abs(g.ep1 - g.ep2)/2
+
+    # get D1
+    g = fd.geodesics[1]
+    D1 = [0, 0]
+    D1[0] = (g.ep1 + g.ep2)/2
+    D1[1] = abs(g.ep1 - g.ep2)/2
+
+    # get D2
+    D2 = [0, np.inf]
+
+    return R, D1, D2
+
+# try to find pullbacks of test points
+def specific_pullbacks() :
+    R, D1, _ = get_circles_UHP(np.pi/6)
+
+    # interested in the following three points
+    z1 = 1j/10
+    z2 = 1/2 + 1j
+    z3 = 1 + 1j
+
+    # pullback for z1 is D2D1
+    print 'D2D1(z1) ='
+    D1z1 = reflect(z1, D1[0], D1[1])
+    print str(-D1z1.real + 1j*D1z1.imag)
+    print ''
+
+    # pullback for z2 is D1D2
+    print 'D1D2(z2)'
+    print reflect(-z2.real + 1j*z2.imag, D1[0], D1[1])
+    print ''
+
+    # pullback for z3 is D1D2
+    print 'D1D2(z3)'
+    print reflect(-z3.real + 1j*z3.imag, D1[0], D1[1])
+    print ''
+
+# general pullback algorithm, which goes by
+#   - if z is in D1, reflect by D1
+#   - elif z is outside R, reflect by R
+#   - elif Re(z) > 0, reflect across imaginary axis
+#   - else, in original FD, so...
+#       - if used odd number of reflections, return D1(z)
+#       - else, return z
+def pullback_Schottky(z, R, D1) :
+    # save z at start in case we enter an infinite loop
+    z_start = z
+
+    # how many reflections have we performed so far?
+    num_refl = 0
+
+    # loop until done
+    while 1 :
+
+        # check if in D1
+        if abs(z - D1[0]) < D1[1] :
+            z = reflect(z, D1[0], D1[1])
+            num_refl += 1
+
+        # check if outside R
+        elif abs(z - R[0]) > R[1] :
+            z = reflect(z, R[0], R[1])
+            num_refl += 1
+
+        # check if real part positive
+        elif z.real > 0 :
+            z = -z.real + 1j*z.imag
+            num_refl += 1
+
+        # otherwise we are in original fundamental domain
+        else :
+            # if odd number of reflections, need to reflect by D1
+            if num_refl % 2 == 1 :
+                return reflect(z, D1[0], D1[1])
+            else :
+                return z
+
+        # if we ever end up back at start, in an infinite loop
+        if abs(z - z_start) < 1e-10 :
+            print 'Warning, pullback algorithm for ' + str(z_start) + ' returned to self.'
+            return z_start
+
+# Given two (center, radius) pairs (c, r) and (a, t), computes the fixed
+# points of the Mobius transformation obtained from reflection across the
+# first circle composed with reflection across the second circle
+def fixed_points_refls(c, r, a, t) :
+    A = (c**2 - a**2 + t**2 - r**2)/2/(c - a)
+    B = np.sqrt(( (a - c)**2 - (r**2 + t**2) )**2 - 4*r**2*t**2 )/2/(c - a)
+    return A - B, A + B
+
+# get flare parameters
+#   - w1, w2: left- and right-hand points of axis cutting off the flare
+#   - t: leftmost point of flare
+#   - pre_kappa: rightmost point of flare
+def get_flare_data(thet) :
+    R, D1, _ = get_circles_UHP(np.pi/6)
+
+    # axis is D1R
+    z1, z2 = fixed_points_refls(D1[0], D1[1], R[0], R[1])
+    w1 = min(z1, z2)
+    w2 = max(z1, z2)
+
+    # t is leftmost point of R
+    t = R[0] - R[1]
+
+    # pre_kappa is D1(t)
+    pre_kappa = reflect(t, D1[0], D1[1])
+
+    return w1, w2, t, pre_kappa
+
+# map points to the flare expansion
+#   - w1, w2: left- and right-hand points of axis cutting off the flare
+#   - t: leftmost point of flare
+def map_to_flare(z, w1, w2, t) :
+    w = (t - w2)/(t - w1)*(z - w1)/(z - w2)
+    return [abs(w), np.arccos(w.real/abs(w))]
+
+# use mpmath to compute Whittaker function for the flare expansion
+def flare_Whitt(thet, m, s, kappa) :
+    nu = s - 1/2
+    mu = -1/2 + 2*np.pi*1j*m/np.log(kappa)
+    return np.sqrt(np.sin(thet))*mp.legenp(mu, -nu, np.cos(thet)).real
+
+# approximates values which appear in test_init_eqns in
+# Algorithms/test_cover_Schottky.pari
+def test_init_eqns() :
+    # points of interest and their (approximate) pullbacks
+    z1 = 1j/10
+    z2 = 1/2 + 1j
+    z3 = 1 + 1j
+    zpb1 = -1.6647866985370762335846328913503045080 + 0.38834951456310679611650485436893203883*1j
+    zpb2 = -0.47482996250770193378102435128659914646 + 1.3254033600140835360567302423526384393*1j
+    zpb3 = -1.0554745644123689251027543177449890821 + 1.1312542286635410364383667765418102415*1j
+
+    # check these points in the flares
+    w1, w2, t, pre_kappa = get_flare_data(np.pi/6)
+    z1_flare = map_to_flare(z1, w1, w2, t)
+    z2_flare = map_to_flare(z2, w1, w2, t)
+    z3_flare = map_to_flare(z3, w1, w2, t)
+    zpb1_flare = map_to_flare(zpb1, w1, w2, t)
+    zpb2_flare = map_to_flare(zpb2, w1, w2, t)
+    zpb3_flare = map_to_flare(zpb3, w1, w2, t)
+    zs = [z1_flare, z2_flare, z3_flare]
+    zpbs = [zpb1_flare, zpb2_flare, zpb3_flare]
+
+    # print info
+    print 'z1 and zpb1 in flare'
+    print z1_flare
+    print zpb1_flare
+    print ''
+    print 'z2 and zpb2 in flare'
+    print z2_flare
+    print zpb2_flare
+    print ''
+    print 'z3 and zpb3 in flare'
+    print z3_flare
+    print zpb3_flare
+    print ''
+
+    # now form the matrix for the linear system
+    kappa = map_to_flare(pre_kappa, w1, w2, t)[0]
+    A = np.zeros((3, 3))
+    for n in range(3) :
+        z = zs[n]
+        zpb = zpbs[n]
+        for m in range(3) :
+            A[n, m] = (flare_Whitt(z[1], m, 0.4, kappa)*
+                       np.cos(2*np.pi*m*np.log(z[0])/np.log(kappa)) -
+                       flare_Whitt(zpb[1], m, 0.4, kappa)*
+                       np.cos(2*np.pi*m*np.log(zpb[0])/np.log(kappa)))
+
+    # print matrix
+    print 'A ='
+    for n in range(3) :
+        print A[n, :]
+
 if __name__ == '__main__' :
-    #draw_doubled_group(np.pi/2, True)
-    #doubled_group_UHP(np.pi/2, True)
-    #draw_flare_domain(np.pi/2, 5, 5)
-    plot_test_points()
+    plot_test_points(116*np.pi/180)

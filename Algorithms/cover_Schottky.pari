@@ -79,8 +79,6 @@ flare_Whitt(thet, m, s, kappa)=
   sqrt(sin(thet))*Plegendre(0.5-s, -0.5+2*Pi*m*I/log(kappa), cos(thet));
 }
 
-/* TODO: update below here */
-
 /**********************************************************************
   Schottky group functions
 **********************************************************************/
@@ -342,8 +340,6 @@ solve_sys(AA, cfree)=
   Code for setting up and solving linear system
 **********************************************************************/
 
-/* TODO: update below here! Also test stuff */
-
 /*
 Sets up matrix of equations for list of test points z
   - use only the flare expansion
@@ -355,11 +351,7 @@ Sets up matrix of equations for list of test points z
 */
 init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
 {
-  local(A, num_eqns, j, z, zpb, kappa, i, z_flare, zpb_flare m, B, prec, re);
-
-  /* grab current precision for checking equalities */
-  prec = default(realprecision);
-  re = 10^(-prec);
+  local(A, num_eqns, j, z, zpb, kappa, i, z_flare, zpb_flare m, B);
 
   /* kappa is the scaling parameters for the flares */
   kappa = true_to_hyp(pre_kappa, z1, z2, t)[1];
@@ -375,7 +367,7 @@ init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
     zpb = pullback_Schottky(z, circles);
 
     /* Check whether point is in fundamental domain */
-    if(abs(zpb - z) < 5*re,
+    if(abs(zpb - z) < 10e-10,
 
       /* Point is IN fundamental domain */
       error("Point "z" is in fundamental domain.");
@@ -387,7 +379,7 @@ init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
       zpb_flare = true_to_hyp(zpb, z1, z2, t);
 
       /* Check that points have different arguments */
-      if(abs(z_flare[2] - zpb_flare[2]) < 5*re,
+      if(abs(z_flare[2] - zpb_flare[2]) < 10e-10,
         error("Point "z" and pullback have same argument in flare domain.");
       );
 
@@ -414,25 +406,22 @@ init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
 
 /*
 Given a set of test points zs, set up and solve linear system for the Fourier
-coefficients. Assumes we are working with a symmetric Schottky group.
+coefficients.
   - s - assumed eigenvalue is lambda = s(1 - s)
   - only use flare expansion if test point has argument <= alpha0
-  - M - number of coefficients to take in each flare expansion
-  - flare_data - see get_flare_data above
-  - circles_doubled, R1_cent, R1_rad - see get_circle_data above
+  - M - number of coefficients to take in the flare expansion
 */
-get_coefficients(zs, s, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad)=
+get_coefficients(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
 {
   local(k, A, AA, B, x);
 
   /* Set up matrix of equations */
-  A = init_eqns(zs, s, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad);
+  A = init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa);
 
   /* Use Strombergsson's method for least squares */
   AA = mattranspose(A)*A;
-  B = vector(3*M-1, k, vector(3*M, j, AA[k+1, j]));
-  x = solve_sys(B, 1); /* TODO: maybe play with second argument?
-                          (normalize wrt different flare...?) */
+  B = vector(M-1, k, vector(M, j, AA[k+1, j]));
+  x = solve_sys(B, 1);
 
   /* return Fourier coefficient vector */
   return(x);
@@ -447,27 +436,25 @@ Runs a "secant method version" of Hejhal's algorithm (learned from
 Strombergsson)
   - s - assumed eigenvalue is lambda = s(1 - s)
   - only use flare expansion if test point has argument <= alpha0
-  - M - number of coefficients to take in each flare expansion
-  - flare_data - see get_flare_data above
-  - circles_doubled, R1_cent, R1_rad - see get_circle_data above
+  - M - number of coefficients to take in the flare expansion
 */
-secant_method(z1, z2, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad, s, delta)=
+secant_method(zs1, zs2, alpha0, M, circles, z1, z2, t, pre_kappa, s, delta)=
 {
   local(s_new, c1, c2, j, s_max, s_min, s_mid, delta_new);
 
-  s_new=vector(4); /* REMEMBER TO CHANGE THIS IF YOU CHANGE C1 AND C2 */
+  s_new=vector(3); /* REMEMBER TO CHANGE THIS IF YOU CHANGE c1 AND c2 */
 
   while(1,
 
     /* Get differences of some Fourier coefficients for s */
-    x1 = get_coefficients(z1, s, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad);
-    x2 = get_coefficients(z2, s, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad);
-    c1 = [x1[2] - x2[2], x1[3] - x2[3], x1[M+1] - x2[M+1], x1[2*M+1] - x2[2*M+1]];
+    x1 = get_coefficients(zs1, s, alpha0, M, circles, z1, z2, t, pre_kappa);
+    x2 = get_coefficients(zs2, s, alpha0, M, circles, z1, z2, t, pre_kappa);
+    c1 = [x1[2] - x2[2], x1[3] - x2[3], x1[4] - x2[4]];
 
     /* Now do the same for s + delta */
-    x1 = get_coefficients(z1, s + delta, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad);
-    x2 = get_coefficients(z2, s + delta, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad);
-    c2 = [x1[2] - x2[2], x1[3] - x2[3], x1[M+1] - x2[M+1], x1[2*M+1] - x2[2*M+1]];
+    x1 = get_coefficients(zs1, s + delta, alpha0, M, circles, z1, z2, t, pre_kappa);
+    x2 = get_coefficients(zs2, s + delta, alpha0, M, circles, z1, z2, t, pre_kappa);
+    c2 = [x1[2] - x2[2], x1[3] - x2[3], x1[4] - x2[4]];
 
     /* Run one iteration of secant method on each difference */
     s_max = 0.0; s_min = 100.0;
@@ -487,7 +474,7 @@ secant_method(z1, z2, alpha0, M, flare_data, circles_doubled, R1_cent, R1_rad, s
     /* Ad hoc check if it's worth continuing */
     delta_new = (s_max - s_min)*5;
     if(delta_new > 0.5*delta,
-      print("Approximate error:"smax-smin);
+      print("Approximate error: "s_max-s_min);
       return(s_mid);
     );
     delta = delta_new;
