@@ -83,7 +83,11 @@ flare_Whitt(thet, m, s, kappa)=
   Schottky group functions
 **********************************************************************/
 
-/* Computes reflection through geodesic semicircle in upper half plane */
+/*
+Computes reflection through geodesic semicircle in upper half plane.
+  (Assume cent is in R, so lines are identified by having rad == oo and are
+  described by having real part equal to cent).
+*/
 reflect(z, cent, rad)=
 {
   if(rad == oo,

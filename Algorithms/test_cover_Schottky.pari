@@ -48,13 +48,15 @@ is_admissible(z, thet, alpha0, circles, z1, z2, t)=
 }
 
 /*
-Tries N test points along a ray in the flare domain of angle alpha. Returns
-all admissible points.
+Takes N test points in the fundamental domain along the ray at angle alpha,
+and applies transformations (D1R)^kD1D2 for some k randomly chosen from 0 to
+K - 1. If inadmissible, error out.
+
+Recall: circles order is R, D1, D2
 */
-test_points_ray(N, thet, alpha, alpha0)=
+test_points_ray(N, thet, alpha, alpha0, K)=
 {
-  local(zs, circles, z1, z2, t, pre_kappa, pts_found, pts_considered,
-        rand_norm, rand_arg, z, z_flare);
+  local(zs, circles, z1, z2, t, pre_kappa, z);
 
   zs = vector(N);
 
@@ -65,22 +67,50 @@ test_points_ray(N, thet, alpha, alpha0)=
   /* kappa is the scaling parameters for the flares */
   kappa = true_to_hyp(pre_kappa, z1, z2, t)[1];
 
-  /* keep track of how many points we find */
-  pts_found = 0;
+  /* loop through N points */
   for(j = 1, N,
 
-    /* get point in flare domain at angle alpha */
+    /* get point in flare domain at angle alpha, and map to original domain */
     z = hyp_to_true(exp(j/(2*N)*log(kappa)), alpha, z1, z2, t);
 
-    /* if admissible, save it; otherwise, continue */
-    if(is_admissible(z, thet, alpha0, circles, z1, z2, t),
-      pts_found += 1;
-      zs[pts_found] = z;
+    /* get random k then map by (D1R)^kD1D2 */
+    k = random(K);
+    z = reflect(z, circles[3][1], circles[3][2]);
+    z = reflect(z, circles[2][1], circles[2][2]);
+    for(i = 1, k,
+      z = reflect(z, circles[1][1], circles[1][2]);
+      z = reflect(z, circles[2][1], circles[2][2]);
+    );
+
+    /* check admissibility */
+    z_flare = true_to_hyp(z, z1, z2, t);
+    zpb = pullback_Schottky(z, circles);
+    zpb_flare = true_to_hyp(zpb, z1, z2, t);
+
+    /* check if in fundamental domain */
+    if(abs(z - zpb) < 10e-10,
+      error("Point j = "j" in fundamental domain."),
+
+      /* check if different args in flare */
+      if(abs(z_flare[2] - zpb_flare[2]) < 10e-10,
+        error("Point j = "j" shares flare arg with pullback."),
+
+        /* check if both points admissible wrt flare */
+        if(z_flare[2] > alpha0,
+          error("Point j = "j" inadmissible with respect to flare."),
+
+          if(zpb_flare[2] > alpha0,
+            error("Pullback of point j = "j" inadmissible with respect to flare."),
+
+            /* if we got here, we have a test point! */
+            zs[j] = z;
+          );
+        );
+      );
     );
   );
 
-  print("Found "pts_found" admissible points out of "N" tested.");
-  return(zs[1..pts_found]);
+  return(zs);
 }
 
 /*
@@ -143,7 +173,7 @@ example_secant() =
 
   N = 100;
 
-  alpha0 = 9*Pi/10; M = 20;
+  alpha0 = 49*Pi/50; M = 20;
 
   s = 0.82; delta = 3e-3;
 
@@ -152,12 +182,12 @@ example_secant() =
   [z1, z2, t, pre_kappa] = get_flare_data(circles);
 
   /* Get test points */
-  zs1 = test_points_random(N, thet, alpha0);
-  zs2 = test_points_random(N, thet, alpha0);
-  /*alpha1 = 3*Pi/4 - 0.1;
-  alpha2 = 3*Pi/4 - 0.2;
-  zs1 = test_points_ray(N, thet, alpha1, alpha0);
-  zs2 = test_points_ray(N, thet, alpha2, alpha0);*/
+  /*zs1 = test_points_random(N, thet, alpha0);
+  zs2 = test_points_random(N, thet, alpha0);*/
+  alpha1 = Pi/2 - 0.1;
+  alpha2 = Pi/2 - 0.2;
+  zs1 = test_points_ray(N, thet, alpha1, alpha0, 3);
+  zs2 = test_points_ray(N, thet, alpha2, alpha0, 3);
 
   a = getwalltime();
   s_guess = secant_method(zs1, zs2, alpha0, M, circles, z1, z2, t, pre_kappa, s, delta);
