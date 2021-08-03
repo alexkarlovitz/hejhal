@@ -105,9 +105,12 @@ class GeodesicWall :
             if q.y !=0 or q.z != 0 :
                 raise ValueError('Points defining a geodesic wall must be j- and k-free. Received point ' + str(q) + '.')
 
-    # draw this geodesic wall on a given matplotlib axis
+    # returns [center, radius, True] where [center, radius] is of circle
+    # describing this hemisphere; if it's a vertical half plane, returns
+    # [(x1, y1), (x2, y2), False] where (x1, y1) and (x2, y2) are
+    # non-infinite points on the line
     #   see http://web.archive.org/web/20161011113446/http://www.abecedarical.com/zenosamples/zs_circle3pts.html
-    def draw(self, ax) :
+    def get_geometric_desc(self) :
         # check if one of the points is inf
         if self.q1 == np.inf or self.q2 == np.inf or self.q3 == np.inf :
             # find non-infinite points
@@ -117,8 +120,8 @@ class GeodesicWall :
             elif p2 == np.inf :
                 p2 = self.q3
 
-            # draw the half plane
-            self.draw_plane(ax, p1.x1, p1.x2, p2.x1, p2.x2)
+            # return non-infinite points
+            return [(p1.x1, p1.x2), (p2.x1, p2.x2), False]
 
         # otherwise, all three are j- and k-free Quaternions
         else :
@@ -134,7 +137,7 @@ class GeodesicWall :
 
             # if M11 = 0, the points are in a line
             if M11 == 0 :
-                self.draw_plane(ax, x1, y1, x2, y2)
+                return [(x1, y1), (x2, y2), False]
 
             # otherwise, points are in a circle
             else :
@@ -153,8 +156,22 @@ class GeodesicWall :
                 y = -M13/M11/2
                 r = np.sqrt(x**2 + y**2 + M14/M11)
 
-                # draw half sphere
-                self.draw_sphere(ax, x, y, r)
+                # return
+                return [(x, y), r, True]
+
+    # draw this geodesic wall on a given matplotlib axis
+    def draw(self, ax) :
+        # get geometric description
+        g = self.get_geometric_desc()
+
+        # third element of g tells if circle
+        is_circle = g[2]
+
+        # draw either half sphere or half plane
+        if is_circle :
+            self.draw_sphere(ax, g[0][0], g[0][1], g[1])
+        else :
+            self.draw_plane(ax, g[0][0], g[0][1], g[1][0], g[1][1])
 
     # given two points on x1x2-plane, draw vertical half plane through them
     def draw_plane(self, ax, x1, y1, x2, y2) :
@@ -215,39 +232,96 @@ class GeodesicWall :
 # given invertible 2x2 matrix A, returns A(z) where action is by Mobius transformation
 #   - A has entries in C
 #   - z is a Quaternion or np.inf
-def mobiusTransform(A, z) :
+def mobiusTransform(A, z, min_size=1e-14) :
     # convert entries in A to Quaternions
     B = [[Quaternion(A[0, 0].real, A[0, 0].imag), Quaternion(A[0, 1].real, A[0, 1].imag)],
          [Quaternion(A[1, 0].real, A[1, 0].imag), Quaternion(A[1, 1].real, A[1, 1].imag)]]
 
     if z == np.inf :
-        if B[1][0] == 0.0 :
+        if A[1, 0] == 0.0 :
             return np.inf
         return B[0][0] / B[1][0]
-    elif B[1][0] * z + B[1][1] == 0.0 :
+    elif (B[1][0] * z + B[1][1]).norm() < min_size :
         return np.inf
     return (B[0][0] * z + B[0][1]) / (B[1][0] * z + B[1][1])
 
 # given invertible 2x2 matrix A, returns mobius transformation A of a geodesic or fund domain
 def mobius(A, x) :
-    # if x is a geodesic, get new geodesic where we applied A to endpoints
-    if isinstance(x, Geodesic) :
-        e1 = mobiusTransform(A, x.ep1)
-        e2 = mobiusTransform(A, x.ep2)
-        return Geodesic(e1, e2)
-
-    # if x is a fundamental domain, get new fundamental domain by applying A to all geodesics
-    elif isinstance(x, FundamentalDomain) :
-        gsNew = []
-        for g in x.geodesics :
-            gsNew.append( mobius(A, g) )
-        refNew = None
-        if x.referencePoint != None :
-            refNew = mobiusTransform(A, x.referencePoint)
-        return FundamentalDomain(gsNew, refNew)
+    # if x is a geodesic wall, get new geodesic where we applied A to endpoints
+    if isinstance(x, GeodesicWall) :
+        q1 = mobiusTransform(A, x.q1)
+        q2 = mobiusTransform(A, x.q2)
+        q3 = mobiusTransform(A, x.q3)
+        return GeodesicWall(q1, q2, q3)
 
     else :
-        raise ValueError('Function "mobius" expects second input to be a Geodesic or FundamentalDomain object.')
+        raise ValueError('Function "mobius" expects second input to be a GeodesicWall object.')
+
+###############
+# Reflections #
+###############
+
+# computes reflection of the Quaternion z through a GeodesicWall
+def reflect(z, W, min_size=1e-14) :
+    if not isinstance(z, Quaternion) :
+        raise ValueError('First argument ' + str(z) + ' to "reflect" is not a Quaternion.')
+    if not isinstance(W, GeodesicWall) :
+        raise ValueError('Second argument ' + str(W) + ' to "reflect" is not a GeodesicWall.')
+
+    # get geometric info about W
+    g = W.get_geometric_desc()
+
+    # proceed depending on whether W is a half sphere or half plane
+    is_sphere = g[2]
+    if is_sphere :
+        if (z - c).norm() < min_size :
+            return np.inf
+
+        c = Quaternion(g[0][0], g[0][1])
+        r_squared = Quaternion(g[1]**2)
+
+        return r_squared*(z - c)/Quaternion((z - c).norm()**2) + c
+
+    else :
+        # get coordinates of point and points on line for ease of reading
+        x, y = z.x1, z.x2
+        x1, y1 = g[0][0], g[0][1]
+        x2, y2 = g[1][0], g[1][1]
+
+        # get vector from a point on line to point and vector on line
+        ax, ay = x - x1, y - y1
+        Lx, Ly = x2 - x1, y2 - y1
+
+        # get orthogonal projection then orthogonal component
+        p_scale = (ax*Lx + ay*Ly)/(Lx**2 + Ly**2)
+        px, py = Lx*p_scale, Ly*p_scale
+        ox, oy = ax - px, ay - py
+
+        # reflection of z is z minus twice the orthogonal component
+        rx, ry = zx - 2*ox, zy - 2*oy
+        return Quaternion(rx, ry, z.y)
+
+# computes reflection of the GeodesicWall W1 through the GeodesicWall W2
+def reflect_wall(W1, W2) :
+    g = W2.get_geometric_desc()
+    is_sphere = g[2]
+
+    # reflect each base point in W1
+    qs = [W1.q1, W2.q2, W3.q3]
+    new_qs = []
+    for q in qs :
+        # if infinity, can get answer immediately
+        if q == np.inf :
+            if is_sphere :
+                new_qs.append(Quaternion(g[0][0], g[0][1]))
+            else :
+                new_qs.append(np.inf)
+
+        # otherwise, use reflect function
+        else :
+            new_qs.append(reflect(q, W2))
+
+    return GeodesicWall(new_qs[0], new_qs[1], new_qs[2])
 
 ############
 # Plotting #
@@ -341,5 +415,59 @@ def test_Mobius() :
     np_print(X)
     print 'nam(y) = ' + str(p)
 
+# test Mobius transformation on a geodesic wall
+def test_Mobius_wall() :
+    x1 = Quaternion(1, 0, 0, 0)
+    x2 = Quaternion(0, 1, 0, 0)
+
+    R = Quaternion(np.sqrt(2), 0, 0, 0)
+    A = GeodesicWall(x1, x2, -x1)
+    B = GeodesicWall(R*x1, R*x2, -R*x1)
+    C = GeodesicWall(x1, x1 + x2, np.inf)
+    D = GeodesicWall(x2, x1 + x2, np.inf)
+    E = GeodesicWall(-x1, -x1 + x2, np.inf)
+    F = GeodesicWall(-x2, x1 - x2, np.inf)
+
+    # plot original
+    ax = axis_3d((-4, 4), (-4, 4), (0, 2))
+    A.draw(ax)
+    B.draw(ax)
+    C.draw(ax)
+    D.draw(ax)
+    E.draw(ax)
+    F.draw(ax)
+
+    # shift everything by 2 in x2 direction
+    n = np.array([[1, 1j], [0, 1]])
+    A = mobius(n, A)
+    B = mobius(n, B)
+    C = mobius(n, C)
+    D = mobius(n, D)
+    E = mobius(n, E)
+    F = mobius(n, F)
+
+    # plot shifted domain
+    A.draw(ax)
+    B.draw(ax)
+    C.draw(ax)
+    D.draw(ax)
+    E.draw(ax)
+    F.draw(ax)
+    plt.show()
+
+# test reflections on Quaternions
+# TODO: finish this!
+def test_reflections() :
+    x1 = Quaternion(1, 0, 0, 0)
+    x2 = Quaternion(0, 1, 0, 0)
+
+    R = Quaternion(np.sqrt(2), 0, 0, 0)
+    A = GeodesicWall(x1, x2, -x1)
+    B = GeodesicWall(R*x1, R*x2, -R*x1)
+    C = GeodesicWall(x1, x1 + x2, np.inf)
+    D = GeodesicWall(x2, x1 + x2, np.inf)
+    E = GeodesicWall(-x1, -x1 + x2, np.inf)
+    F = GeodesicWall(-x2, x1 - x2, np.inf)
+
 if __name__ == '__main__' :
-    test_Mobius()
+    example_fundamental_domain()

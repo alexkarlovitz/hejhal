@@ -1,0 +1,231 @@
+/*
+This file contains PARI code to run Hejhal's algorithm on infinite
+covolume, discrete groups acting on hyperbolic 3-space.
+*/
+
+/*
+We assume the group admits no cusps, so the only portions of a fundamental
+domain on the boundary are infinite volume pieces. These can therefore be
+converted into flare domains.
+*/
+
+/* Author: Alex Karlovitz */
+
+/**********************************************************************
+  Special functions (from Andreas Strombergsson)
+**********************************************************************/
+
+/* See def in GR, 9.100. We sum up to and including the z^N-term.
+ Chooses N by the following (completely ad hoc and sloppy heuristic)
+ method: Stop when p has decreased >= 10 times in a row and |p|<re*|s|. */
+
+hypergeom(a,b,c,z)=
+{
+  local(s,p,pp,n,r,re,prec);
+
+  /* re: Desired relative error bound for hypergeom function.
+     Let's make it correspond to current precision. */
+  prec = default(realprecision);
+  re = 10^(-prec);
+
+  s=1;
+  p=1;
+  r=0;
+  n=0;
+  while(1,
+    pp=(a+n)*(b+n)/((c+n)*(1+n))*z;
+    if (abs(pp)<1, r++, r=0);
+    p=p*pp;
+    s+=p;
+    if ((r>=10 && abs(p)<re*abs(s)), return(s););
+    n++;
+  );
+  s;
+}
+
+/**********************************************************************
+  Whittaker functions
+**********************************************************************/
+
+/* Whittaker function in the flare expansion */
+flare_Whitt(thet, phi, m, n, s, kappa)=
+{
+  TODO;
+}
+
+/**********************************************************************
+  Upper half space model functions
+**********************************************************************/
+
+/*
+Computes reflection through geodesic wall in upper half space.
+  (Assume cent is in R, so lines are identified by having rad == oo and are
+  described by having real part equal to cent).
+*/
+reflect(z, cent, rad)=
+{
+  TODO;
+}
+
+/*
+TODO: think through info needed for Appolonian packing; specifically, need
+      the pullback algorithm and method to map over to flare.
+*/
+
+/*
+Pullback to fundamental domain; the algorithm we use is
+  - TODO
+*/
+pullback_Ap(z_start, circles)=
+{
+  TODO;
+}
+
+/*
+Map from flare domain to original domain
+*/
+hyp_to_true(rho, th, z1, z2, t) =
+{
+  TODO;
+}
+
+/*
+Map from original domain to flare domain
+*/
+true_to_hyp(z, z1, z2, t)=
+{
+  TODO;
+}
+
+/**********************************************************************
+  Linear algebra algorithm (from Strombergsson)
+**********************************************************************/
+
+/*
+ To utilize as much information as possible, we will typically be looking
+ at a linear system with more equations than variables. In particular, we
+ have a system of the type "A*x=0", where x is the sought for M-dimensional
+ vector of Fourier coefficients, and A is an N*M-matrix where N>=M-1
+ is the number of given points. Of course, since typically N should be
+ much larger than M, it will be impossible to find an EXACT solution x
+ to "A*x=0". Instead we seek x so as to MINIMIZE |A*x| (Euclidean norm).
+ for some given normalization of x. Perhaps the most natural normalization
+ of x would be |x|=1; however here we instead normalize by setting
+ x[1]=1. Thus, since |A*x|^2=x^t*AA*x with AA:=A^t*A (an M*M-matrix), it
+ turns out that we wish to find that vector x which satisfies x[1]=1 and
+ AA'*x=0, where AA' is the (M-1)*M-matrix obtained by removing the top row
+ from AA. We find this vector x using Gauss elimination, via solve_sys.
+*/
+
+/*
+ The following routine solves a linear system of equations using
+ Gauss elimination. Of course we could instead have tried to make
+ use of some built-in PARI routine, but we wanted to have maximal
+ control. Actually the routine below is a very downscaled version
+ of a much longer routine, which e.g. allows a higher dimensional
+ solution space (e.g. when looking for holomorphic modular forms)
+ and also allows some "tricks", e.g. to have available more
+ equations than are actually used in the end, so that in each new
+ j-iteration we seek among more than one row to find a good pivot.
+ (This is probably humbug to any expert in numerical linear algebra,
+ but it has been found to work well in practice when dealing with a
+ higher dimensional space of holomorphic modular forms.) Anyway,
+ I have taken this away below since I doubt it would be useful for
+ the problem we are now discussing.)
+*/
+
+/*
+ Solve the homogeneous system of equations whose coefficients are
+ given by AA using Gauss elimination.
+ cfree is the index of the column which should be kept as a free variable.
+*/
+solve_sys(AA, cfree)=
+{
+  local(Nequ, Nu, c, maxc, maxk, columninfo, j, k, A, N, jj);
+
+  /* get number of equations and variables */
+  Nequ = matsize(AA)[2];
+  Nu = matsize(AA[1])[2];
+
+  /* We maintain  columninfo  so that
+    columninfo[k] = j   if column k has been used as pivot column and
+                          the corresponding "1" is in row j.
+                  = -1  if column k has not yet been used as pivot. */
+  columninfo=vector(Nu,k,-1);
+
+  /* loop through rows */
+  for(j=1,Nequ,
+    /* Find the coefficient of largest absolute value in row number j. */
+    maxc=0; maxk=-1;
+    for(k=1,Nu, if((k!=cfree),
+      c=abs(AA[j][k]); if((c>maxc), maxk=k; maxc=c;);
+    ););
+    if((maxk==-1), error("In solveequsyst; unexpected linear dependence "j););
+
+    /* Divide all coefficients in row j  with  AA[j,maxk]. */
+    A=1/AA[j][maxk];
+    AA[j]=A*AA[j];
+    AA[j][maxk]=1;    /* EXACT 1, not "1.000000000023", say! */
+
+    /* Update columninfo. */
+    columninfo[maxk]=j;
+
+    /* Subtract row j from all other rows. */
+    for(N=1,Nequ,
+      if(N != j,
+        A=AA[N][maxk];
+        AA[N] = AA[N]-A*AA[j];
+        AA[N][maxk]=0;   /* EXACT 0, not "0.0E-10", say! */
+      );
+    );
+  );
+
+  /* Return the solution vector. */
+  vector(Nu, k, if(k==cfree, 1, -AA[columninfo[k]][cfree]));
+}
+
+/**********************************************************************
+  Code for setting up and solving linear system
+**********************************************************************/
+
+/*
+Sets up matrix of equations for list of test points z
+  - use only the flare expansion
+    - if test point is in fundamental domain, error
+    - else, compare expansion at pullback
+  - lambda = s(2 - s)
+  - only use flare expansion if test point has argument <= alpha0
+  - M - number of coefficients to take in the flare expansion
+*/
+init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
+{
+  TODO;
+}
+
+/*
+Given a set of test points zs, set up and solve linear system for the Fourier
+coefficients.
+  - s - assumed eigenvalue is lambda = s(2 - s)
+  - only use flare expansion if test point has argument <= alpha0
+  - M - number of coefficients to take in the flare expansion
+*/
+get_coefficients(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
+{
+  TODO;
+}
+
+/**********************************************************************
+  Actual loops for Hejhal's algorithm
+**********************************************************************/
+
+/*
+Runs a "secant method version" of Hejhal's algorithm (learned from
+Strombergsson)
+  - s - assumed eigenvalue is lambda = s(2 - s)
+  - only use flare expansion if test point has argument <= alpha0
+  - M - number of coefficients to take in the flare expansion
+*/
+secant_method(zs1, zs2, alpha0, M, circles, z1, z2, t, pre_kappa, s, delta)=
+{
+  TODO
+}
