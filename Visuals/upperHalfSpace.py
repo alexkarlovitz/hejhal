@@ -469,5 +469,37 @@ def test_reflections() :
     E = GeodesicWall(-x1, -x1 + x2, np.inf)
     F = GeodesicWall(-x2, x1 - x2, np.inf)
 
+####################
+# Apollonian Group #
+####################
+
+# get the cocluster for the Apollonian group as extended geodesic walls in H3
+def get_cocluster_A() :
+    z = Quaternion()
+    x1 = Quaternion(1)
+    x2 = Quaternion(0, 1)
+    two = x1 + x1
+    m1 = Quaternion(-1)
+
+    v2 = GeodesicWall(x2, x1 + x2, np.inf)
+    v3 = GeodesicWall(two, two*x2, m1*two*x1)
+    v4 = GeodesicWall(x1, x1 + x2, np.inf)
+    v5 = GeodesicWall(z, x2, np.inf)
+
+    return (v2, v3, v4, v5)
+
+# plot the cocluster
+def plot_cocluster_A() :
+    # get cocluster
+    v2, v3, v4, v5 = get_cocluster_A()
+
+    # plot it!
+    ax = axis_3d((-2, 2), (-2, 2), (0, 2))
+    v2.draw(ax)
+    v3.draw(ax)
+    v4.draw(ax)
+    v5.draw(ax)
+    plt.show()
+
 if __name__ == '__main__' :
-    example_fundamental_domain()
+    plot_cocluster_A()
