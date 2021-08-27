@@ -9,6 +9,13 @@
 
 \usepackage{mathtools}
 
+\usepackage[
+backend=bibtex,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+\addbibresource{refs}
+
 \PassOptionsToPackage{hyperfootnotes=false}{hyperref}
 \usepackage{hyperref}
 
@@ -212,5 +219,85 @@ In spherical coordinates, this is
 $$
 \frac{\sin\varphi drd\theta d\varphi}{r\cos^3\varphi}
 $$
+\textbf{TODO:} add Mathematica file to the github and make notes here on the formulas.
+
+\section*{Example: Apollonian Circle Packing}
+
+Recall that the Apollonian circle packing can be recognized as the orbit of circles in its ``cluster'' under reflections through circles in its ``cocluster'' (this is true for all ``crystallographic'' sphere packings; see \cite{kontorovich2017geometry} Theorem 31).
+In Figure \ref{c_coc}, we show one realization of the cluster/cocluster decomposition for the Apollonian packing.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{cluster_cocluster.png}
+	\caption{Cluster (black)/cocluster (blue) for the Apollonian packing}
+	\label{c_coc}
+\end{figure}
+(Note that we think of lines as circles with infinite radius).
+When the line $v$ is reflected through line 3, it gives a new line $w$; reflecting $w$ through circle 4 gives a circle of radius $1/2$ which is tangent to both $v$ and $w$.
+In Figure \ref{orbit}, we see 21 circles in the orbit of $v$.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{some_circles.png}
+	\caption{After various reflections through the cocluster (blue), we start to see the beginnings of an Apollonian circle packing (black)}
+	\label{orbit}
+\end{figure}
+
+Another realization of the Apollonian circle packing is as the limit set of a reflection group in hyperbolic 3-space \cite{kontorovich2017geometry}.
+Specifically, imagine drawing the cocluster in the $x_1x_2$-plane, then raising these to walls in the upper half-space model; that is, we raise circles to hemispheres and lines to vertical half-planes.
+See Figure \ref{coc3d} for reference.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{cocluster_3D.png}
+	\caption{The cocluster for the Apollonian packing raised into hyperbolic 3-space}
+	\label{coc3d}
+\end{figure}
+\\
+\textbf{TODO:} add image to Figure \ref{coc3d} with orbits of lots of points. This should be experimental verification of the statement that the Apollonian packing is the limit set (proof in \cite{kontorovich2017geometry}).
+
+\subsection*{Doubling the Reflection Group}
+
+For use in Hejhal's algorithm, the group in question must consist of M\"obius transformations.
+As in the 2-dimensional case, we achieve this by doubling our reflection group across one of the base reflections.
+Let $R_i$ denote reflection through the $i^{th}$ wall for $i = 1, 2, 3, 4$, where the numbering is taken as in Figure \ref{coc3d}.
+Then the reflection group $\Gamma$ can be written as
+$$
+\Gamma = \langle R_1, R_2, R_3, R_4 \rangle
+$$
+We will consider the group $\Gamma_0$ which is obtained by doubling $\Gamma$ across $R_1$.
+$$
+\Gamma_0 = \langle R_1R_2, R_1R_3, R_1R_4 \rangle
+$$
+In general, an even word in reflections through walls in $H^3$ is a M\"obius transformation; in this example, we can of course compute the actions directly.
+One finds that
+$$
+R_1R_2(z) = z + 1 ~~~~~~~~ R_1R_3(z) = -z + 2i ~~~~~~~~ R_1R_4(z) = -\frac{1}{z}
+$$
+Thus, the corresponding matrices in $\text{SL}(2, \mathbb{C})$ are
+$$
+R_1R_2 \sim T :=
+\begin{pmatrix}
+	1 & 1 \\
+	0 & 1
+\end{pmatrix} ~~~~~~~~
+R_1R_3 \sim A :=
+\begin{pmatrix}
+	-i & -2 \\
+	0 & i
+\end{pmatrix} ~~~~~~~~
+R_1R_4 \sim S :=
+\begin{pmatrix}
+	0 & -1 \\
+	1 & 0
+\end{pmatrix}
+$$
+
+Let us make a few immediate observations about the group $\Gamma_0 \cong \langle T, A, S \rangle$.
+Clearly, $\Gamma_0 \leq \text{SL}(2, \mathbb{Z}[i])$.
+Moreover, since $T$ and $S$ are the classic generators of $\text{SL}(2, \mathbb{Z})$, we see that $\text{SL}(2, \mathbb{Z}) \leq \Gamma_0$.
+This fact can even be seen geometrically in Figure \ref{c_coc}; the area to the right of line 1, to the left of line 2, and outside circle 4 represents half of the usual fundamental domain for $\text{SL}(2, \mathbb{Z})$ in the upper half-plane.
+Doubling across line 1 introduces the other half.
+
+\pagebreak
+
+\printbibliography
 
 \end{document}

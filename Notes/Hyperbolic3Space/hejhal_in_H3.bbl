@@ -1,0 +1,51 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.1 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\datalist[entry]{ynt/global//global/global}
+  \entry{kontorovich2017geometry}{misc}{}
+    \name{author}{2}{}{%
+      {{hash=KA}{%
+         family={Kontorovich},
+         familyi={K\bibinitperiod},
+         given={Alex},
+         giveni={A\bibinitperiod},
+      }}%
+      {{hash=NK}{%
+         family={Nakamura},
+         familyi={N\bibinitperiod},
+         given={Kei},
+         giveni={K\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{KANK1}
+    \strng{fullhash}{KANK1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{KN17}
+    \field{sortinit}{2}
+    \field{sortinithash}{2}
+    \verb{eprint}
+    \verb 1712.00147
+    \endverb
+    \field{title}{Geometry and Arithmetic of Crystallographic Sphere Packings}
+    \field{eprinttype}{arXiv}
+    \field{eprintclass}{math.MG}
+    \field{year}{2017}
+  \endentry
+\enddatalist
+\endinput

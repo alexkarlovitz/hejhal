@@ -1,4 +1,3 @@
-from __future__ import division
 from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
@@ -160,7 +159,7 @@ class GeodesicWall :
                 return [(x, y), r, True]
 
     # draw this geodesic wall on a given matplotlib axis
-    def draw(self, ax) :
+    def draw(self, ax, color='k') :
         # get geometric description
         g = self.get_geometric_desc()
 
@@ -169,12 +168,12 @@ class GeodesicWall :
 
         # draw either half sphere or half plane
         if is_circle :
-            self.draw_sphere(ax, g[0][0], g[0][1], g[1])
+            self.draw_sphere(ax, g[0][0], g[0][1], g[1], color)
         else :
-            self.draw_plane(ax, g[0][0], g[0][1], g[1][0], g[1][1])
+            self.draw_plane(ax, g[0][0], g[0][1], g[1][0], g[1][1], color)
 
     # given two points on x1x2-plane, draw vertical half plane through them
-    def draw_plane(self, ax, x1, y1, x2, y2) :
+    def draw_plane(self, ax, x1, y1, x2, y2, color='k') :
         # get bounds for cube
         x_min, x_max = ax.get_xlim()
         y_min, y_max = ax.get_ylim()
@@ -187,7 +186,7 @@ class GeodesicWall :
 
             # now plot
             Y = np.zeros_like(X) + y1
-            ax.plot_surface(X, Y, Z, color='k', alpha=0.2)
+            ax.plot_surface(X, Y, Z, color=color, alpha=0.2)
 
         # check if plane is parallel to x2 axis
         elif x1 == x2 :
@@ -196,7 +195,7 @@ class GeodesicWall :
 
             # now plot
             X = np.zeros_like(Y) + x1
-            ax.plot_surface(X, Y, Z, color='k', alpha=0.2)
+            ax.plot_surface(X, Y, Z, color=color, alpha=0.2)
 
         # otherwise, treat y as a function of x
         else :
@@ -206,10 +205,10 @@ class GeodesicWall :
             # compute y and plot
             m = (y2 - y1)/(x2 - x1)
             Y = m*(X - x1) + y1
-            ax.plot_surface(X, Y, Z, color='k', alpha=0.2)
+            ax.plot_surface(X, Y, Z, color=color, alpha=0.2)
 
     # given center (on x1x2-plane) and radius, draw half sphere
-    def draw_sphere(self, ax, x, y, r) :
+    def draw_sphere(self, ax, x, y, r, color='k') :
         # form meshgrid for unit half sphere, then scale and shift
         u, v = np.mgrid[0:2*np.pi:51j, 0:np.pi/2:51j]
         X = r*np.cos(u)*np.sin(v) + x
@@ -217,7 +216,7 @@ class GeodesicWall :
         Z = r*np.cos(v)
 
         # plot it!
-        ax.plot_surface(X, Y, Z, color='k', alpha=0.2)
+        ax.plot_surface(X, Y, Z, color=color, alpha=0.2)
 
     # return string with the endpoints of the geodesic
     def __str__(self) :
@@ -368,52 +367,52 @@ def example_fundamental_domain() :
 # print matrix line by line
 def np_print(A) :
     for i in range(len(A)) :
-        print A[i]
+        print(A[i])
 
 # test out Mobius transformations
 def test_Mobius() :
     # start with quaternion at j
     y = Quaternion(0, 0, 1, 0)
-    print 'y is: ' + str(y)
-    print ''
+    print('y is: ' + str(y))
+    print('')
 
     # matrices in N shift the point parallel to x1x2-plane
     n = np.array([[1, 1 + 1j], [0, 1]])
     p = mobiusTransform(n, y)
-    print 'n:'
+    print('n:')
     np_print(n)
-    print 'n(y) = ' + str(p)
-    print ''
+    print('n(y) = ' + str(p))
+    print('')
 
     # matrices in A move the point up the y-axis at unit speed
     a = np.array([[np.exp(2), 0], [0, np.exp(-2)]])
     p = mobiusTransform(a, y)
-    print 'a:'
+    print('a:')
     np_print(a)
-    print 'a(y) = ' + str(p)
-    print ''
+    print('a(y) = ' + str(p))
+    print('')
 
     # matrices in M and SO(2) fix the point
     m = np.array([[np.exp(1j*2.3), 0], [0, np.exp(-1j*2.3)]])
     p = mobiusTransform(m, y)
-    print 'm:'
+    print('m:')
     np_print(m)
-    print 'm(y) = ' + str(p)
-    print ''
+    print('m(y) = ' + str(p))
+    print('')
 
     o = np.array([[np.cos(-1.7), -np.sin(-1.7)], [np.sin(-1.7), np.cos(-1.7)]])
     p = mobiusTransform(o, y)
-    print 'o:'
+    print('o:')
     np_print(o)
-    print 'o(y) = ' + str(p)
-    print ''
+    print('o(y) = ' + str(p))
+    print('')
 
     # products of matrices act right-to-left
     X = np.matmul(np.matmul(n, a), m)
     p = mobiusTransform(X, y)
-    print 'nam:'
+    print('nam:')
     np_print(X)
-    print 'nam(y) = ' + str(p)
+    print('nam(y) = ' + str(p))
 
 # test Mobius transformation on a geodesic wall
 def test_Mobius_wall() :
@@ -478,28 +477,36 @@ def get_cocluster_A() :
     z = Quaternion()
     x1 = Quaternion(1)
     x2 = Quaternion(0, 1)
-    two = x1 + x1
+    h = Quaternion(1/2)
     m1 = Quaternion(-1)
 
-    v2 = GeodesicWall(x2, x1 + x2, np.inf)
-    v3 = GeodesicWall(two, two*x2, m1*two*x1)
-    v4 = GeodesicWall(x1, x1 + x2, np.inf)
-    v5 = GeodesicWall(z, x2, np.inf)
+    W1 = GeodesicWall(z, x2, np.inf)
+    W2 = GeodesicWall(h, h + x2, np.inf)
+    W3 = GeodesicWall(h*x2, x1 + h*x2, np.inf)
+    W4 = GeodesicWall(x1, x2, m1*x1)
 
-    return (v2, v3, v4, v5)
+    return (W1, W2, W3, W4)
 
 # plot the cocluster
-def plot_cocluster_A() :
+def plot_cocluster_A(label=False) :
     # get cocluster
-    v2, v3, v4, v5 = get_cocluster_A()
+    W1, W2, W3, W4 = get_cocluster_A()
 
     # plot it!
-    ax = axis_3d((-2, 2), (-2, 2), (0, 2))
-    v2.draw(ax)
-    v3.draw(ax)
-    v4.draw(ax)
-    v5.draw(ax)
+    ax = axis_3d((-1.5, 1.5), (-1.5, 1.5), (0, 2))
+    W1.draw(ax, 'b')
+    W2.draw(ax, 'b')
+    W3.draw(ax, 'b')
+    W4.draw(ax, 'b')
+
+    # if asked to label, label walls
+    if label :
+        ax.text(0, -1.45, 0.1, '1')
+        ax.text(0.5, -1.45, 0.1, '2')
+        ax.text(1.25, 0.5, 1.75, '3')
+        ax.text(-0.75, -0.65, 0, '4')
+
     plt.show()
 
 if __name__ == '__main__' :
-    plot_cocluster_A()
+    plot_cocluster_A(True)
