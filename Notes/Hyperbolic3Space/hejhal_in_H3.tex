@@ -16,8 +16,8 @@ sorting=ynt
 ]{biblatex}
 \addbibresource{refs}
 
-\PassOptionsToPackage{hyperfootnotes=false}{hyperref}
 \usepackage{hyperref}
+\PassOptionsToPackage{hypernotes=false}{hyperref}
 
 %opening
 \title{Hejhal's Algorithm in $\mathbb{H}^3$}
@@ -76,12 +76,12 @@ $$
 \text{F}\mathbb{H}^3 = \{ (z, v, w) \in U^3 \times \mathbb{R}^3 \times \mathbb{R}^3 : ||(v, w)||_z = 1, ~ v \perp w \}
 $$
 where the norm $||(\cdot, \cdot)||_z$ is derived from the hyperbolic metric.
-\textbf{(ASK AK FOR DETAILS HERE)!}
+(\textbf{TODO:} work out details for norm!).
 One can show that $\text{PSL}(2, \mathbb{C})$ acts simply transitively on F$\mathbb{H}^3$, where the action is by
 $$
-g(z, v, w) = (g(z), \textbf{?}, \textbf{?}) ~~~~~ \text{Maybe}~ (g(z), g'(z)v, g'(z)w)\text{? But need to think about derivative...}
+g(z, v, w) = (g(z), \textbf{?}, \textbf{?}) ~~~~~ \text{Probably}~ (g(z), g'(z)v, g'(z)w)\text{? But need to think about derivative...}
 $$
-\textbf{(ASK AK FOR DETAILS HERE)!}
+(\textbf{TODO:} work out details of action!)
 Thus, we can identify $\text{PSL}(2, \mathbb{C})$ with F$\mathbb{H}^3$ by associating a matrix $g$ with the point $g(j, j, 1)$.
 Intuitively, one thinks of $z$ as the base point in upper half-space, $v$ as a tangent vector pointing in the direction of a geodesic, and $w$ as a ``frame vector'' which is perpendicular to the tangent vector.
 (Recall that geodesics in $\mathbb{H}^3$ are semicircles or vertical lines which are perpendicular to the $x_1x_2$-plane).
@@ -250,7 +250,7 @@ See Figure \ref{coc3d} for reference.
 	\caption{The cocluster for the Apollonian packing raised into hyperbolic 3-space}
 	\label{coc3d}
 \end{figure}
-\\
+\\ \\
 \textbf{TODO:} add image to Figure \ref{coc3d} with orbits of lots of points. This should be experimental verification of the statement that the Apollonian packing is the limit set (proof in \cite{kontorovich2017geometry}).
 
 \subsection*{Doubling the Reflection Group}
@@ -269,19 +269,19 @@ $$
 In general, an even word in reflections through walls in $H^3$ is a M\"obius transformation; in this example, we can of course compute the actions directly.
 One finds that
 $$
-R_1R_2(z) = z + 1 ~~~~~~~~ R_1R_3(z) = -z + 2i ~~~~~~~~ R_1R_4(z) = -\frac{1}{z}
+R_1R_2(z) = z - 1 ~~~~~~~~ R_1R_3(z) = izi + i ~~~~~~~~ R_1R_4(z) = -\frac{1}{z}
 $$
 Thus, the corresponding matrices in $\text{SL}(2, \mathbb{C})$ are
 $$
-R_1R_2 \sim T :=
+R_1R_2 \sim T^{-1} :=
 \begin{pmatrix}
-	1 & 1 \\
+	1 & -1 \\
 	0 & 1
 \end{pmatrix} ~~~~~~~~
 R_1R_3 \sim A :=
 \begin{pmatrix}
-	-i & -2 \\
-	0 & i
+	i & 1 \\
+	0 & -i
 \end{pmatrix} ~~~~~~~~
 R_1R_4 \sim S :=
 \begin{pmatrix}
@@ -295,6 +295,89 @@ Clearly, $\Gamma_0 \leq \text{SL}(2, \mathbb{Z}[i])$.
 Moreover, since $T$ and $S$ are the classic generators of $\text{SL}(2, \mathbb{Z})$, we see that $\text{SL}(2, \mathbb{Z}) \leq \Gamma_0$.
 This fact can even be seen geometrically in Figure \ref{c_coc}; the area to the right of line 1, to the left of line 2, and outside circle 4 represents half of the usual fundamental domain for $\text{SL}(2, \mathbb{Z})$ in the upper half-plane.
 Doubling across line 1 introduces the other half.
+\\
+
+To identify a fundamental domain $\mathcal{F}$ for $\Gamma_0$, we first note that the generator $T: z \mapsto z + 1$ allows us to map points into any width-1 interval in the $x_1$ coordinate.
+We choose our fundamental domain with $-1/2 < x_1 < 1/2$; thus, $\mathcal{F}$ will be bounded by the half-plane 2 and the half-plane obtained by reflection 2 across 1.
+
+Next, note that the generator $S : z \mapsto -1/z$ maps the unit sphere to itself while swapping its interior and exterior.
+We will require points in $\mathcal{F}$ to have norm greater than 1; that is, hemisphere 4 provides another wall bounding our fundamental domain.
+Finally, the generator $A: x_1 + ix_2 + jy \mapsto -x_1 + i(1 - x_2) + jy$ provides a bijection between points with $x_2 > 1$ and those with $x_2 < 1$.
+So we take $\mathcal{F}$ to be on the side of half-plane 3 with $x_2 > 1$.
+
+Thus, we can describe the fundamental domain $\mathcal{F}$ as the set
+$$
+\mathcal{F} = \left\{ z = x_1 + ix_2 + jy \in \mathbb{H}^3 : -\frac{1}{2} < x_1 < \frac{1}{2}, x_2 > 1, |z| > 1 \right\}
+$$
+In Figure \ref{doubled_coc_2d}, we show this fundamental domain in the $x_1x_2$-plane.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{doubledFD_in_plane.png}
+	\caption{The cocluster for the Apollonian packing doubled across line 1; fundamental domain (intersected with $x_1x_2$-plane) shown in gray}
+	\label{doubled_coc_2d}
+\end{figure}
+\\
+
+We now consider a pullback algorithm to obtain the point in $\mathcal{F}$ corresponding to any given point in $\mathbb{H}^3$.
+Here is pseudocode for the pullback; we assume the input is a point $z = x_1 + ix_2 + jy$ with $j > 0$.
+\begin{verbatim}
+if x2 < 1 :
+    z = A(z)
+    
+repeat:
+    # [[x]] := nearest integer to x
+    z = T^(-[[x1]])(z)
+    if |z| >= 1 :
+        return z
+    else :
+        z = S(z)
+\end{verbatim}
+Note that $T$ does not change the $x_2$ coordinate.
+Moreover, if a point $z = x_1 + ix_2 + jy$ has $x_2 >=1$ and $|z| < 1$, then applying $S$ to $z$ can only increase its $x_2$ component.
+Thus, once we are in the ``repeat'' stage of the algorithm, we will never hit a point with $x_2 < 1$.
+This is why we only need to apply $A$ at most once.
+Inside the ``repeat'' loop, we are simply using $T$ to force $z$ into the strip $-1/2 \leq x_1 \leq 1/2$.
+Then if $|z| < 1$, we apply $S$ to force the point outside of the unit sphere.
+Note that within this loop, we are always increasing the $x_2$ component whenever we map by $S$.
+Since $\Gamma$ acts discontinuously on $\mathbb{H}^3$, this loop must terminate in finitely many steps with a $z$ in the fundamental domain.
+\\ \\
+\textbf{TODO:} consider adding a 3D image of the fundamental domain (maybe bold the walls where they touch $\mathcal{F}$?)
+
+\subsection*{Mapping to a Flare Domain}
+
+To obtain a flare domain, we must identify a hyperbolic matrix in $\Gamma_0$.
+Recalling that $\Gamma_0$ contains $\text{SL}(2, \mathbb{Z})$, we know that we have the matrix
+$$
+\gamma =
+\begin{pmatrix}
+	2 & 1 \\
+	1 & 1
+\end{pmatrix}
+$$
+One can check that $\gamma = T^2ST$, where $T: z \mapsto z + 1$ and $S: z \mapsto -1/z$ as defined above.
+Recalling that $T = R_1R_2$ and $S = R_1R_4$, we could of course also write $\gamma$ in terms of the original reflections.
+
+Next, one notes that $\gamma$ is diagonalized by $\gamma = P^{-1}DP$ where
+$$
+P =
+\begin{pmatrix}
+	\frac{-\sqrt{5}}{5} & \frac{5 + \sqrt{5}}{10} \\
+	\frac{\sqrt{5}}{5} & \frac{5 - \sqrt{5}}{10}
+\end{pmatrix} ~~~~~~~~
+D =
+\begin{pmatrix}
+	\frac{3 - \sqrt{5}}{2} & 0 \\
+	0 & \frac{3 + \sqrt{5}}{2}
+\end{pmatrix}
+$$
+Since $\gamma \in \Gamma_0$, we have that $D \in P\Gamma_0P^{-1}$.
+In particular, this implies $D^{-1} \in P\Gamma_0P^{-1}$, and $D^{-1}$ acts on $\mathbb{H}^3$ by scaling $z \mapsto \kappa z$ where
+$$
+\kappa = \frac{3 + \sqrt{5}}{3 - \sqrt{5}}
+$$
+This implies that $P\Gamma_0P^{-1}$ has a fundamental domain which is trapped between the unit hemisphere and the hemisphere centered at the origin with radius $\kappa$.
+On the other hand, since $P\Gamma_0P^{-1}$ acts on $P\mathbb{H}^3$ in the same way that $\Gamma_0$ acts on $\mathbb{H}^3$, we note that one can obtain a fundamental domain for the conjugate group simply by applying $P$ to any fundamental domain for the original group.
+In fact, as can be seen in Figure \textbf{ADD PIC}, the fundamental domain $P\mathcal{F}$ for $P\Gamma_0P^{-1}$ already constitutes a flare domain.
 
 \pagebreak
 

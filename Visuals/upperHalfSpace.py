@@ -226,8 +226,6 @@ class GeodesicWall :
 # Mobius Transforms #
 #####################
 
-# TODO: double check this func, then update one below
-
 # given invertible 2x2 matrix A, returns A(z) where action is by Mobius transformation
 #   - A has entries in C
 #   - z is a Quaternion or np.inf
@@ -244,7 +242,8 @@ def mobiusTransform(A, z, min_size=1e-14) :
         return np.inf
     return (B[0][0] * z + B[0][1]) / (B[1][0] * z + B[1][1])
 
-# given invertible 2x2 matrix A, returns mobius transformation A of a geodesic or fund domain
+# given invertible 2x2 matrix A, returns mobius transformation A of a geodesic
+# wall or list of such
 def mobius(A, x) :
     # if x is a geodesic wall, get new geodesic where we applied A to endpoints
     if isinstance(x, GeodesicWall) :
@@ -253,8 +252,18 @@ def mobius(A, x) :
         q3 = mobiusTransform(A, x.q3)
         return GeodesicWall(q1, q2, q3)
 
+    # if x is a list of walls, apply A to every wall in list
+    elif hasattr(x, '__iter__') :
+        l = []
+        for w in x :
+            l.append(mobius(A, w))
+        return l
+
     else :
-        raise ValueError('Function "mobius" expects second input to be a GeodesicWall object.')
+        raise ValueError('Function "mobius" expects second input to be a GeodesicWall object (or a list of such).')
+
+# given invertible 2x2 matrix A, applies mobius transformation A to a list of
+# geodesics
 
 ###############
 # Reflections #
@@ -337,6 +346,21 @@ def axis_3d(x_lims=(-1, 1), y_lims=(-1, 1), z_lims=(-1, 1)) :
     ax.set_ylim(y_lims[0], y_lims[1])
     ax.set_zlim(z_lims[0], z_lims[1])
     return ax
+
+# plot list of GeodesicWalls
+def plot_walls(Ws, b=None, x_lims=(-1, 1), y_lims=(-1, 1), z_lims=(-1, 1)) :
+    # prepare 3d axis
+    ax = None
+    if b is None :
+        ax = axis_3d(x_lims, y_lims, z_lims)
+    else :
+        ax = axis_3d((-b, b), (-b, b), (-1, 2*b - 1))
+
+    # draw every wall
+    for W in Ws :
+        W.draw(ax)
+
+    plt.show()
 
 ############
 # Examples #
@@ -490,14 +514,12 @@ def get_cocluster_A() :
 # plot the cocluster
 def plot_cocluster_A(label=False) :
     # get cocluster
-    W1, W2, W3, W4 = get_cocluster_A()
+    Ws = get_cocluster_A()
 
     # plot it!
     ax = axis_3d((-1.5, 1.5), (-1.5, 1.5), (0, 2))
-    W1.draw(ax, 'b')
-    W2.draw(ax, 'b')
-    W3.draw(ax, 'b')
-    W4.draw(ax, 'b')
+    for W in Ws :
+        W.draw(ax, 'b')
 
     # if asked to label, label walls
     if label :
@@ -508,5 +530,60 @@ def plot_cocluster_A(label=False) :
 
     plt.show()
 
+# get cocluster doubled across wall 1
+def get_doubled_A() :
+    z = Quaternion()
+    x1 = Quaternion(1)
+    x2 = Quaternion(0, 1)
+    h = Quaternion(1/2)
+    m1 = Quaternion(-1)
+
+    Wnew = GeodesicWall(m1*h,m1*h + x2, np.inf)
+    W2 = GeodesicWall(h, h + x2, np.inf)
+    W3 = GeodesicWall(h*x2, x1 + h*x2, np.inf)
+    W4 = GeodesicWall(x1, x2, m1*x1)
+
+    return (Wnew, W2, W3, W4)
+
+# plot the doubled group
+def plot_doubled_A(label=False) :
+    # get cocluster
+    Ws = get_doubled_A()
+
+    # plot it!
+    ax = axis_3d((-1.5, 1.5), (-1.5, 1.5), (0, 2))
+    for W in Ws :
+        W.draw(ax, 'b')
+
+    # if asked to label, label walls
+    if label :
+        ax.text(-0.5, -1.45, 0.3, '$R_1(2)$') # TODO: rotate?
+        ax.text(0.5, -1.45, 0.1, '2')
+        ax.text(1.25, 0.5, 1.75, '3')
+        ax.text(-0.75, -0.65, 0, '4')
+
+    plt.show()
+
+# get flare domain for doubled group
+def get_flare_A() :
+    # get walls in doubled group
+    Ws = get_doubled_A()
+
+    # P is the Mobius transformation mapping to flare domain
+    P = np.array([ [-np.sqrt(5)/5, (5 + np.sqrt(5))/10], [np.sqrt(5)/5, (5 - np.sqrt(5))/10] ])
+
+    # apply P to each wall
+    Ws_f = []
+    for W in Ws :
+        Ws_f.append(mobius(P, W))
+
+    # plot it!
+    #ax = axis_3d((-1.5, 1.5), (-1.5, 1.5), (0, 2))
+    ax = axis_3d((-7, 7), (-7, 7), (0, 13))
+    for W in Ws_f :
+        W.draw(ax, 'b')
+
+    plt.show()
+
 if __name__ == '__main__' :
-    plot_cocluster_A(True)
+    get_flare_A()
