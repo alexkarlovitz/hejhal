@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.8.16)  27 AUG 2021 13:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.8.16)  28 SEP 2021 16:46
 entering extended mode
 **./hejhal_in_H3.tex
 (hejhal_in_H3.tex
@@ -491,7 +491,6 @@ File: puenc.def 2021-06-07 v7.00m Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
 ... no UTF-8 mapping file for font encoding PU
 )
-Package hyperref Info: Option `hyperfootnotes' set `false' on input line 4073.
 Package hyperref Info: Hyper figures OFF on input line 4192.
 Package hyperref Info: Link nesting OFF on input line 4197.
 Package hyperref Info: Hyper index ON on input line 4200.
@@ -530,6 +529,7 @@ package with kernel methods
 )
 \Hy@abspage=\count406
 \c@Item=\count407
+\c@Hfootnote=\count408
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
@@ -540,8 +540,8 @@ Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atvery packag
 e
 with kernel methods
 )
-\Fld@listcount=\count408
-\c@bookmark@seq@number=\count409
+\Fld@listcount=\count409
+\c@bookmark@seq@number=\count410
 
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
 echeck.sty
@@ -556,13 +556,13 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip81
 )
-\@quotelevel=\count410
-\@quotereset=\count411
+\@quotelevel=\count411
+\@quotereset=\count412
 
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
 File: l3backend-pdftex.def 2021-08-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count412
+\l__color_backend_stack_int=\count413
 \l__pdf_internal_box=\box53
 ) (hejhal_in_H3.aux)
 \openout1 = `hejhal_in_H3.aux'.
@@ -624,16 +624,16 @@ LaTeX Font Info:    ... okay on input line 27.
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
 ii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count413
+\scratchcounter=\count414
 \scratchdimen=\dimen172
 \scratchbox=\box54
-\nofMPsegments=\count414
-\nofMParguments=\count415
+\nofMPsegments=\count415
+\nofMParguments=\count416
 \everyMPshowfont=\toks29
-\MPscratchCnt=\count416
+\MPscratchCnt=\count417
 \MPscratchDim=\dimen173
-\MPnumerator=\count417
-\makeMPintoPDFobject=\count418
+\MPnumerator=\count418
+\makeMPintoPDFobject=\count419
 \everyMPtoPDFconversion=\toks30
 )
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
@@ -695,7 +695,7 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 lestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count419
+\c@section@level=\count420
 )
 LaTeX Info: Redefining \ref on input line 27.
 LaTeX Info: Redefining \pageref on input line 27.
@@ -704,13 +704,13 @@ LaTeX Info: Redefining \nameref on input line 27.
 \@outlinefile=\write4
 \openout4 = `hejhal_in_H3.out'.
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 29.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 30.
 
 
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 29.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 30.
 
 
 (C:\Users\alexk\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
@@ -754,10 +754,39 @@ File: cocluster_3D.png.png Graphic file (type png)
 Package pdftex.def Info: cocluster_3D.png.png  used on input line 249.
 (pdftex.def)             Requested size: 234.8775pt x 202.683pt.
 
+Underfull \hbox (badness 10000) in paragraph at lines 244--255
+
+ []
+
+
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[4 <./cluster_cocluster.png.png>] [5 <./some_circles.png.png>] [6 <./cocluster_
-3D.png.png>] (hejhal_in_H3.aux)
+[4 <./cluster_cocluster.png.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 293--299
+
+ []
+
+[5 <./some_circles.png.png>]
+<doubledFD_in_plane.png.png, id=71, 555.57562pt x 551.05875pt>
+File: doubledFD_in_plane.png.png Graphic file (type png)
+<use doubledFD_in_plane.png.png>
+Package pdftex.def Info: doubledFD_in_plane.png.png  used on input line 315.
+(pdftex.def)             Requested size: 234.8775pt x 232.96503pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 311--320
+
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 335--345
+
+ []
+
+[6 <./cocluster_3D.png.png>] [7 <./doubledFD_in_plane.png.png>] [8]
+(hejhal_in_H3.aux)
 Package rerunfilecheck Info: File `hejhal_in_H3.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 Package logreq Info: Writing requests to 'hejhal_in_H3.run.xml'.
@@ -765,13 +794,13 @@ Package logreq Info: Writing requests to 'hejhal_in_H3.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 17379 strings out of 478868
- 294835 string characters out of 2848809
- 820529 words of memory out of 3000000
- 35071 multiletter control sequences out of 15000+600000
+ 17415 strings out of 478868
+ 295517 string characters out of 2848809
+ 820913 words of memory out of 3000000
+ 35102 multiletter control sequences out of 15000+600000
  415255 words of font info for 73 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,8n,66p,1849b,1269s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,8n,66p,1849b,1268s stack positions out of 5000i,500n,10000p,200000b,80000s
  <C:\Users\alexk\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
 1000.pk><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmbx10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/publ
@@ -793,9 +822,9 @@ rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/alexk/AppData/L
 ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/a
 lexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm7.pf
 b>
-Output written on hejhal_in_H3.pdf (6 pages, 409555 bytes).
+Output written on hejhal_in_H3.pdf (8 pages, 443863 bytes).
 PDF statistics:
- 157 PDF objects out of 1000 (max. 8388607)
- 19 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 172 PDF objects out of 1000 (max. 8388607)
+ 23 named destinations out of 1000 (max. 500000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
