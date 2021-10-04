@@ -302,12 +302,12 @@ We choose our fundamental domain with $-1/2 < x_1 < 1/2$; thus, $\mathcal{F}$ wi
 
 Next, note that the generator $S : z \mapsto -1/z$ maps the unit sphere to itself while swapping its interior and exterior.
 We will require points in $\mathcal{F}$ to have norm greater than 1; that is, hemisphere 4 provides another wall bounding our fundamental domain.
-Finally, the generator $A: x_1 + ix_2 + jy \mapsto -x_1 + i(1 - x_2) + jy$ provides a bijection between points with $x_2 > 1$ and those with $x_2 < 1$.
-So we take $\mathcal{F}$ to be on the side of half-plane 3 with $x_2 > 1$.
+Finally, the generator $A: x_1 + ix_2 + jy \mapsto -x_1 + i(1 - x_2) + jy$ provides a bijection between points with $x_2 > 1/2$ and those with $x_2 < 1/2$.
+So we take $\mathcal{F}$ to be on the side of half-plane 3 with $x_2 > 1/2$.
 
 Thus, we can describe the fundamental domain $\mathcal{F}$ as the set
 $$
-\mathcal{F} = \left\{ z = x_1 + ix_2 + jy \in \mathbb{H}^3 : -\frac{1}{2} < x_1 < \frac{1}{2}, x_2 > 1, |z| > 1 \right\}
+\mathcal{F} = \left\{ z = x_1 + ix_2 + jy \in \mathbb{H}^3 : -\frac{1}{2} < x_1 < \frac{1}{2}, x_2 > \frac{1}{2}, |z| > 1 \right\}
 $$
 In Figure \ref{doubled_coc_2d}, we show this fundamental domain in the $x_1x_2$-plane.
 \begin{figure}[h]
@@ -321,7 +321,7 @@ In Figure \ref{doubled_coc_2d}, we show this fundamental domain in the $x_1x_2$-
 We now consider a pullback algorithm to obtain the point in $\mathcal{F}$ corresponding to any given point in $\mathbb{H}^3$.
 Here is pseudocode for the pullback; we assume the input is a point $z = x_1 + ix_2 + jy$ with $j > 0$.
 \begin{verbatim}
-if x2 < 1 :
+if x2 < 1/2 :
     z = A(z)
     
 repeat:
@@ -333,15 +333,15 @@ repeat:
         z = S(z)
 \end{verbatim}
 Note that $T$ does not change the $x_2$ coordinate.
-Moreover, if a point $z = x_1 + ix_2 + jy$ has $x_2 >=1$ and $|z| < 1$, then applying $S$ to $z$ can only increase its $x_2$ component.
-Thus, once we are in the ``repeat'' stage of the algorithm, we will never hit a point with $x_2 < 1$.
+Moreover, if a point $z = x_1 + ix_2 + jy$ has $x_2 >=1/2$ and $|z| < 1$, then applying $S$ to $z$ can only increase its $x_2$ component.
+Thus, once we are in the ``repeat'' stage of the algorithm, we will never hit a point with $x_2 < 1/2$.
 This is why we only need to apply $A$ at most once.
 Inside the ``repeat'' loop, we are simply using $T$ to force $z$ into the strip $-1/2 \leq x_1 \leq 1/2$.
 Then if $|z| < 1$, we apply $S$ to force the point outside of the unit sphere.
 Note that within this loop, we are always increasing the $x_2$ component whenever we map by $S$.
 Since $\Gamma$ acts discontinuously on $\mathbb{H}^3$, this loop must terminate in finitely many steps with a $z$ in the fundamental domain.
 \\ \\
-\textbf{TODO:} consider adding a 3D image of the fundamental domain (maybe bold the walls where they touch $\mathcal{F}$?)
+\textbf{TODO:} consider adding a 3D image of the fundamental domain (maybe bold the walls where they touch $\mathcal{F}$? Maybe remove non-boundary parts of walls entirely?)
 
 \subsection*{Mapping to a Flare Domain}
 

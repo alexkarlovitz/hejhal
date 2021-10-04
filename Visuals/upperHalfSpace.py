@@ -577,10 +577,16 @@ def get_flare_A() :
     for W in Ws :
         Ws_f.append(mobius(P, W))
 
+    return Ws_f
+
+# plot flare domain for doubled group
+def plot_flare_A() :
+    # grab domain
+    Ws = get_flare_A()
+
     # plot it!
-    #ax = axis_3d((-1.5, 1.5), (-1.5, 1.5), (0, 2))
     ax = axis_3d((-7, 7), (-7, 7), (0, 13))
-    for W in Ws_f :
+    for W in Ws :
         W.draw(ax, 'b')
 
     plt.show()
