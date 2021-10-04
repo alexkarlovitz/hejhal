@@ -1,6 +1,6 @@
 /*
 This file contains functions for testing the algorithms in
-cover_Schottky.pari. NOTE: need to run "\r flare_disk_Schottky.pari"
+cover_Schottky.pari. NOTE: need to run "\r cover_Schottky.pari"
 in gp before running any code in this file, since it assumes those
 functions are defined.
 */

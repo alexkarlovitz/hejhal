@@ -1,0 +1,115 @@
+/*
+This file contains functions for testing the algorithms in
+H3_flares.pari. NOTE: need to run "\r H3-flares.pari"
+in gp before running any code in this file, since it assumes those
+functions are defined.
+*/
+
+/**********************************************************************
+  Functions for generating test points
+**********************************************************************/
+
+/*
+TODO: think about what admissible means in this case.
+*/
+is_admissible()=
+{
+  TODO;
+}
+
+/**********************************************************************
+  Experiments
+**********************************************************************/
+
+/* Run one iteration of the secant method zoom in */
+example_secant() =
+{
+  TODO;
+}
+
+/**********************************************************************
+  Miscellaneous test functions
+**********************************************************************/
+
+test_quaternions()=
+{
+  local(q1, qi, qj, qk, q);
+
+  /* make some quaternions */
+  q1 = [1, 0, 0, 0];
+  qi = [0, 1, 0, 0];
+  qj = [0, 0, 1, 0];
+  qk = [0, 0, 0, 1];
+
+  /* try combination of these */
+  q = Qadd(Qc(2, q1), Qc(3, qj));
+  print(q);
+
+  /* products */
+  print(Qmult(q, q1));
+  print(Qmult(q, qi));
+  print(Qmult(q, qj));
+  print(Qmult(q, qk));
+  print(Qmult(q1, q));
+  print(Qmult(qi, q));
+  print(Qmult(qj, q));
+  print(Qmult(qk, q));
+
+  /* division should give inverse */
+  print(Qdiv(q1, q1));
+  print(Qdiv(qi, qi));
+  print(Qdiv(qj, qj));
+  print(Qdiv(qk, qk));
+  print(Qdiv(q, q));
+}
+
+test_mobius()=
+{
+  local(T, S, A, qj);
+
+  /* act on the k-free quaternion j */
+  qj = [0, 0, 1];
+
+  /* T shifts by 1 in x1-dimension */
+  T = [[1, 1], [0, 1]];
+  print(mobius(T, qj));
+
+  /* S reflects through unit sphere and across x2-axis */
+  S = [[0, -1], [1, 0]];
+  print(mobius(S, qj));
+  print(mobius(S, mobius(T, qj)));
+
+  /* A negates real and i components and adds i */
+  A = [[I, 1], [0, -I]];
+  print(mobius(A, qj));
+  print(mobius(A, [1, 1, -1]));
+}
+
+test_pullback()=
+{
+  local(zs);
+
+  /* random UHP points */
+  zs = [[0, 0, 1],
+        [7, 2, 1],
+        [-1.2, 1.5, 1],
+        [0, -2, 0.5],
+        [5.2, -2, 0.5],
+        [1, 1, 1]];
+
+  for(i = 1, length(zs),
+    print(zs[i]", "pullback_Ap(zs[i]));
+  );
+
+  /* some points on the boundary */
+  zs = [[0, 2, 0],
+        [7, 0.5, 0],
+        [-1.2, 1.5, 0],
+        [-2.7, 0.2, 0]];
+
+  print(" ");
+
+  for(i = 1, length(zs),
+    print(zs[i]", "pullback_Ap(zs[i]));
+  );
+}
