@@ -182,19 +182,49 @@ pullback_Ap(z_start)=
 }
 
 /*
-Map from flare domain to original domain
+Map from original domain to flare domain
 */
-hyp_to_true(rho, th, z1, z2, t) =
+true_to_hyp(z)=
 {
-  TODO;
+  local(P, Pz, rho, th, phi);
+
+  /* apply map to flare domain */
+  P = [[-2*sqrt(5), 5 + sqrt(5)],
+       [2*sqrt(5), 5 - sqrt(5)]];
+  Pz = mobius(P, z);
+
+  /* convert to spherical coordinates */
+  rho = sqrt(Pz[1]^2 + Pz[2]^2 + Pz[3]^2);
+  th = Pi/2;
+  if(Pz[1] == 0,
+    if(Pz[2] < 0, th = -Pi/2);
+    ,
+    if(Pz[1] < 0,
+      th = atan(Pz[2]/Pz[1]) + Pi,
+      th = atan(Pz[2]/Pz[1])
+    );
+  );
+  phi = acos(Pz[3]/rho);
+
+  [rho, th, phi];
 }
 
 /*
-Map from original domain to flare domain
+Map from flare domain to original domain
 */
-true_to_hyp(z, z1, z2, t)=
+hyp_to_true(rho, th, phi) =
 {
-  TODO;
+  local(z, B);
+
+  /* convert to Cartesian coordinates */
+  z = [rho*sin(phi)*cos(th),
+       rho*sin(phi)*sin(th),
+       rho*cos(phi)];
+
+  /* apply map to original domain */
+  B = [[5 - sqrt(5), -5 - sqrt(5)],
+       [-2*sqrt(5), -2*sqrt(5)]];
+  mobius(B, z);
 }
 
 /**********************************************************************
