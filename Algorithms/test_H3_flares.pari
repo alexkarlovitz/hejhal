@@ -10,11 +10,33 @@ functions are defined.
 **********************************************************************/
 
 /*
-TODO: think about what admissible means in this case.
+To be admissible, a point cannot be in the fundamental domain, and its pullback
+must have different azimuthal AND polar angles.
+TODO: think about what admissible means in this case. Maybe it isn't a concern
+      in 3-space.
 */
 is_admissible()=
 {
   TODO;
+}
+
+/*
+Generates N test points in the flare domain at angle [thet, phi] evenly spaced
+(in log space) from 1 to sqrt(kappa). Returns those points in original domain.
+*/
+test_points_ray(N, thet, phi)=
+{
+  /* here is the kappa we use for the Apollonian packing */
+  kappa = (3 + sqrt(5))/(3 - sqrt(5));
+  log_kappa = log(kappa);
+
+  /* now form the points! */
+  zs = vector(N);
+  for(j = 1, N,
+    zs[j] = hyp_to_true(exp(j/(2*N)*log_kappa), thet, phi);
+  );
+
+  return(zs);
 }
 
 /**********************************************************************
@@ -112,4 +134,36 @@ test_pullback()=
   for(i = 1, length(zs),
     print(zs[i]", "pullback_Ap(zs[i]));
   );
+}
+
+test_Whitt()=
+{
+  print(flare_Whitt(1, 1, 1, 1.5, exp(1)));
+  print(flare_Whitt(Pi/4, 2, 7, 1.72, exp(exp(1))));
+  a = getwalltime();
+  print(flare_Whitt(0.001, 21, 11, 1.1, exp(15)));
+  b = getwalltime();
+  print((b - a)/1000.0);
+  print(flare_Whitt(Pi/2 - 0.01, 2, 5, 1.001, exp(6.8)));
+  print(flare_Whitt(1.12, 2, 4, 1.98, exp(1.342)));
+}
+
+test_init_eqns()=
+{
+  local(A, circles, z1, z2, t, pre_kappa, zs, s, alpha0, rho0, M1, M2);
+
+  /* Some test z values */
+  zs = vector(3);
+  zs[1] = [0, 0, 1/10];
+  zs[2] = [1/2, 0, 1];
+  zs[3] = [0, -2, 1];
+
+  /* Parameters */
+  s = 0.4;
+  M = 3;
+
+  A = init_eqns(zs, s, M);
+  default(realprecision, 2);
+  print(A);
+  default(realprecision, 38);
 }

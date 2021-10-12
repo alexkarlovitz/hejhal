@@ -47,10 +47,13 @@ hypergeom(a,b,c,z)=
   Whittaker functions
 **********************************************************************/
 
-/* Whittaker function in the flare expansion */
-flare_Whitt(thet, phi, m, n, s, kappa)=
+/* Whittaker function in the flare expansion (see the Mathematica file
+   Misc/TransformedSpherical.nb for the computation) */
+flare_Whitt(phi, m, n, s, kappa)=
 {
-  TODO;
+  N = n*Pi/log(kappa);
+  cos(phi)^s*real(sin(phi)^(-m*I)*hypergeom(s/2 - m*I/2 - I*N,
+        s/2 - m*I/2 + I*N, s, cos(phi)^2));
 }
 
 /**********************************************************************
@@ -324,12 +327,73 @@ Sets up matrix of equations for list of test points z
     - if test point is in fundamental domain, error
     - else, compare expansion at pullback
   - lambda = s(2 - s)
-  - only use flare expansion if test point has argument <= alpha0
-  - M - number of coefficients to take in the flare expansion
+  - TODO: think about if admissibility is a concern
+  - M - number of coefficients to take in the flare expansion (we take all m, n
+        with |m|, |n| <= M)
 */
-init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
+init_eqns(zs, s, M)=
 {
-  TODO;
+  /* here is the kappa we use for the Apollonian packing */
+  kappa = (3 + sqrt(5))/(3 - sqrt(5));
+
+  /* every point in the vector z must give 1 equation
+     - rows of A correspond to equations
+     - cols correspond to coefficients (1 through M^2 for coeffs (0, 0) through
+       (M - 1, M - 1); the first M cols are for (0, 0), ..., (0, M - 1), the
+       second M cols are for (1, 0), ..., (1, M - 1), and so on) */
+  A = vector(length(zs), x, vector(M^2));
+
+  /* Loop through all test points */
+  for(j = 1, length(zs),
+    z = zs[j];
+    zpb = pullback_Ap(z);
+
+    /* Check whether point is in fundamental domain */
+    if(abs(zpb[1] - z[1]) + abs(zpb[2] - z[2]) + abs(zpb[3] - z[3]) < 10e-10,
+
+      /* Point is IN fundamental domain */
+      error("Point "z" is in fundamental domain.");
+    ,
+
+      /* Point is NOT in fundamental domain */
+
+      /* Get corresponding points in flare */
+      z_flare = true_to_hyp(z);
+      zpb_flare = true_to_hyp(zpb);
+
+      print("z: "z);
+      print("zpb: "zpb);
+      print("z_flare: "z_flare);
+      print("zpb_flare: "zpb_flare);
+
+      /* Check that points have different azimuthal AND polar angles */
+      if(abs(z_flare[2] - zpb_flare[2]) < 10e-10,
+        error("Point "z" and pullback have same azimuthal angle in flare domain.");
+      );
+      if(abs(z_flare[3] - zpb_flare[3]) < 10e-10,
+        error("Point "z" and pullback have same polar angle in flare domain.");
+      );
+
+      /* Add expansion at z_flare and subtract expansion at zpb_flare */
+      for(m = 0, M - 1,
+        for(n = 0, M - 1,
+          A[j][M*m + n + 1] = flare_Whitt(z_flare[3], m, n, s, kappa) *
+                              cos(2*m*z_flare[2]) *
+                              cos(2*Pi*n*log(z_flare[1])/log(kappa));
+          A[j][M*m + n + 1] -= flare_Whitt(zpb_flare[3], m, n, s, kappa) *
+                              cos(2*m*zpb_flare[2]) *
+                              cos(2*Pi*n*log(zpb_flare[1])/log(kappa));
+        );
+      );
+
+      print(A[j]);
+      print(" ");
+    );
+  );
+
+  /* return a matrix object */
+  B = matrix(length(zs), M^2, k, j, A[k][j]);
+  return(B);
 }
 
 /*
