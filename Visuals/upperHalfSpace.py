@@ -569,13 +569,16 @@ def get_flare_A() :
     # get walls in doubled group
     Ws = get_doubled_A()
 
-    # P is the Mobius transformation mapping to flare domain
-    P = np.array([ [-np.sqrt(5)/5, (5 + np.sqrt(5))/10], [np.sqrt(5)/5, (5 - np.sqrt(5))/10] ])
+    # need to shift the fundamental domain by T for it to end up in flare
+    T = np.array([ [1, 1], [0, 1] ])
 
-    # apply P to each wall
+    # P is the Mobius transformation mapping to flare domain
+    P = np.array([ [2*np.sqrt(5), 5 - np.sqrt(5)], [-2*np.sqrt(5), 5 + np.sqrt(5)] ])
+
+    # apply PT to each wall
     Ws_f = []
     for W in Ws :
-        Ws_f.append(mobius(P, W))
+        Ws_f.append(mobius(P, mobius(T, W)))
 
     return Ws_f
 
@@ -585,11 +588,11 @@ def plot_flare_A() :
     Ws = get_flare_A()
 
     # plot it!
-    ax = axis_3d((-7, 7), (-7, 7), (0, 13))
+    ax = axis_3d((-5, 5), (-5, 5), (0, 9))
     for W in Ws :
         W.draw(ax, 'b')
 
     plt.show()
 
 if __name__ == '__main__' :
-    get_flare_A()
+    plot_flare_A()
