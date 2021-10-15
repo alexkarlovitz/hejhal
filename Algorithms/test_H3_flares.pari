@@ -12,12 +12,41 @@ functions are defined.
 /*
 To be admissible, a point cannot be in the fundamental domain, and its pullback
 must have different azimuthal AND polar angles.
-TODO: think about what admissible means in this case. Maybe it isn't a concern
-      in 3-space.
+TODO: think about what admissible wrt expansion means in this case.
+      Maybe it isn't a concern in 3-space.
 */
-is_admissible()=
+is_admissible(zs)=
 {
-  TODO;
+  local(z, zpb, z_flare, zpb_flare);
+
+  /* loop through points */
+  for(j = 1, length(zs),
+    z = zs[j];
+    zpb = pullback_Ap(z);
+
+    /* Check whether point is in fundamental domain */
+    if(abs(zpb[1] - z[1]) + abs(zpb[2] - z[2]) + abs(zpb[3] - z[3]) < 10e-10,
+
+      /* Point is IN fundamental domain */
+      error("Point "z" is in fundamental domain.");
+    ,
+
+      /* Point is NOT in fundamental domain */
+
+      /* Get corresponding points in flare */
+      z_flare = true_to_hyp(z);
+      zpb_flare = true_to_hyp(zpb);
+
+      /* Check that points have different azimuthal AND polar angles */
+      if(abs(z_flare[2] - zpb_flare[2]) < 10e-10,
+        error("Point "z" and pullback have same azimuthal angle in flare domain.");
+      );
+      if(abs(z_flare[3] - zpb_flare[3]) < 10e-10,
+        error("Point "z" and pullback have same polar angle in flare domain.");
+      );
+    );
+  );
+  print("Admissibility check passed!");
 }
 
 /*
@@ -26,6 +55,8 @@ Generates N test points in the flare domain at angle [thet, phi] evenly spaced
 */
 test_points_ray(N, thet, phi)=
 {
+  local(kappa, log_kappa, zs);
+
   /* here is the kappa we use for the Apollonian packing */
   kappa = (3 + sqrt(5))/(3 - sqrt(5));
   log_kappa = log(kappa);
@@ -46,7 +77,28 @@ test_points_ray(N, thet, phi)=
 /* Run one iteration of the secant method zoom in */
 example_secant() =
 {
-  TODO;
+  local(thet, N, s, delta, a, b, elapsed);
+
+  /*default(realprecision, 60);*/
+
+  /* Parameters */
+  N = 105; M = 10;
+
+  thet1 = -3*Pi/4; thet2 = -3*Pi/4 + 0.01;
+  phi1 = Pi/4; phi2 = Pi/4 + 0.01;
+
+  s = 1.31; delta = 3e-3;
+
+  /* form points */
+  zs1 = test_points_ray(N, thet1, phi1);
+  zs2 = test_points_ray(N, thet2, phi2);
+
+  a = getwalltime();
+  s_guess = secant_method(zs1, zs2, M, s, delta);
+  b = getwalltime();
+  elapsed = (b - a)/1000.0;
+  print("Time: "elapsed" seconds");
+  print("Final guess: s = "s_guess);
 }
 
 /**********************************************************************
@@ -148,6 +200,26 @@ test_Whitt()=
   print(flare_Whitt(1.12, 2, 4, 1.98, exp(1.342)));
 }
 
+test_flare_map()=
+{
+  local(zs);
+
+  /* random UHP points */
+  zs = [[0, 0, 1],
+        [7, 2, 1],
+        [-1.2, 1.5, 1],
+        [0, -2, 0.5],
+        [5.2, -2, 0.5],
+        [0, 2, 1]];
+
+  for(i = 1, length(zs),
+    z = zs[i];
+    z_flare = true_to_hyp(z);
+    print(z", "z_flare", "hyp_to_true(z_flare[1], z_flare[2], z_flare[3]));
+    print(" ");
+  );
+}
+
 test_init_eqns()=
 {
   local(A, circles, z1, z2, t, pre_kappa, zs, s, alpha0, rho0, M1, M2);
@@ -164,6 +236,26 @@ test_init_eqns()=
 
   A = init_eqns(zs, s, M);
   default(realprecision, 2);
-  print(A);
+  for(i = 1, length(zs),
+    print(A[i, 1..M^2]);
+  );
   default(realprecision, 38);
+}
+
+test_test_points()=
+{
+  local(zs1, zs2, N, thet1, thet2, phi1, phi2);
+
+  /* choose parameters */
+  N = 15;
+  thet1 = -3*Pi/4; thet2 = -3*Pi/4 + 0.01;
+  phi1 = Pi/4; phi2 = Pi/4 + 0.01;
+
+  /* form points */
+  zs1 = test_points_ray(N, thet1, phi1);
+  zs2 = test_points_ray(N, thet2, phi2);
+
+  /* check admissibility */
+  is_admissible(zs1);
+  is_admissible(zs2);
 }

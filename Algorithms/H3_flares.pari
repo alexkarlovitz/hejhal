@@ -192,9 +192,11 @@ true_to_hyp(z)=
   local(P, Pz, rho, th, phi);
 
   /* apply map to flare domain */
-  P = [[-2*sqrt(5), 5 + sqrt(5)],
-       [2*sqrt(5), 5 - sqrt(5)]];
-  Pz = mobius(P, z);
+  P = [[2*sqrt(5), 5 - sqrt(5)],
+       [-2*sqrt(5), 5 + sqrt(5)]];
+  T = [[1, 1],
+       [0, 1]];
+  Pz = mobius(P, mobius(T, z));
 
   /* convert to spherical coordinates */
   rho = sqrt(Pz[1]^2 + Pz[2]^2 + Pz[3]^2);
@@ -225,9 +227,11 @@ hyp_to_true(rho, th, phi) =
        rho*cos(phi)];
 
   /* apply map to original domain */
-  B = [[5 - sqrt(5), -5 - sqrt(5)],
+  B = [[-5 - sqrt(5), 5 - sqrt(5)],
        [-2*sqrt(5), -2*sqrt(5)]];
-  mobius(B, z);
+  Tinv = [[1, -1],
+          [0, 1]];
+  mobius(Tinv, mobius(B, z));
 }
 
 /**********************************************************************
@@ -333,6 +337,8 @@ Sets up matrix of equations for list of test points z
 */
 init_eqns(zs, s, M)=
 {
+  local(kappa, A, z, zpb, z_flare, zpb_flare, B);
+
   /* here is the kappa we use for the Apollonian packing */
   kappa = (3 + sqrt(5))/(3 - sqrt(5));
 
@@ -361,11 +367,6 @@ init_eqns(zs, s, M)=
       z_flare = true_to_hyp(z);
       zpb_flare = true_to_hyp(zpb);
 
-      print("z: "z);
-      print("zpb: "zpb);
-      print("z_flare: "z_flare);
-      print("zpb_flare: "zpb_flare);
-
       /* Check that points have different azimuthal AND polar angles */
       if(abs(z_flare[2] - zpb_flare[2]) < 10e-10,
         error("Point "z" and pullback have same azimuthal angle in flare domain.");
@@ -385,9 +386,6 @@ init_eqns(zs, s, M)=
                               cos(2*Pi*n*log(zpb_flare[1])/log(kappa));
         );
       );
-
-      print(A[j]);
-      print(" ");
     );
   );
 
@@ -400,12 +398,23 @@ init_eqns(zs, s, M)=
 Given a set of test points zs, set up and solve linear system for the Fourier
 coefficients.
   - s - assumed eigenvalue is lambda = s(2 - s)
-  - only use flare expansion if test point has argument <= alpha0
-  - M - number of coefficients to take in the flare expansion
+  - M - number of coefficients to take in the flare expansion (we take all m, n
+        with |m|, |n| <= M)
 */
-get_coefficients(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
+get_coefficients(zs, s, M)=
 {
-  TODO;
+  local(k, A, AA, B, x);
+
+  /* Set up matrix of equations */
+  A = init_eqns(zs, s, M);
+
+  /* Use Strombergsson's method for least squares */
+  AA = mattranspose(A)*A;
+  B = vector(M^2-1, k, vector(M^2, j, AA[k+1, j])); /* TODO: double check this! */
+  x = solve_sys(B, 1);
+
+  /* return Fourier coefficient vector */
+  return(x);
 }
 
 /**********************************************************************
@@ -416,10 +425,49 @@ get_coefficients(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
 Runs a "secant method version" of Hejhal's algorithm (learned from
 Strombergsson)
   - s - assumed eigenvalue is lambda = s(2 - s)
-  - only use flare expansion if test point has argument <= alpha0
-  - M - number of coefficients to take in the flare expansion
+  - M - number of coefficients to take in the flare expansion (we take all m, n
+        with |m|, |n| <= M)
 */
-secant_method(zs1, zs2, alpha0, M, circles, z1, z2, t, pre_kappa, s, delta)=
+secant_method(zs1, zs2, M, s, delta)=
 {
-  TODO;
+  local(s_new, c1, c2, j, s_max, s_min, s_mid, delta_new);
+
+  s_new = vector(3); /* REMEMBER TO CHANGE THIS IF YOU CHANGE c1 AND c2 */
+
+  while(1,
+
+    /* Get differences of some Fourier coefficients for s */
+    x1 = get_coefficients(zs1, s, M);
+    x2 = get_coefficients(zs2, s, M);
+    c1 = [x1[2] - x2[2], x1[3] - x2[3], x1[4] - x2[4]];
+
+    /* Now do the same for s + delta */
+    x1 = get_coefficients(zs1, s + delta, M);
+    x2 = get_coefficients(zs2, s + delta, M);
+    c2 = [x1[2] - x2[2], x1[3] - x2[3], x1[4] - x2[4]];
+
+    /* Run one iteration of secant method on each difference */
+    s_max = 0.0; s_min = 100.0;
+    for(j = 1, length(c1),
+      s_new[j] = (c1[j]*(s+delta) - c2[j]*s)/(c1[j] - c2[j]);
+      s_max = max(s_max, s_new[j]);
+      s_min = min(s_min, s_new[j]);
+    );
+    s_mid = 0.5*(s_max + s_min);
+
+    /* Uncomment if you want to print current predictions */
+    print("--------------------------------------");
+    print("Current predictions:");
+    for(j = 1, length(c1), print(s_new[j]));
+    print(" ");
+
+    /* Ad hoc check if it's worth continuing */
+    delta_new = (s_max - s_min)*5;
+    if(delta_new > 0.5*delta,
+      print("Approximate error: "s_max-s_min);
+      return(s_mid);
+    );
+    delta = delta_new;
+    s = s_mid-0.5*delta;
+  );
 }
