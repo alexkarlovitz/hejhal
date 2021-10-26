@@ -70,6 +70,28 @@ test_points_ray(N, thet, phi)=
   return(zs);
 }
 
+/*
+Generates N test points in the flare domain at angle [thet, phi] evenly spaced
+(in log space) from 1 + kappa^((j + sh)/(2*(N + sh))) to sqrt(kappa).
+Returns those points in original domain.
+*/
+test_points_shifted(N, thet, phi, sh)=
+{
+  local(kappa, log_kappa, zs);
+
+  /* here is the kappa we use for the Apollonian packing */
+  kappa = (3 + sqrt(5))/(3 - sqrt(5));
+  log_kappa = log(kappa);
+
+  /* now form the points! */
+  zs = vector(N);
+  for(j = 1, N,
+    zs[j] = hyp_to_true(exp((j + sh)/(2*(N + sh))*log_kappa), thet, phi);
+  );
+
+  return(zs);
+}
+
 /**********************************************************************
   Experiments
 **********************************************************************/
@@ -77,21 +99,23 @@ test_points_ray(N, thet, phi)=
 /* Run one iteration of the secant method zoom in */
 example_secant() =
 {
-  local(thet, N, s, delta, a, b, elapsed);
+  local(thet1, thet2, phi1, phi2, M, N, s, delta, a, b, elapsed);
 
   /*default(realprecision, 60);*/
 
   /* Parameters */
-  N = 105; M = 10;
+  N = 405; M = 20;
 
-  thet1 = -3*Pi/4; thet2 = -3*Pi/4 + 0.01;
-  phi1 = Pi/4; phi2 = Pi/4 + 0.01;
+  thet1 = 2.95256; thet2 = thet1 - 0.01;
+  phi1 = Pi/2 - 0.01; phi2 = phi1 - 0.01;
+
+  sh = 20;
 
   s = 1.31; delta = 3e-3;
 
   /* form points */
-  zs1 = test_points_ray(N, thet1, phi1);
-  zs2 = test_points_ray(N, thet2, phi2);
+  zs1 = test_points_shifted(N, thet1, phi1, sh);
+  zs2 = test_points_shifted(N, thet2, phi2, sh);
 
   a = getwalltime();
   s_guess = secant_method(zs1, zs2, M, s, delta);
@@ -220,9 +244,22 @@ test_flare_map()=
   );
 }
 
+test_pairs()=
+{
+  local(Ms, pairs, i);
+
+  Ms = [0, 4, 7, 13];
+
+  for(i = 1, length(Ms),
+    print(Ms[i]);
+    print(get_pairs(Ms[i]));
+    print(" ");
+  );
+}
+
 test_init_eqns()=
 {
-  local(A, circles, z1, z2, t, pre_kappa, zs, s, alpha0, rho0, M1, M2);
+  local(zs, s, M, A);
 
   /* Some test z values */
   zs = vector(3);
@@ -231,13 +268,13 @@ test_init_eqns()=
   zs[3] = [0, -2, 1];
 
   /* Parameters */
-  s = 0.4;
+  s = 0.4;;
   M = 3;
 
   A = init_eqns(zs, s, M);
   default(realprecision, 2);
   for(i = 1, length(zs),
-    print(A[i, 1..M^2]);
+    print(A[i,]);
   );
   default(realprecision, 38);
 }
@@ -258,4 +295,63 @@ test_test_points()=
   /* check admissibility */
   is_admissible(zs1);
   is_admissible(zs2);
+}
+
+test_shifted_points()=
+{
+  local(thet1, thet2, phi1, phi2, N);
+
+  /* Parameters */
+  N = 105;
+
+  thet1 = 2.95256; thet2 = thet1 - 0.01;
+  phi1 = Pi/2 - 0.01; phi2 = phi1 - 0.01;
+
+  sh = 5;
+
+  /* form points */
+  zs1 = test_points_shifted(N, thet1, phi1, sh);
+  zs2 = test_points_shifted(N, thet2, phi2, sh);
+
+  /* check admissibility */
+  is_admissible(zs1);
+  is_admissible(zs2);
+}
+
+test_true_s()=
+{
+  local(N, M, thet1, thet2, phi1, phi2, zs1, zs2, s, x1, x2);
+
+  /* Parameters */
+  /* N = 10100; M = 100; */
+  N = 5200; M = 100;          /* Need N >= (M + 2)(M + 1)/2 */
+
+  thet1 = 2.95256; thet2 = thet1 - 0.01;
+  phi1 = Pi/2 - 0.01; phi2 = phi1 - 0.01;
+
+  sh = 25;
+
+  /* form points */
+  zs1 = test_points_shifted(N, thet1, phi1, sh);
+  zs2 = test_points_shifted(N, thet2, phi2, sh);
+
+  /* true s to 6 digits (from McMullen) */
+  s = 1.305688;
+  s = 1.305686728049877184645986206851;
+
+  a = getwalltime();
+  x1 = get_coefficients(zs1, s, M);
+  b = getwalltime();
+  elapsed = (b - a)/1000.0;
+  print("Time: "elapsed" seconds");
+  print("x1 = "precision(x1, 1));
+  print(" ");
+  a = getwalltime();
+  x2 = get_coefficients(zs2, s, M);
+  b = getwalltime();
+  elapsed = (b - a)/1000.0;
+  print("Time: "elapsed" seconds");
+  print("x2 = "precision(x2, 1));
+  print(" ");
+  print("x1 - x2 = "precision(x1-x2, 1));
 }

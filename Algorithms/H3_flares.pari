@@ -326,6 +326,30 @@ solve_sys(AA, cfree)=
 **********************************************************************/
 
 /*
+Gets all pairs (m, n) with 0 <= m, n and m + n <= M. Order ascending by sum
+then m.
+*/
+get_pairs(M)=
+{
+  local(pairs, cntr, S, m);
+
+  /* number of pairs is (M + 2)(M + 1)/2 */
+  pairs = vector((M + 2)*(M + 1)/2, x, vector(2));
+
+  /* form all pairs */
+  cntr = 1;
+  for(S = 0, M,
+    for(m = 0, S,
+      pairs[cntr][1] = m;
+      pairs[cntr][2] = S - m;
+      cntr += 1;
+    );
+  );
+
+  return(pairs);
+}
+
+/*
 Sets up matrix of equations for list of test points z
   - use only the flare expansion
     - if test point is in fundamental domain, error
@@ -333,21 +357,36 @@ Sets up matrix of equations for list of test points z
   - lambda = s(2 - s)
   - TODO: think about if admissibility is a concern
   - M - number of coefficients to take in the flare expansion (we take all m, n
-        with |m|, |n| <= M)
+        with 0 <= m, n and m + n <= M)
 */
 init_eqns(zs, s, M)=
 {
-  local(kappa, A, z, zpb, z_flare, zpb_flare, B);
+  local(kappa, pairs, P, A, z, zpb, z_flare, zpb_flare, B, Ws, j, m, n, p);
 
   /* here is the kappa we use for the Apollonian packing */
   kappa = (3 + sqrt(5))/(3 - sqrt(5));
 
+  /* get pairs (m, n) with sum up to M */
+  pairs = get_pairs(M);
+  P = length(pairs);
+
+  /*
+  We assume all test points are taken at the same polar angle, so we only need
+  to compute the Whittaker function at this angle once for each pair
+  */
+  z_flare = true_to_hyp(zs[1]);
+  Ws = vector(P);
+  for(p = 1, P,
+    m = pairs[p][1];
+    n = pairs[p][2];
+    Ws[p] = flare_Whitt(z_flare[3], m, n, s, kappa);
+  );
+
   /* every point in the vector z must give 1 equation
      - rows of A correspond to equations
-     - cols correspond to coefficients (1 through M^2 for coeffs (0, 0) through
-       (M - 1, M - 1); the first M cols are for (0, 0), ..., (0, M - 1), the
-       second M cols are for (1, 0), ..., (1, M - 1), and so on) */
-  A = vector(length(zs), x, vector(M^2));
+     - cols correspond to coefficients (ordering determined by the function
+       get_pairs) */
+  A = vector(length(zs), x, vector(P));
 
   /* Loop through all test points */
   for(j = 1, length(zs),
@@ -376,21 +415,21 @@ init_eqns(zs, s, M)=
       );
 
       /* Add expansion at z_flare and subtract expansion at zpb_flare */
-      for(m = 0, M - 1,
-        for(n = 0, M - 1,
-          A[j][M*m + n + 1] = flare_Whitt(z_flare[3], m, n, s, kappa) *
-                              cos(2*m*z_flare[2]) *
-                              cos(2*Pi*n*log(z_flare[1])/log(kappa));
-          A[j][M*m + n + 1] -= flare_Whitt(zpb_flare[3], m, n, s, kappa) *
-                              cos(2*m*zpb_flare[2]) *
-                              cos(2*Pi*n*log(zpb_flare[1])/log(kappa));
-        );
+      for(p = 1, P,
+        m = pairs[p][1];
+        n = pairs[p][2];
+        A[j][p] = Ws[p] *
+                  cos(m*z_flare[2]) *
+                  cos(2*Pi*n*log(z_flare[1])/log(kappa));
+        A[j][p] -= flare_Whitt(zpb_flare[3], m, n, s, kappa) *
+                   cos(m*zpb_flare[2]) *
+                   cos(2*Pi*n*log(zpb_flare[1])/log(kappa));
       );
     );
   );
 
   /* return a matrix object */
-  B = matrix(length(zs), M^2, k, j, A[k][j]);
+  B = matrix(length(zs), P, k, j, A[k][j]);
   return(B);
 }
 
@@ -410,7 +449,8 @@ get_coefficients(zs, s, M)=
 
   /* Use Strombergsson's method for least squares */
   AA = mattranspose(A)*A;
-  B = vector(M^2-1, k, vector(M^2, j, AA[k+1, j])); /* TODO: double check this! */
+  P = length(A[1,]);
+  B = vector(P-1, k, vector(P, j, AA[k+1, j])); /* TODO: double check this! */
   x = solve_sys(B, 1);
 
   /* return Fourier coefficient vector */
