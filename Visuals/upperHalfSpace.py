@@ -260,7 +260,7 @@ def mobius(A, x) :
         return l
 
     else :
-        raise ValueError('Function "mobius" expects second input to be a GeodesicWall object (or a list of such).')
+        raise ValueError('Function "mobius" expects second input to be a GeodesicWall object (or a list of such). Received: ' + str(x))
 
 # given invertible 2x2 matrix A, applies mobius transformation A to a list of
 # geodesics
@@ -361,6 +361,25 @@ def plot_walls(Ws, b=None, x_lims=(-1, 1), y_lims=(-1, 1), z_lims=(-1, 1)) :
         W.draw(ax)
 
     plt.show()
+
+# plot list of walls on a given axis
+def plot_Ws(ax, Ws, color='k') :
+    for W in Ws :
+        W.draw(ax, color)
+
+# plot list of Quaternions
+def plot_points(ax, qs, marker='o', color='k') :
+    # make lists of x1, x2, and y-components
+    xs = np.zeros(len(qs))
+    ys = np.zeros(len(qs))
+    zs = np.zeros(len(qs))
+    for i in range(len(qs)) :
+        q = qs[i]
+        xs[i] = q.x1
+        ys[i] = q.x2
+        zs[i] = q.y
+
+    ax.scatter(xs, ys, zs, marker=marker, color=color)
 
 ############
 # Examples #
@@ -593,6 +612,119 @@ def plot_flare_A() :
         W.draw(ax, 'b')
 
     plt.show()
+
+##################
+# Pullback Tests #
+##################
+
+# pullback algorithm for the double Apollonian group (also keeps track of word
+# in matrices used to map to pullback)
+def pullback_A(z) :
+    # here are the matrices involved in the pullback algorithm
+    T = np.array([ [1, 1],
+                   [0, 1]])
+    Tinv = np.array([ [1, -1],
+                      [0, 1]])
+    A = np.array([ [1j, 1],
+                   [0, -1j]])
+    S = np.array([ [0, -1],
+                   [1, 0]])
+
+    # keep track of word in matrices
+    word = ''
+
+    # first, need to apply A if x2 is less than 1/2
+    if z.x2 < 1/2 :
+        z = mobiusTransform(A, z)
+        word = 'A'
+
+    # now repeat strings of T's then S until done
+    while 1 :
+        # use T's to get x1 between -1/2 and 1/2
+        numTs = 0
+        while z.x1 < -1/2 :
+            z = mobiusTransform(T, z)
+            numTs += 1
+        while z.x1 >= 1/2 :
+            z = mobiusTransform(Tinv, z)
+            numTs -= 1
+
+        # add the T-string to word
+        if numTs < 0 :
+            word = 'T^(' + str(numTs) + ')' + word
+        elif numTs > 0 :
+            word = 'T^' + str(numTs) + word
+
+        # if |z| >= 1, done; otherwise, apply S
+        if z.norm() >= 1 :
+            return z, word
+        else :
+            z = mobiusTransform(S, z)
+            word = 'S' + word
+
+# map from original space to flare domain
+def to_flare(z) :
+    # P is the Mobius transformation mapping to flare domain
+    P = np.array([ [2*np.sqrt(5), 5 - np.sqrt(5)], [-2*np.sqrt(5), 5 + np.sqrt(5)] ])
+
+    # need to shift point by T for it to end up in flare
+    return mobiusTransform(P, Quaternion(z.x1 + 1, z.x2, z.y))
+
+# map from flare domain to original space
+def to_orig(z) :
+    # B is the Mobius transformation mapping back from flare domain
+    B = np.array([ [-5 - np.sqrt(5), 5 - np.sqrt(5)], [-2*np.sqrt(5), -2*np.sqrt(5)] ])
+
+    # shift back by T^(-1) at end
+    z_temp = mobiusTransform(B, z)
+    return Quaternion(z_temp.x1 - 1, z_temp.x2, z_temp.y)
+
+# playing with test points and pullbacks
+def test_test_points(N, thet, phi) :
+    # scaling parameter for Apollonian packing
+    kappa = (3 + np.sqrt(5))/(3 - np.sqrt(5));
+
+    # form test points in flare domain
+    rhos = np.exp(np.arange(1, N + 1)/(2*N)*np.log(kappa))
+    z_flares = []
+    for rho in rhos :
+        z_flares.append(Quaternion(rho*np.sin(phi)*np.cos(thet),
+                                   rho*np.sin(phi)*np.sin(thet),
+                                   rho*np.cos(phi)))
+
+    # get points in original domain plus pullbacks (and look at word for each
+    # pullback)
+    zs = []
+    z_pbs = []
+    for z in z_flares :
+        z_orig = to_orig(z)
+        z_pb, word = pullback_A(z_orig)
+        print(word)
+
+        zs.append(z_orig)
+        z_pbs.append(z_pb)
+
+    # plot some points
+    # Ws = get_doubled_A()
+    # ax = axis_3d((-3, 3), (-3, 3), (0, 5))
+    # for W in Ws :
+    #     W.draw(ax, 'b')
+    # plot_points(ax, zs, 'o', color='k')
+    # plot_points(ax, z_pbs, 'o', color='g')
+    #
+    # plt.show()
+
+# create list of thetas and phis to play with
+def many_test_points() :
+    N = 15
+    thets = np.linspace(0, 2*np.pi - 0.05, 20)
+    phis = np.linspace(np.pi/4, np.pi/2 - 0.01, 3)
+
+    for thet in thets :
+        for phi in phis :
+            print('thet =', thet, 'phi =', phi)
+            test_test_points(N, thet, phi)
+            print('')
 
 if __name__ == '__main__' :
     plot_flare_A()
