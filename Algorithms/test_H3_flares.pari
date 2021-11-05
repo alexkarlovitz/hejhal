@@ -224,6 +224,23 @@ test_Whitt()=
   print(flare_Whitt(1.12, 2, 4, 1.98, exp(1.342)));
 }
 
+test_Whitt_eff()=
+{
+  print("Computing with old method...");
+  a = getwalltime();
+  print(flare_Whitt(Pi/2 - 0.001, 21, 11, 1.1, exp(15)));
+  b = getwalltime();
+  print((b - a)/1000.0);
+
+  print("");
+
+  print("Computing with new method...");
+  a = getwalltime();
+  print(flare_Whitt_eff(Pi/2 - 0.001, 21, 11, 1.1, exp(15)));
+  b = getwalltime();
+  print((b - a)/1000.0);
+}
+
 test_flare_map()=
 {
   local(zs);
@@ -324,12 +341,12 @@ test_true_s()=
 
   /* Parameters */
   /* N = 10100; M = 100; */
-  N = 5200; M = 100;          /* Need N >= (M + 2)(M + 1)/2 */
+  N = 1350; M = 50;          /* Need N >= (M + 2)(M + 1)/2 */
 
   thet1 = 2.95256; thet2 = thet1 - 0.01;
   phi1 = Pi/2 - 0.01; phi2 = phi1 - 0.01;
 
-  sh = 25;
+  sh = 100;
 
   /* form points */
   zs1 = test_points_shifted(N, thet1, phi1, sh);

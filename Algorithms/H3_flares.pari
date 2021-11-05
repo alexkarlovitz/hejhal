@@ -51,9 +51,55 @@ hypergeom(a,b,c,z)=
    Misc/TransformedSpherical.nb for the computation) */
 flare_Whitt(phi, m, n, s, kappa)=
 {
+  local(N);
+
   N = n*Pi/log(kappa);
-  cos(phi)^s*real(sin(phi)^(-m*I)*hypergeom(s/2 - m*I/2 - I*N,
-        s/2 - m*I/2 + I*N, s, cos(phi)^2));
+  /*cos(phi)^s*real(sin(phi)^(-m*I)*hypergeom(s/2 - m*I/2 - I*N,
+        s/2 - m*I/2 + I*N, s, cos(phi)^2));*/
+  cos(phi)^s*sin(phi)^(-m*I)*hypergeom(s/2 - m*I/2 - I*N,
+        s/2 - m*I/2 + I*N, s, cos(phi)^2);
+}
+
+/*
+The real part of a sum is the sum of the real parts. Using this plus the fact
+that our expression for the Whittaker function is real-valued (we think), we
+should be able to compute the fuction more efficiently by only looking at
+real parts.
+*/
+flare_Whitt_eff(phi, m, n, s, kappa)=
+{
+  local(N, a, b, c, z, sm, prec, re, part_sum, p, pp, p_real, r, k);
+
+  /* get hypergeom function arguments from inputs */
+  N = n*Pi/log(kappa);
+  a = s/2 - m*I/2 - I*N;
+  b = s/2 - m*I/2 + I*N;
+  c = s;
+  z = cos(phi)^2;
+  sm = sin(phi)^(-m*I);
+
+  /* re: Desired relative error bound for hypergeom function.
+     Let's make it correspond to current precision. */
+  prec = default(realprecision);
+  re = 10^(-prec);
+
+  /* keep summing (just real parts!) until size of piece added has decreased
+     at least 10 times and is below relative error bound */
+  part_sum=real(sm);
+  p=1;
+  r=0;
+  k=0;
+  p_real = 0;
+  while(1,
+    pp=(a+k)*(b+k)/((c+k)*(1+k))*z;
+    p=p*pp;
+    if(abs(real(p)) < abs(p_real), r++, r = 0);
+    p_real = real(p);
+    part_sum+=p_real;
+    if ((r>=10 && abs(p_real)<re*abs(part_sum)), return(cos(phi)^s*part_sum););
+    k++;
+  );
+  cos(phi)^s*part_sum;
 }
 
 /**********************************************************************
