@@ -63,7 +63,7 @@ flare_Whitt(phi, m, n, s, kappa)=
 /*
 The real part of a sum is the sum of the real parts. Using this plus the fact
 that our expression for the Whittaker function is real-valued (we think), we
-should be able to compute the fuction more efficiently by only looking at
+should be able to compute the function more efficiently by only looking at
 real parts.
 */
 flare_Whitt_eff(phi, m, n, s, kappa)=
@@ -86,7 +86,7 @@ flare_Whitt_eff(phi, m, n, s, kappa)=
   /* keep summing (just real parts!) until size of piece added has decreased
      at least 10 times and is below relative error bound */
   part_sum=real(sm);
-  p=1;
+  p=sm;
   r=0;
   k=0;
   p_real = 0;

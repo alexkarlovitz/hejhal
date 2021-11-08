@@ -228,7 +228,7 @@ test_Whitt_eff()=
 {
   print("Computing with old method...");
   a = getwalltime();
-  print(flare_Whitt(Pi/2 - 0.001, 21, 11, 1.1, exp(15)));
+  print(flare_Whitt(0.001, 21, 11, 1.1, exp(15)));
   b = getwalltime();
   print((b - a)/1000.0);
 
@@ -236,7 +236,7 @@ test_Whitt_eff()=
 
   print("Computing with new method...");
   a = getwalltime();
-  print(flare_Whitt_eff(Pi/2 - 0.001, 21, 11, 1.1, exp(15)));
+  print(flare_Whitt_eff(0.001, 21, 11, 1.1, exp(15)));
   b = getwalltime();
   print((b - a)/1000.0);
 }
