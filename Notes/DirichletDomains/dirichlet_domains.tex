@@ -52,15 +52,15 @@ def find_equidistant_geodesic(z1, z2) :
         G = line((x1, 0), (x1, y1))
     else :
         # G is circle of center c and radius r
-        c = (|z1|^2 - |z2|^2)/2/(x2 - x1)
-        r = sqrt( (x1 - c)^2 - y1^2 )
+        c = (|z2|^2 - |z1|^2)/2/(x2 - x1)
+        r = sqrt( (x1 - c)^2 + y1^2 )
         G = circle(c, r)
         
     # Step 2: get point z0 on G equidistant from z1 and z2 (in hyperbolic distance)
     
     eqn1 = |z - z1|^2/4/imag(z)/y1 == |z - z2|^2/4/imag(z)/y2
     if isCircle(G) :
-        eqn2 = (z - c)^2 == r^2
+        eqn2 = |z - c|^2 == r^2
     else :
         eqn2 = real(z) == x1
     z0 = solve((eqn1, eqn2), unknown=z)
@@ -69,7 +69,7 @@ def find_equidistant_geodesic(z1, z2) :
     
     x0, y0 = real(z0), imag(z0)
     if isCircle(G) :
-        # first get slope of g at z0
+        # first get slope of G at z0
         s = (c - x0)/y0
         
         # if the slope is 0, return vertical line through z0
