@@ -139,7 +139,7 @@ def draw_all_geodesics() :
 
         # label x-axis with which matrix this is
         ticks.append(float(sp.N(g[0])))
-        labels.append('$M_' + str(i) + '$')
+        labels.append('$M_{' + str(i) + '}$')
 
     plt.xticks(ticks, labels)
 
