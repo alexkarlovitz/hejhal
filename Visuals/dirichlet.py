@@ -122,6 +122,7 @@ def get_all_geodesics() :
 
     return gs
 
+# draw every geodesic obtained from get_all_geodesics
 def draw_all_geodesics() :
     # get all geodesics
     gs = get_all_geodesics()
@@ -144,6 +145,20 @@ def draw_all_geodesics() :
     plt.xticks(ticks, labels)
 
     plt.show()
+
+# get only the matrices which contribute to fundamental in Kontorovich's
+# example
+def get_fd_matrices() :
+    # 7, 11, 3, 5, 0, 6, 4, 8
+    L = [(0, 0, 0, 1),
+         (-3, 0, -2, -2),
+         (-3, 0, 2, 2),
+         (-2, 0, -1, 0),
+         (-2, 0, 1, 0),
+         (-2, 0, -2, -3),
+         (-2, 0, 2, 3),
+         (0, 0, 1, 2)]
+
 
 #########
 # Tests #
