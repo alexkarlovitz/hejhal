@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.8.16)  8 NOV 2021 15:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.8.16)  2 DEC 2021 15:31
 entering extended mode
 **./dirichlet_domains.tex
 (dirichlet_domains.tex
@@ -718,8 +718,27 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 [1
 
-{C:/Users/alexk/AppData/Local/MiKTeX/pdftex/config/pdftex.map}] [2] [3]
-(dirichlet_domains.aux)
+{C:/Users/alexk/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
+Underfull \hbox (badness 10000) in paragraph at lines 93--96
+
+ []
+
+<cocompact_fd.png, id=23, 980.16188pt x 421.575pt>
+File: cocompact_fd.png Graphic file (type png)
+<use cocompact_fd.png>
+Package pdftex.def Info: cocompact_fd.png  used on input line 100.
+(pdftex.def)             Requested size: 469.75502pt x 202.04492pt.
+
+Overfull \hbox (38.10612pt too wide) detected at line 140
+[]
+ []
+
+[2 <./cocompact_fd.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 162--166
+
+ []
+
+[3] [4] (dirichlet_domains.aux)
 Package rerunfilecheck Info: File `dirichlet_domains.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 Package logreq Info: Writing requests to 'dirichlet_domains.run.xml'.
@@ -727,28 +746,31 @@ Package logreq Info: Writing requests to 'dirichlet_domains.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 17325 strings out of 478868
- 293950 string characters out of 2848809
- 823381 words of memory out of 3000000
- 35038 multiletter control sequences out of 15000+600000
- 410846 words of font info for 57 fonts, out of 8000000 for 9000
+ 17340 strings out of 478868
+ 294157 string characters out of 2848809
+ 823456 words of memory out of 3000000
+ 35047 multiletter control sequences out of 15000+600000
+ 411192 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,6n,66p,1854b,1142s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,14n,66p,1854b,1146s stack positions out of 5000i,500n,10000p,200000b,80000s
 <C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
 cmbx12.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmmi10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/p
-ublic/amsfonts/cm/cmr10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/alexk/AppData/Local/Programs/MiKT
-eX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/alexk/AppData/Local/Progr
-ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/alexk/AppData/Loca
-l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/alexk/App
-Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/a
-lexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C
-:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols
-/msbm10.pfb>
-Output written on dirichlet_domains.pdf (3 pages, 117273 bytes).
+fonts/cm/cmex10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmmi10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/font
+s/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/alexk/AppData/Local/Programs/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/alexk/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/alexk/AppData/Lo
+cal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/alexk/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/a
+lexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C
+:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy
+7.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts
+/cm/cmti10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmtt10.pfb><C:/Users/alexk/AppData/Local/Programs/MiKTeX/fonts/typ
+e1/public/amsfonts/symbols/msbm10.pfb>
+Output written on dirichlet_domains.pdf (4 pages, 197339 bytes).
 PDF statistics:
- 75 PDF objects out of 1000 (max. 8388607)
- 7 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 102 PDF objects out of 1000 (max. 8388607)
+ 10 named destinations out of 1000 (max. 500000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
