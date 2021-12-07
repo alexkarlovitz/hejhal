@@ -374,3 +374,30 @@ def draw_pullbacks() :
     ax.plot(zpbs.real, zpbs.imag, 'x')
 
     plt.show()
+
+def test_more_pullbacks() :
+    # set up ordering, Ms, centers, and radii
+    ordering = [0, 7, 3, 1, 5, 4, 2, 6]
+    inverses = [0, 7, 4, 2, 6, 3, 1, 5]
+    Ms = np.array([sp.N(M) for M in get_fd_matrices()], dtype=np.float)
+    cs, rs = get_fd_data()
+    cs = [float(sp.N(c)) for c in cs]
+    rs = [float(sp.N(r)) for r in rs]
+
+    # get N z values along ray of angle alpha evenly spaced in log space from
+    # length 1 to sqrt(kappa)
+    kappa = (2 + np.sqrt(3))/(2 - np.sqrt(3))
+
+    thet = np.pi/20
+    N = 50
+
+    rhos = kappa**(np.arange(N)/(2*N))
+    zs = [rho*np.exp(1j*thet) for rho in rhos]
+
+    # get pullbacks
+    zpbs = []
+    for z in zs :
+        zpb, word = pullback(z, ordering, inverses, Ms, cs, rs)
+        print(z)
+        print(zpb)
+        print()

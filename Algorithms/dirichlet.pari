@@ -1,0 +1,319 @@
+/*
+This file contains PARI code to run Hejhal's algorithm on the compact
+arithmetic surface described in
+    https://sites.math.rutgers.edu/~alexk/files/UniformLattice.pdf
+A lot of the code is borrowed from Andreas Strombergsson.
+*/
+
+/* Author: Alex Karlovitz */
+
+/**********************************************************************
+  Special functions (from Strombergsson)
+**********************************************************************/
+
+/* See def in GR, 9.100. We sum up to and including the z^N-term.
+ Chooses N by the following (completely ad hoc and sloppy heuristic)
+ method: Stop when p has decreased >= 10 times in a row and |p|<re*|s|. */
+
+hypergeom(a,b,c,z)=
+{
+  local(s,p,pp,n,r,re,prec);
+
+  /* re: Desired relative error bound for hypergeom function.
+     Let's make it correspond to current precision. */
+  prec = default(realprecision);
+  re = 10^(-prec);
+
+  s=1;
+  p=1;
+  r=0;
+  n=0;
+  while(1,
+    pp=(a+n)*(b+n)/((c+n)*(1+n))*z;
+    if (abs(pp)<1, r++, r=0);
+    p=p*pp;
+    s+=p;
+    if ((r>=10 && abs(p)<re*abs(s)), return(s););
+    n++;
+  );
+  s;
+}
+
+/* Legendre function of the first kind, for -1<=x<=1.  */
+/* See def in GR, 8.704.  */
+Plegendre(mu,nu,x)=
+{
+  real(1/gamma(1-mu)*((1+x)/(1-x))^(mu/2)*hypergeom(-nu,nu+1,1-mu,(1-x)/2));
+}
+
+/**********************************************************************
+  Whittaker functions
+**********************************************************************/
+
+/* Whittaker function in the flare expansion */
+flare_Whitt(thet, m, s, kappa)=
+{
+  sqrt(sin(thet))*Plegendre(0.5-s, -0.5+2*Pi*m*I/log(kappa), cos(thet));
+}
+
+/**********************************************************************
+  Functions for the cocompact example
+**********************************************************************/
+
+/*
+In the file Visuals/dirichlet.py, we use sympy to work out the exact values
+needed to compute pullbacks in this example.
+*/
+
+/*
+Creates list of matrices Ms which are needed for the pullback algorithm. The
+order matches the centers and radii from get_geodesics in the following manner:
+    let the ith geodesic correspond to the matrix M_i; then Ms[i] = M_i^(-1),
+    since this is the matrix which maps out of the geodesic
+*/
+get_matrices()=
+{
+  local(M0, M1, M2, M3, M4, M5, M6, M7, Ms);
+
+  M0 = [[0, -1], [1, 0]];
+  M1 = [[-3, 2 + 2*sqrt(3)], [-2 + 2*sqrt(3), -3]];
+  M2 = [[-3, -2*sqrt(3) - 2], [2 - 2*sqrt(3), -3]];
+  M3 = [[-2, sqrt(3)], [sqrt(3), -2]];
+  M4 = [[-2, -sqrt(3)], [-sqrt(3), -2]];
+  M5 = [[-2, 3 + 2*sqrt(3)], [-3 + 2*sqrt(3), -2]];
+  M6 = [[-2, -2*sqrt(3) - 3], [3 - 2*sqrt(3), -2]];
+  M7 = [[0, -2 - sqrt(3)], [2 - sqrt(3), 0]];
+
+  Ms = [M0, M7, M4, M2, M6, M3, M1, M5];
+  return(Ms);
+}
+
+/*
+Returns list of centers and radii for the geodesics defining our fundamental
+domain. See comment for get_matrices explaining ordering.
+*/
+get_geodesics()=
+{
+  local(c0, c1, c2, c3, c4, c5, c6, c7, cs, r0, r1, r2, r3, r4, r5, r6, r7, rs);
+
+  c0 = 0;
+  c1 = -3*sqrt(3)/4 - 3/4;
+  c2 = 3/4 + 3*sqrt(3)/4;
+  c3 = -2*sqrt(3)/3;
+  c4 = 2*sqrt(3)/3;
+  c5 = -4*sqrt(3)/3 - 2;
+  c6 = 2 + 4*sqrt(3)/3;
+  c7 = 0;
+
+  r0 = 1;
+  r1 = 371531*sqrt(2)*sqrt(80055211922 - 44925186375*sqrt(3))/75261660188 +
+       57164*sqrt(6)*sqrt(80055211922 - 44925186375*sqrt(3))/18815415047;
+  r2 = 371531*sqrt(2)*sqrt(80055211922 - 44925186375*sqrt(3))/75261660188 +
+       57164*sqrt(6)*sqrt(80055211922 - 44925186375*sqrt(3))/18815415047;
+  r3 = sqrt(3)/3;
+  r4 = sqrt(3)/3;
+  r5 = 1451698*sqrt(912904244419 - 526006406880*sqrt(3))/57844094269 +
+       2525891*sqrt(3)*sqrt(912904244419 - 526006406880*sqrt(3))/173532282807;
+  r6 = 1451698*sqrt(912904244419 - 526006406880*sqrt(3))/57844094269 +
+       2525891*sqrt(3)*sqrt(912904244419 - 526006406880*sqrt(3))/173532282807;
+  r7 = sqrt(sqrt(3) + 2)/sqrt(2 - sqrt(3));
+
+  cs = [c0, c7, c3, c1, c5, c4, c2, c6];
+  rs = [r0, r7, r3, r1, r5, r4, r2, r6];
+
+  return([cs, rs]);
+}
+
+/*
+Given a 2x2 matrix M and point z, applies the Mobius transformation
+    (M[1][1]*z + M[1][2])/(M[2][1]*z + M[2][2])
+NOTE: we assume z is in the upper half plane, so we don't need to worry about
+division by 0 and infinity.
+*/
+mobius(M, z)=
+{
+  return((M[1][1]*z + M[1][2])/(M[2][1]*z + M[2][2]));
+}
+
+/*
+Pullback to fundamental domain; the algorithm we use is
+  - fix an ordering of the geodesics
+  - until done
+    - for g in geodesics
+      - if point in interior of g
+        - apply M^(-1) where M is matrix corresponding to g
+        - restart loop
+      - if we got here, point is in exterior of all geodesics, so done
+*/
+pullback(z, Ms, cs, rs)=
+{
+  local(i, n, max_steps, z_start, in_g);
+
+  z_start = z;
+
+  /* if it takes too many steps, probably entered infinite loop */
+  max_steps = 1000;
+  n = 0;
+
+  while(n < max_steps,
+    n += 1;
+
+    /* loop through geodesics */
+    in_g = 0;
+    for(i = 1, length(Ms),
+      /* if we haven't already found a geodesic, check if in interior of this
+         geodesic */
+      if(in_g == 0,
+
+        /* interior of second geodesic is OUTSIDE circle, rest are INSIDE */
+        if(i == 2,
+          if(abs(z - cs[i]) > rs[i], in_g = 1),
+          if(abs(z - cs[i]) < rs[i], in_g = 1)
+        );
+
+        /* if in this geodesic, apply appropriate M */
+        if(in_g == 1, z = mobius(Ms[i], z));
+      );
+
+    );
+
+    /* if in_g still 0 at this point, then in the fundamental domain */
+    if(in_g == 1, return(z));
+  );
+
+  /* if we got here, took more than max_steps */
+  error("Pullback algorithm for "z_start" took more than "max_steps" steps.");
+}
+
+/**********************************************************************
+  Linear algebra algorithm (from Strombergsson)
+**********************************************************************/
+
+/*
+ To utilize as much information as possible, we will typically be looking
+ at a linear system with more equations than variables. In particular, we
+ have a system of the type "A*x=0", where x is the sought for M-dimensional
+ vector of Fourier coefficients, and A is an N*M-matrix where N>=M-1
+ is the number of given points. Of course, since typically N should be
+ much larger than M, it will be impossible to find an EXACT solution x
+ to "A*x=0". Instead we seek x so as to MINIMIZE |A*x| (Euclidean norm).
+ for some given normalization of x. Perhaps the most natural normalization
+ of x would be |x|=1; however here we instead normalize by setting
+ x[1]=1. Thus, since |A*x|^2=x^t*AA*x with AA:=A^t*A (an M*M-matrix), it
+ turns out that we wish to find that vector x which satisfies x[1]=1 and
+ AA'*x=0, where AA' is the (M-1)*M-matrix obtained by removing the top row
+ from AA. We find this vector x using Gauss elimination, via solve_sys.
+*/
+
+/*
+ The following routine solves a linear system of equations using
+ Gauss elimination. Of course we could instead have tried to make
+ use of some built-in PARI routine, but we wanted to have maximal
+ control. Actually the routine below is a very downscaled version
+ of a much longer routine, which e.g. allows a higher dimensional
+ solution space (e.g. when looking for holomorphic modular forms)
+ and also allows some "tricks", e.g. to have available more
+ equations than are actually used in the end, so that in each new
+ j-iteration we seek among more than one row to find a good pivot.
+ (This is probably humbug to any expert in numerical linear algebra,
+ but it has been found to work well in practice when dealing with a
+ higher dimensional space of holomorphic modular forms.) Anyway,
+ I have taken this away below since I doubt it would be useful for
+ the problem we are now discussing.)
+*/
+
+/*
+ Solve the homogeneous system of equations whose coefficients are
+ given by AA using Gauss elimination.
+ cfree is the index of the column which should be kept as a free variable.
+*/
+solve_sys(AA, cfree)=
+{
+  local(Nequ, Nu, c, maxc, maxk, columninfo, j, k, A, N, jj);
+
+  /* get number of equations and variables */
+  Nequ = matsize(AA)[2];
+  Nu = matsize(AA[1])[2];
+
+  /* We maintain  columninfo  so that
+    columninfo[k] = j   if column k has been used as pivot column and
+                          the corresponding "1" is in row j.
+                  = -1  if column k has not yet been used as pivot. */
+  columninfo=vector(Nu,k,-1);
+
+  /* loop through rows */
+  for(j=1,Nequ,
+    /* Find the coefficient of largest absolute value in row number j. */
+    maxc=0; maxk=-1;
+    for(k=1,Nu, if((k!=cfree),
+      c=abs(AA[j][k]); if((c>maxc), maxk=k; maxc=c;);
+    ););
+    if((maxk==-1), error("In solveequsyst; unexpected linear dependence "j););
+
+    /* Divide all coefficients in row j  with  AA[j,maxk]. */
+    A=1/AA[j][maxk];
+    AA[j]=A*AA[j];
+    AA[j][maxk]=1;    /* EXACT 1, not "1.000000000023", say! */
+
+    /* Update columninfo. */
+    columninfo[maxk]=j;
+
+    /* Subtract row j from all other rows. */
+    for(N=1,Nequ,
+      if(N != j,
+        A=AA[N][maxk];
+        AA[N] = AA[N]-A*AA[j];
+        AA[N][maxk]=0;   /* EXACT 0, not "0.0E-10", say! */
+      );
+    );
+  );
+
+  /* Return the solution vector. */
+  vector(Nu, k, if(k==cfree, 1, -AA[columninfo[k]][cfree]));
+}
+
+/**********************************************************************
+  Code for setting up and solving linear system
+**********************************************************************/
+
+/*
+Sets up matrix of equations for list of test points z
+  - use only the flare expansion
+    - if test point is in fundamental domain, error out
+    - else, compare expansion at pullback
+  - lambda = s(1 - s)
+  - only use flare expansion if test point has argument <= alpha0
+  - M - number of coefficients to take in the flare expansion
+*/
+init_eqns(zs, s, alpha0, M, circles)=
+{
+  TODO;
+}
+
+/*
+Given a set of test points zs, set up and solve linear system for the Fourier
+coefficients.
+  - s - assumed eigenvalue is lambda = s(1 - s)
+  - only use flare expansion if test point has argument <= alpha0
+  - M - number of coefficients to take in the flare expansion
+*/
+get_coefficients(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
+{
+  TODO;
+}
+
+/**********************************************************************
+  Actual loops for Hejhal's algorithm
+**********************************************************************/
+
+/*
+Runs a "secant method version" of Hejhal's algorithm (learned from
+Strombergsson)
+  - s - assumed eigenvalue is lambda = s(1 - s)
+  - only use flare expansion if test point has argument <= alpha0
+  - M - number of coefficients to take in the flare expansion
+*/
+secant_method(zs1, zs2, alpha0, M, circles, z1, z2, t, pre_kappa, s, delta)=
+{
+  TODO;
+}

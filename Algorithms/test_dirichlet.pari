@@ -1,0 +1,75 @@
+/*
+This file contains functions for testing the algorithms in
+dirichlet.pari. NOTE: need to run "\r dirichlet.pari"
+in gp before running any code in this file, since it assumes those
+functions are defined.
+*/
+
+/**********************************************************************
+  Functions for generating test points
+**********************************************************************/
+
+/*
+Checks if a test point is admissible. This means the point cannot be in the
+fundamental domain, the point and its pullback must have different arguments
+in the flare, and both points must be admissible with respect to the flare
+(arg <= alpha0).
+*/
+is_admissible(z, thet, alpha0, circles, z1, z2, t)=
+{
+  TODO;
+}
+
+/**********************************************************************
+  Experiments
+**********************************************************************/
+
+/* Run one iteration of the secant method zoom in */
+example_secant() =
+{
+  TODO;
+}
+
+/**********************************************************************
+  Miscellaneous test functions
+**********************************************************************/
+
+test_pullback()=
+{
+  local(kappa, zs, i, Ms, gs, cs, rs, z, zpb);
+
+  kappa = (2 + sqrt(3))/(2 - sqrt(3));
+
+  /* parameters */
+  thet = Pi/20;
+  N = 50;
+
+  /* set up test points */
+  zs = vector(N, x, 0);
+  for(i = 0, N - 1,
+    zs[i + 1] = kappa^i/(2*N)*exp(thet*I);
+  );
+
+  /* print each point with pullback */
+  Ms = get_matrices();
+  gs = get_geodesics();
+  cs = gs[1];
+  rs = gs[2];
+  for(i = 1, N,
+    z = zs[i];
+    print(z);
+    zpb = pullback(z, Ms, cs, rs);
+    print(zpb);
+    print("");
+  );
+}
+
+test_init_eqns()=
+{
+  TODO;
+}
+
+test_true_s()=
+{
+  TODO;
+}
