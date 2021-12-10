@@ -178,11 +178,11 @@ pullback(z, Ms, cs, rs)=
     );
 
     /* if in_g still 0 at this point, then in the fundamental domain */
-    if(in_g == 1, return(z));
+    if(in_g == 0, return(z));
   );
 
   /* if we got here, took more than max_steps */
-  error("Pullback algorithm for "z_start" took more than "max_steps" steps.");
+  error("Pullback algorithm for "z_start" took more than "max_steps" steps. Ended at "z);
 }
 
 /**********************************************************************
@@ -277,29 +277,62 @@ solve_sys(AA, cfree)=
 **********************************************************************/
 
 /*
-Sets up matrix of equations for list of test points z
+Sets up matrix of equations for list of test points z as compared to their
+pullbacks zpbs (assume both sets of points are given in polar coordinates as
+[radius, angle] pairs)
   - use only the flare expansion
-    - if test point is in fundamental domain, error out
-    - else, compare expansion at pullback
   - lambda = s(1 - s)
-  - only use flare expansion if test point has argument <= alpha0
   - M - number of coefficients to take in the flare expansion
+  - kappa - scaling parameter for the flare
 */
-init_eqns(zs, s, alpha0, M, circles)=
+init_eqns(zs, zpbs, s, M, kappa)=
 {
-  TODO;
+  local(A, j, z, zpb, i, m, B);
+
+  /* every point in the vector z gives 1 equation
+     - rows of A correspond to equations
+     - cols correspond to coefficients (1 through M for coeffs 0 through M-1) */
+  A = vector(length(zs), x, vector(M));
+
+  /* Loop through all test points */
+  for(j = 1, length(zs),
+    z = zs[j];
+    zpb = zpbs[j];
+
+    /* Add expansion at z_flare and subtract expansion at zpb_flare */
+    for(m = 0, M - 1,
+      A[j][m + 1] = flare_Whitt(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
+      A[j][m + 1] -= flare_Whitt(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
+    );
+  );
+
+  /* return a matrix object */
+  B = matrix(length(zs), M, k, j, A[k][j]);
+  return(B);
 }
 
 /*
-Given a set of test points zs, set up and solve linear system for the Fourier
-coefficients.
+Given a set of test points zs and their pullbacks zpbs, set up and solve linear
+system for the Fourier coefficients (assume both sets of points are given in
+polar coordinates as [radius, angle] pairs)
   - s - assumed eigenvalue is lambda = s(1 - s)
-  - only use flare expansion if test point has argument <= alpha0
   - M - number of coefficients to take in the flare expansion
+  - kappa - scaling parameter for the flare
 */
-get_coefficients(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
+get_coefficients(zs, zpbs, s, M, kappa)=
 {
-  TODO;
+  local(k, A, AA, B, x);
+
+  /* Set up matrix of equations */
+  A = init_eqns(zs, zpbs, s, M, kappa);
+
+  /* Use Strombergsson's method for least squares */
+  AA = mattranspose(A)*A;
+  B = vector(M-1, k, vector(M, j, AA[k+1, j]));
+  x = solve_sys(B, 1);
+
+  /* return Fourier coefficient vector */
+  return(x);
 }
 
 /**********************************************************************

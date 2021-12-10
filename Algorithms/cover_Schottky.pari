@@ -355,7 +355,7 @@ Sets up matrix of equations for list of test points z
 */
 init_eqns(zs, s, alpha0, M, circles, z1, z2, t, pre_kappa)=
 {
-  local(A, num_eqns, j, z, zpb, kappa, i, z_flare, zpb_flare m, B);
+  local(A, j, z, zpb, kappa, i, z_flare, zpb_flare, m, B);
 
   /* kappa is the scaling parameters for the flares */
   kappa = true_to_hyp(pre_kappa, z1, z2, t)[1];
