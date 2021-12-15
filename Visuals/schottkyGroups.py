@@ -114,7 +114,7 @@ def pullback_Schottky(z, circles) :
 
         i = i + 1
         if i == 30 :
-            print 'Warning: z = ' + str(z) + ' took more than 30 steps in pullback algorithm.'
+            print('Warning: z = ' + str(z) + ' took more than 30 steps in pullback algorithm.')
             return None
 
 # Given two (center, radius) pairs (c, r) and (a, t), computes the fixed
@@ -304,10 +304,10 @@ def disk_Whitt(rho, m, s) :
 
 # print some calculations on the point z
 def print_z_and_pb(z, circles) :
-    print 'z =', z
-    print ''
+    print('z =', z)
+    print('')
     w = pullback_shifted(z, circles)
-    print 'Pullback =', w
+    print('Pullback =', w)
     return w
 
 def plot_test_points() :
@@ -324,7 +324,7 @@ def plot_test_points() :
         try :
             pts.append(complex(p_new))
         except ValueError :
-            print p_new
+            print(p_new)
             return
 
     # get geodesics
