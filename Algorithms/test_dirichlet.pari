@@ -80,7 +80,49 @@ rect_to_pol(zs)=
 /* Run one iteration of the secant method zoom in */
 example_secant() =
 {
-  TODO;
+  local(kappa, zs1, zs2, i, Ms, gs, cs, rs, thet1, thet2, N, M, zpbs1, zpsb2,
+        zs1_pol, zs2_pol, zpbs1_pol, zpbs2_pol, s, R);
+
+  default(realprecision, 60);
+
+  kappa = (2 + sqrt(3))/(2 - sqrt(3));
+
+  /* parameters */
+  thet1 = Pi/20; thet2 = Pi/21;
+  N = 100; M = 40;
+
+  R = 4.388; delta = 3e-4;
+
+  /* get info needed for pullbacks */
+  Ms = get_matrices();
+  gs = get_geodesics();
+  cs = gs[1];
+  rs = gs[2];
+
+  /* set up test points */
+  zs1 = test_points_ray(N, thet1);
+  zs2 = test_points_ray(N, thet2);
+
+  /* check that test points are admissible */
+  for(i = 1, N,
+    is_admissible(zs1[i], Ms, cs, rs);
+    is_admissible(zs2[i], Ms, cs, rs);
+  );
+
+  /* get pullbacks and convert everything to polar */
+  zpbs1 = vector(N);
+  zpbs2 = vector(N);
+  for(i = 1, N,
+    zpbs1[i] = pullback(zs1[i], Ms, cs, rs);
+    zpbs2[i] = pullback(zs2[i], Ms, cs, rs);
+  );
+  zs1_pol = rect_to_pol(zs1);
+  zpbs1_pol = rect_to_pol(zpbs1);
+  zs2_pol = rect_to_pol(zs2);
+  zpbs2_pol = rect_to_pol(zpbs2);
+
+  /* run secant method */
+  secant_method(zs1_pol, zs2_pol, zpbs1_pol, zpbs2_pol, M, circles, kappa, R, delta);
 }
 
 /**********************************************************************
@@ -136,6 +178,7 @@ test_init_eqns()=
 
   /* set up test points */
   zs = test_points_ray(N, thet);
+  print(zs);
 
   /* check that test points are admissible */
   for(i = 1, N,
@@ -147,8 +190,11 @@ test_init_eqns()=
   for(i = 1, N,
     zpbs[i] = pullback(zs[i], Ms, cs, rs);
   );
+  print(zpbs);
   zs_pol = rect_to_pol(zs);
   zpbs_pol = rect_to_pol(zpbs);
+  print(zs_pol);
+  print(zpbs_pol);
 
   /* set up equation and print matrix */
   A = init_eqns(zs_pol, zpbs_pol, s, M, kappa);
@@ -158,16 +204,21 @@ test_init_eqns()=
 test_true_s()=
 {
   local(kappa, zs1, zs2, i, Ms, gs, cs, rs, thet1, thet2, N, M, zpbs1, zpsb2,
-        zs1_pol, zs2_pol, zpbs1_pol, zpbs2_pol);
+        zs1_pol, zs2_pol, zpbs1_pol, zpbs2_pol, s, R);
+
+  default(realprecision, 60);
 
   kappa = (2 + sqrt(3))/(2 - sqrt(3));
 
   /* parameters */
   thet1 = Pi/20; thet2 = Pi/21;
-  N = 50; M = 20;
+  N = 100; M = 20;
 
   /* true s value */
-  s = 0.4;
+  R = 5.0987419087295;
+  /*R = 3.5360020929376;
+  R = 4.3880535632221;*/
+  s = 0.5 + I*R;
 
   /* get info needed for pullbacks */
   Ms = get_matrices();
@@ -206,4 +257,6 @@ test_true_s()=
   print("x2 = "precision(x2, 1));
   print(" ");
   print("x1 - x2 = "precision(x1-x2, 1));
+
+  return([x1, x2]);
 }

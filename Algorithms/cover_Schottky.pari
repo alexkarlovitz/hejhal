@@ -214,7 +214,7 @@ pullback_Schottky(z_start, circles)=
           if(num_steps % 2 == 0,
             return(z);
           ,
-            z = reflect(z, circles[2][1], circles[2][2]);
+            /*z = reflect(z, circles[2][1], circles[2][2]);*/
             return(z);
           );
         );

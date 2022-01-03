@@ -291,7 +291,7 @@ init_eqns(zs, zpbs, s, M, kappa)=
 
   /* every point in the vector z gives 1 equation
      - rows of A correspond to equations
-     - cols correspond to coefficients (1 through M for coeffs 0 through M-1) */
+     - cols correspond to coefficients (1 through M for coeffs 1 through M) */
   A = vector(length(zs), x, vector(M));
 
   /* Loop through all test points */
@@ -300,9 +300,9 @@ init_eqns(zs, zpbs, s, M, kappa)=
     zpb = zpbs[j];
 
     /* Add expansion at z_flare and subtract expansion at zpb_flare */
-    for(m = 0, M - 1,
-      A[j][m + 1] = flare_Whitt(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
-      A[j][m + 1] -= flare_Whitt(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
+    for(m = 1, M,
+      A[j][m] = flare_Whitt(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
+      A[j][m] -= flare_Whitt(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
     );
   );
 
@@ -342,11 +342,52 @@ get_coefficients(zs, zpbs, s, M, kappa)=
 /*
 Runs a "secant method version" of Hejhal's algorithm (learned from
 Strombergsson)
-  - s - assumed eigenvalue is lambda = s(1 - s)
+  - R - assumed eigenvalue is lambda = s(1 - s) where s = 0.5 + I*R
   - only use flare expansion if test point has argument <= alpha0
   - M - number of coefficients to take in the flare expansion
 */
-secant_method(zs1, zs2, alpha0, M, circles, z1, z2, t, pre_kappa, s, delta)=
+secant_method(zs1, zs2, zpbs1, zpbs2, M, circles, kappa, R, delta)=
 {
-  TODO;
+  local(R_new, c1, c2, j, R_max, R_min, R_mid, delta_new);
+
+  R_new=vector(3); /* REMEMBER TO CHANGE THIS IF YOU CHANGE c1 AND c2 */
+
+  while(1,
+
+    s = 0.5 + I*R;
+
+    /* Get differences of some Fourier coefficients for s */
+    x1 = get_coefficients(zs1, zpbs1, s, M, kappa);
+    x2 = get_coefficients(zs2, zpbs2, s, M, kappa);
+    c1 = [x1[2] - x2[2], x1[3] - x2[3], x1[4] - x2[4]];
+
+    /* Now do the same for s + I*delta (same as R + delta) */
+    x1 = get_coefficients(zs1, zpbs1, s + I*delta, M, kappa);
+    x2 = get_coefficients(zs2, zpbs2, s + I*delta, M, kappa);
+    c2 = [x1[2] - x2[2], x1[3] - x2[3], x1[4] - x2[4]];
+
+    /* Run one iteration of secant method on each difference */
+    R_max = 0.0; R_min = 100.0;
+    for(j = 1, length(c1),
+      R_new[j] = (c1[j]*(R+delta) - c2[j]*R)/(c1[j] - c2[j]);
+      R_max = max(R_max, R_new[j]);
+      R_min = min(R_min, R_new[j]);
+    );
+    R_mid = 0.5*(R_max + R_min);
+
+    /* Uncomment if you want to print current predictions */
+    print("--------------------------------------");
+    print("Current predictions:");
+    for(j = 1, length(c1), print(R_new[j]));
+    print(" ");
+
+    /* Ad hoc check if it's worth continuing */
+    delta_new = (R_max - R_min)*5;
+    if(delta_new > 0.5*delta,
+      print("Approximate error: "R_max-R_min);
+      return(R_mid);
+    );
+    delta = delta_new;
+    R = R_mid-0.5*delta;
+  );
 }
