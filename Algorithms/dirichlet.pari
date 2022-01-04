@@ -43,7 +43,16 @@ hypergeom(a,b,c,z)=
 /* See def in GR, 8.704.  */
 Plegendre(mu,nu,x)=
 {
-  real(1/gamma(1-mu)*((1+x)/(1-x))^(mu/2)*hypergeom(-nu,nu+1,1-mu,(1-x)/2));
+  1/gamma(1-mu)*((1+x)/(1-x))^(mu/2)*hypergeom(-nu,nu+1,1-mu,(1-x)/2);
+}
+
+/* Legendre function of the second kind, for -1<=x<=1.  */
+/* See def in DLMF, 14.3.2.  */
+Qlegendre(mu,nu,x)=
+{
+  Pi/2*(cos(Pi*mu)/gamma(1-mu)*((1+x)/(1-x))^(mu/2)*hypergeom(-nu,nu+1,1-mu,(1-x)/2) -
+    gamma(nu+mu+1)/gamma(nu-mu+1)/gamma(1+mu)*((1-x)/(1+x))^(mu/2)*hypergeom(-nu,nu+1,1+mu,(1-x)/2)
+  )/sin(Pi*mu);
 }
 
 /**********************************************************************
@@ -54,6 +63,12 @@ Plegendre(mu,nu,x)=
 flare_Whitt(thet, m, s, kappa)=
 {
   sqrt(sin(thet))*Plegendre(0.5-s, -0.5+2*Pi*m*I/log(kappa), cos(thet));
+}
+
+/* second Whittaker function in the flare expansion */
+flare_Whitt_sec(thet, m, s, kappa)=
+{
+  sqrt(sin(thet))*Qlegendre(0.5-s, -0.5+2*Pi*m*I/log(kappa), cos(thet));
 }
 
 /**********************************************************************
@@ -282,7 +297,8 @@ pullbacks zpbs (assume both sets of points are given in polar coordinates as
 [radius, angle] pairs)
   - use only the flare expansion
   - lambda = s(1 - s)
-  - M - number of coefficients to take in the flare expansion
+  - M - will have 2M coefficients in the flare expansion (M for coefficients of
+        Legendre P function, and M for Legendre Q)
   - kappa - scaling parameter for the flare
 */
 init_eqns(zs, zpbs, s, M, kappa)=
@@ -291,8 +307,9 @@ init_eqns(zs, zpbs, s, M, kappa)=
 
   /* every point in the vector z gives 1 equation
      - rows of A correspond to equations
-     - cols correspond to coefficients (1 through M for coeffs 1 through M) */
-  A = vector(length(zs), x, vector(M));
+     - cols correspond to coefficients (1 through M for coeffs 0 through M-1 for
+       Legendre P, M+1 through 2M for coeffs 0 through M-1 for Legendre Q) */
+  A = vector(length(zs), x, vector(2*M));
 
   /* Loop through all test points */
   for(j = 1, length(zs),
@@ -300,14 +317,22 @@ init_eqns(zs, zpbs, s, M, kappa)=
     zpb = zpbs[j];
 
     /* Add expansion at z_flare and subtract expansion at zpb_flare */
-    for(m = 1, M,
-      A[j][m] = flare_Whitt(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
-      A[j][m] -= flare_Whitt(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
+
+    /* first do coeffs of P */
+    for(m = 0, M-1,
+      A[j][m + 1] = flare_Whitt(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
+      A[j][m + 1] -= flare_Whitt(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
+    );
+
+    /* next do coeffs of Q */
+    for(m = 0, M-1,
+      A[j][M + m + 1] = flare_Whitt_sec(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
+      A[j][M + m + 1] -= flare_Whitt_sec(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
     );
   );
 
   /* return a matrix object */
-  B = matrix(length(zs), M, k, j, A[k][j]);
+  B = matrix(length(zs), 2*M, k, j, A[k][j]);
   return(B);
 }
 
@@ -328,7 +353,7 @@ get_coefficients(zs, zpbs, s, M, kappa)=
 
   /* Use Strombergsson's method for least squares */
   AA = mattranspose(A)*A;
-  B = vector(M-1, k, vector(M, j, AA[k+1, j]));
+  B = vector(2*M-1, k, vector(2*M, j, AA[k+1, j]));
   x = solve_sys(B, 1);
 
   /* return Fourier coefficient vector */

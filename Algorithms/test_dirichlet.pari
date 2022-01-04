@@ -206,13 +206,13 @@ test_true_s()=
   local(kappa, zs1, zs2, i, Ms, gs, cs, rs, thet1, thet2, N, M, zpbs1, zpsb2,
         zs1_pol, zs2_pol, zpbs1_pol, zpbs2_pol, s, R);
 
-  default(realprecision, 60);
+  /*default(realprecision, 60);*/
 
   kappa = (2 + sqrt(3))/(2 - sqrt(3));
 
   /* parameters */
   thet1 = Pi/20; thet2 = Pi/21;
-  N = 100; M = 20;
+  N = 50; M = 20;
 
   /* true s value */
   R = 5.0987419087295;
@@ -251,12 +251,16 @@ test_true_s()=
   /* compute and compare coefficients */
   x1 = get_coefficients(zs1_pol, zpbs1_pol, s, M, kappa);
   x2 = get_coefficients(zs2_pol, zpbs2_pol, s, M, kappa);
+  rel = vector(length(x1));
+  for(i = 1, length(x1), rel[i] = abs(x1[i] - x2[i])/abs(x1[i]));
 
   print("x1 = "precision(x1, 1));
   print(" ");
   print("x2 = "precision(x2, 1));
   print(" ");
   print("x1 - x2 = "precision(x1-x2, 1));
+  print(" ");
+  print("rel = "precision(rel, 1));
 
   return([x1, x2]);
 }
