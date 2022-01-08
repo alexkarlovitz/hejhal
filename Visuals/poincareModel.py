@@ -174,6 +174,39 @@ def heckeGroupFD(mu) :
     gs = [Geodesic(-mu, np.inf), Geodesic(mu, np.inf), Geodesic(-1, 1)]
     return FundamentalDomain(gs, 2j)
 
+# plots flare version of the Hecke group as obtained from heckeFD
+def plot_Hecke_flare(r) :
+    # get original fundamental domain
+    fd = heckeFD(r)
+
+    # z1 and z2 are endpoints of the axis of our hyperbolic element
+    z1 = (1 - np.sqrt(1 - 4*r**2))/2
+    z2 = (1 + np.sqrt(1 - 4*r**2))/2
+
+    # set up matrix to map to flare
+    c = (r - z2)/(r - z1)
+    U = np.array([[c, -c*z1], [1, -z2]])
+
+    # now actually map to flare!
+    fd = mobius(U, fd)
+
+    # plot
+    kappa = (z2/r)**2
+
+    ax = setupFig(-7, 7, 0, 9)
+    fd.draw(ax, fill=1)
+
+    # labels
+    plt.xticks([1, kappa], ['$1$', '$\kappa$'])
+    plt.yticks([])
+
+    # plot axis at angle alpha as dotted line
+    R = 15
+    alpha = np.pi/6
+    ax.plot([0, R*np.cos(alpha)], [0, R*np.sin(alpha)], 'k--')
+
+    plt.show()
+
 # creates and draws a FundamentalDomain object for the Apollonian cocluster
 # intersected with the x1x2-plane and doubled across the x2-axis
 def draw_apollonian_FD() :
@@ -225,16 +258,18 @@ def post_flare() :
     g2 = Geodesic(-2, 2)
     g = Geodesic(0, np.inf)
 
+    f = FundamentalDomain([g1, g2], 1.5j)
+
     ax = setupFig(-3, 3, 0, 3)
 
-    g1.draw(ax)
-    g2.draw(ax)
-    g.draw(ax, 'k', ':')
+    f.draw(ax, fill=1)
+    #g.draw(ax, 'k', ':')
 
-    plt.xticks([0, 1], ['$U(z_1) = 0$', '$U(t) = 1$'])
+    #plt.xticks([0, 1], ['$U(z_1) = 0$', '$U(t) = 1$'])
+    plt.xticks([1, 2], ['$1$', '$\kappa$'])
     plt.yticks([])
 
     plt.show()
 
 if __name__ == '__main__' :
-    draw_apollonian_FD()
+    post_flare()
