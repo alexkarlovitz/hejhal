@@ -1,10 +1,11 @@
 /*
-NOTE: cocompact.pari does the same thing as this file but using a 4-fold
-      cover of the group. I think using the cover is better!
 This file contains PARI code to run Hejhal's algorithm on the compact
 arithmetic surface described in
     https://sites.math.rutgers.edu/~alexk/files/UniformLattice.pdf
 A lot of the code is borrowed from Andreas Strombergsson.
+
+This file differs from dirichlet.pari in that it uses the 4-fold cover of the
+group.
 */
 
 /* Author: Alex Karlovitz */
@@ -45,7 +46,7 @@ hypergeom(a,b,c,z)=
 /* See def in GR, 8.704.  */
 Plegendre(mu,nu,x)=
 {
-  1/gamma(1-mu)*((1+x)/(1-x))^(mu/2)*hypergeom(-nu,nu+1,1-mu,(1-x)/2);
+  real(1/gamma(1-mu)*((1+x)/(1-x))^(mu/2)*hypergeom(-nu,nu+1,1-mu,(1-x)/2));
 }
 
 /* Legendre function of the second kind, for -1<=x<=1.  */
@@ -83,73 +84,42 @@ needed to compute pullbacks in this example.
 */
 
 /*
-Creates list of matrices Ms which are needed for the pullback algorithm. The
-order matches the centers and radii from get_geodesics in the following manner:
-    let the ith geodesic correspond to the matrix M_i; then Ms[i] = M_i^(-1),
-    since this is the matrix which maps out of the geodesic
-*/
-get_matrices()=
-{
-  local(M0, M1, M2, M3, M4, M5, M6, M7, Ms);
-
-  M0 = [[0, -1], [1, 0]];
-  M1 = [[-3, 2 + 2*sqrt(3)], [-2 + 2*sqrt(3), -3]];
-  M2 = [[-3, -2*sqrt(3) - 2], [2 - 2*sqrt(3), -3]];
-  M3 = [[-2, sqrt(3)], [sqrt(3), -2]];
-  M4 = [[-2, -sqrt(3)], [-sqrt(3), -2]];
-  M5 = [[-2, 3 + 2*sqrt(3)], [-3 + 2*sqrt(3), -2]];
-  M6 = [[-2, -2*sqrt(3) - 3], [3 - 2*sqrt(3), -2]];
-  M7 = [[0, -2 - sqrt(3)], [2 - sqrt(3), 0]];
-
-  Ms = [M0, M7, M4, M2, M6, M3, M1, M5];
-  return(Ms);
-}
-
-/*
 Returns list of centers and radii for the geodesics defining our fundamental
-domain. See comment for get_matrices explaining ordering.
+domain
 */
 get_geodesics()=
 {
-  local(c0, c1, c2, c3, c4, c5, c6, c7, cs, r0, r1, r2, r3, r4, r5, r6, r7, rs);
+  local(c0, c1, c2, c3, cs, r0, r1, r2, r3, rs);
 
   c0 = 0;
-  c1 = -3*sqrt(3)/4 - 3/4;
-  c2 = 3/4 + 3*sqrt(3)/4;
-  c3 = -2*sqrt(3)/3;
-  c4 = 2*sqrt(3)/3;
-  c5 = -4*sqrt(3)/3 - 2;
-  c6 = 2 + 4*sqrt(3)/3;
-  c7 = 0;
+  c1 = 0;
+  c2 = 2*sqrt(3)/3;
+  c3 = 3/4 + 3*sqrt(3)/4;
 
   r0 = 1;
-  r1 = 371531*sqrt(2)*sqrt(80055211922 - 44925186375*sqrt(3))/75261660188 +
+  r1 = ((sqrt(3) + 2)/(2 - sqrt(3)))^(1/4);
+  r2 = sqrt(3)/3;
+  r3 = 371531*sqrt(2)*sqrt(80055211922 - 44925186375*sqrt(3))/75261660188 +
        57164*sqrt(6)*sqrt(80055211922 - 44925186375*sqrt(3))/18815415047;
-  r2 = 371531*sqrt(2)*sqrt(80055211922 - 44925186375*sqrt(3))/75261660188 +
-       57164*sqrt(6)*sqrt(80055211922 - 44925186375*sqrt(3))/18815415047;
-  r3 = sqrt(3)/3;
-  r4 = sqrt(3)/3;
-  r5 = 1451698*sqrt(912904244419 - 526006406880*sqrt(3))/57844094269 +
-       2525891*sqrt(3)*sqrt(912904244419 - 526006406880*sqrt(3))/173532282807;
-  r6 = 1451698*sqrt(912904244419 - 526006406880*sqrt(3))/57844094269 +
-       2525891*sqrt(3)*sqrt(912904244419 - 526006406880*sqrt(3))/173532282807;
-  r7 = sqrt(sqrt(3) + 2)/sqrt(2 - sqrt(3));
 
-  cs = [c0, c7, c3, c1, c5, c4, c2, c6];
-  rs = [r0, r7, r3, r1, r5, r4, r2, r6];
+  cs = [c0, c1, c2, c3];
+  rs = [r0, r1, r2, r3];
 
   return([cs, rs]);
 }
 
 /*
-Given a 2x2 matrix M and point z, applies the Mobius transformation
-    (M[1][1]*z + M[1][2])/(M[2][1]*z + M[2][2])
-NOTE: we assume z is in the upper half plane, so we don't need to worry about
-division by 0 and infinity.
+Computes reflection through geodesic semicircle in upper half plane.
+  (Assume cent is in R, so lines are identified by having rad == oo and are
+  described by having real part equal to cent).
 */
-mobius(M, z)=
+reflect(z, cent, rad)=
 {
-  return((M[1][1]*z + M[1][2])/(M[2][1]*z + M[2][2]));
+  if(rad == oo,
+    return(-real(z) + I*imag(z) + 2*cent);
+  ,
+    return( rad^2 / (real(z) - I*imag(z) - cent) + cent );
+  );
 }
 
 /*
@@ -158,15 +128,18 @@ Pullback to fundamental domain; the algorithm we use is
   - until done
     - for g in geodesics
       - if point in interior of g
-        - apply M^(-1) where M is matrix corresponding to g
+        - reflect across g
         - restart loop
       - if we got here, point is in exterior of all geodesics, so done
 */
-pullback(z, Ms, cs, rs)=
+pullback(z, cs, rs)=
 {
   local(i, n, max_steps, z_start, in_g);
 
   z_start = z;
+
+  /* if real part negative, reflect across imaginary axis */
+  if(real(z) < 0, z = -real(z) + imag(z)*I);
 
   /* if it takes too many steps, probably entered infinite loop */
   max_steps = 1000;
@@ -177,7 +150,7 @@ pullback(z, Ms, cs, rs)=
 
     /* loop through geodesics */
     in_g = 0;
-    for(i = 1, length(Ms),
+    for(i = 1, length(cs),
       /* if we haven't already found a geodesic, check if in interior of this
          geodesic */
       if(in_g == 0,
@@ -188,8 +161,11 @@ pullback(z, Ms, cs, rs)=
           if(abs(z - cs[i]) < rs[i], in_g = 1)
         );
 
-        /* if in this geodesic, apply appropriate M */
-        if(in_g == 1, z = mobius(Ms[i], z));
+        /* if in this geodesic, apply appropriate reflection */
+        if(in_g == 1,
+          z = reflect(z, cs[i], rs[i]);
+          if(real(z) < 0, z = -real(z) + imag(z)*I);
+        );
       );
 
     );
@@ -299,8 +275,7 @@ pullbacks zpbs (assume both sets of points are given in polar coordinates as
 [radius, angle] pairs)
   - use only the flare expansion
   - lambda = s(1 - s)
-  - M - will have 2M coefficients in the flare expansion (M for coefficients of
-        Legendre P function, and M for Legendre Q)
+  - M - number of coefficients in the flare expansion
   - kappa - scaling parameter for the flare
 */
 init_eqns(zs, zpbs, s, M, kappa)=
@@ -309,9 +284,8 @@ init_eqns(zs, zpbs, s, M, kappa)=
 
   /* every point in the vector z gives 1 equation
      - rows of A correspond to equations
-     - cols correspond to coefficients (1 through M for coeffs 0 through M-1 for
-       Legendre P, M+1 through 2M for coeffs 0 through M-1 for Legendre Q) */
-  A = vector(length(zs), x, vector(2*M));
+     - cols correspond to coefficients (1 through M for coeffs 0 through M-1) */
+  A = vector(length(zs), x, vector(M));
 
   /* Loop through all test points */
   for(j = 1, length(zs),
@@ -319,22 +293,15 @@ init_eqns(zs, zpbs, s, M, kappa)=
     zpb = zpbs[j];
 
     /* Add expansion at z_flare and subtract expansion at zpb_flare */
-
-    /* first do coeffs of P */
     for(m = 0, M-1,
       A[j][m + 1] = flare_Whitt(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
       A[j][m + 1] -= flare_Whitt(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
     );
 
-    /* next do coeffs of Q */
-    for(m = 0, M-1,
-      A[j][M + m + 1] = flare_Whitt_sec(z[2], m, s, kappa)*cos(2*Pi*m*log(z[1])/log(kappa));
-      A[j][M + m + 1] -= flare_Whitt_sec(zpb[2], m, s, kappa)*cos(2*Pi*m*log(zpb[1])/log(kappa));
-    );
   );
 
   /* return a matrix object */
-  B = matrix(length(zs), 2*M, k, j, A[k][j]);
+  B = matrix(length(zs), M, k, j, A[k][j]);
   return(B);
 }
 
@@ -355,7 +322,7 @@ get_coefficients(zs, zpbs, s, M, kappa)=
 
   /* Use Strombergsson's method for least squares */
   AA = mattranspose(A)*A;
-  B = vector(2*M-1, k, vector(2*M, j, AA[k+1, j]));
+  B = vector(M-1, k, vector(M, j, AA[k+1, j]));
   x = solve_sys(B, 1);
 
   /* return Fourier coefficient vector */
@@ -381,7 +348,7 @@ secant_method(zs1, zs2, zpbs1, zpbs2, M, circles, kappa, R, delta)=
 
   while(1,
 
-    s = 0.5 + I*R;
+    s = 0.5 - I*R;
 
     /* Get differences of some Fourier coefficients for s */
     x1 = get_coefficients(zs1, zpbs1, s, M, kappa);

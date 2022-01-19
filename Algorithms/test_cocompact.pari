@@ -1,6 +1,4 @@
 /*
-NOTE: test_cocompact.pari does the same thing as this file but using a 4-fold
-      cover of the group. I think using the cover is better!
 This file contains functions for testing the algorithms in
 dirichlet.pari. NOTE: need to run "\r dirichlet.pari"
 in gp before running any code in this file, since it assumes those
@@ -16,12 +14,12 @@ Checks if a test point is admissible. This means the point cannot be in the
 fundamental domain, and the point and its pullback must have different arguments
 in the flare.
 */
-is_admissible(z, Ms, cs, rs)=
+is_admissible(z, cs, rs)=
 {
   local(zpb, zs, zs_pol);
 
   /* get pullback and convert points to polar */
-  zpb = pullback(z, Ms, cs, rs);
+  zpb = pullback(z, cs, rs);
   zs = [z, zpb];
   zs_pol = rect_to_pol(zs);
 
@@ -46,7 +44,7 @@ test_points_ray(N, alpha)=
 {
   local(zs, kappa, j);
 
-  kappa = (2 + sqrt(3))/(2 - sqrt(3));
+  kappa = sqrt(2 + sqrt(3))/sqrt(2 - sqrt(3));
 
   zs = vector(N);
   for(j = 1, N,
@@ -87,7 +85,7 @@ example_secant() =
 
   default(realprecision, 60);
 
-  kappa = (2 + sqrt(3))/(2 - sqrt(3));
+  kappa = sqrt(2 + sqrt(3))/sqrt(2 - sqrt(3));
 
   /* parameters */
   thet1 = Pi/20; thet2 = Pi/21;
@@ -96,7 +94,6 @@ example_secant() =
   R = 4.388; delta = 3e-4;
 
   /* get info needed for pullbacks */
-  Ms = get_matrices();
   gs = get_geodesics();
   cs = gs[1];
   rs = gs[2];
@@ -107,16 +104,16 @@ example_secant() =
 
   /* check that test points are admissible */
   for(i = 1, N,
-    is_admissible(zs1[i], Ms, cs, rs);
-    is_admissible(zs2[i], Ms, cs, rs);
+    is_admissible(zs1[i], cs, rs);
+    is_admissible(zs2[i], cs, rs);
   );
 
   /* get pullbacks and convert everything to polar */
   zpbs1 = vector(N);
   zpbs2 = vector(N);
   for(i = 1, N,
-    zpbs1[i] = pullback(zs1[i], Ms, cs, rs);
-    zpbs2[i] = pullback(zs2[i], Ms, cs, rs);
+    zpbs1[i] = pullback(zs1[i], cs, rs);
+    zpbs2[i] = pullback(zs2[i], cs, rs);
   );
   zs1_pol = rect_to_pol(zs1);
   zpbs1_pol = rect_to_pol(zpbs1);
@@ -210,7 +207,7 @@ test_true_s()=
 
   /*default(realprecision, 60);*/
 
-  kappa = (2 + sqrt(3))/(2 - sqrt(3));
+  kappa = sqrt(2 + sqrt(3))/sqrt(2 - sqrt(3));
 
   /* parameters */
   thet1 = Pi/20; thet2 = Pi/21;
@@ -218,12 +215,11 @@ test_true_s()=
 
   /* true s value */
   R = 5.0987419087295;
-  /*R = 3.5360020929376;
-  R = 4.3880535632221;*/
+  /*R = 3.5360020929376;*/
+  R = 4.3880535632221;
   s = 0.5 + I*R;
 
   /* get info needed for pullbacks */
-  Ms = get_matrices();
   gs = get_geodesics();
   cs = gs[1];
   rs = gs[2];
@@ -234,16 +230,16 @@ test_true_s()=
 
   /* check that test points are admissible */
   for(i = 1, N,
-    is_admissible(zs1[i], Ms, cs, rs);
-    is_admissible(zs2[i], Ms, cs, rs);
+    is_admissible(zs1[i], cs, rs);
+    is_admissible(zs2[i], cs, rs);
   );
 
   /* get pullbacks and convert everything to polar */
   zpbs1 = vector(N);
   zpbs2 = vector(N);
   for(i = 1, N,
-    zpbs1[i] = pullback(zs1[i], Ms, cs, rs);
-    zpbs2[i] = pullback(zs2[i], Ms, cs, rs);
+    zpbs1[i] = pullback(zs1[i], cs, rs);
+    zpbs2[i] = pullback(zs2[i], cs, rs);
   );
   zs1_pol = rect_to_pol(zs1);
   zpbs1_pol = rect_to_pol(zpbs1);
